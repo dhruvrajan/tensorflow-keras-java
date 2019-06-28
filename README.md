@@ -204,4 +204,8 @@ The ability to set breakpoints etc. within `Layer` class definitions would be ve
  TODO(): Add support for Keras callbacks. This would allow things like model checkpointing, early stopping,
   Tensorboard integration, and other useful features.
   
+  Scala/Kotlin
+  --
+  One of the nice things about using the JVM is that we can have clean interface to other JVM languages like Scala and Kotlin, without having to re-implement everything.
   
+  TODO: Would be nice to have nice Scala/Kotlin-esque interfaces for those languages in addition to the Java API.
