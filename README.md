@@ -91,32 +91,32 @@ that can be optimized using backpropagation.
     to create the necessary graph components (variables), while `Layer.call` defines the layer's logic in terms of these
     variables, and other tensorflow operators.
     
-    TODO(#1): Currently, the build vs. call functionality is mixed, and handled entirely by the `build` function.        
+    TODO([#1]): Currently, the build vs. call functionality is mixed, and handled entirely by the `build` function.        
     
 2. **Custom Layers.** New custom layers can be built by subclassing any `Layer` class. Use `Layer.addWeight(String name, Variable var)`
     to add a weight tensor to the layer and `Layer.addInitializer(String name, Assign initOp)` to add its initializer, during
     build (See `keras.layers.Dense` for an example).
     
-    TODO(): More robust Initializer support.
+    TODO([#2]): More robust Initializer support.
     
-    TODO(): Add support for Regularizers.   
+    TODO([#3]): Add support for Regularizers.   
     
 3. **Multiple Input/Output.** Keras Layers can express functions between labeled sets of tensors. Multiple inputs
    are handled by adding arguments to `Layer.call`.
    
-   TODO(): Add support for multiple outputs; likely based on the the keras Network Layer.
+   TODO([#4]): Add support for multiple outputs; likely based on the the keras Network Layer.
    
 4. **Arbitrarily-Shaped Input.** So long as the layer's comptuations are implemented properly, keras layers
     can operate on arbitrarily shaped input (within the restrictions of the computation). It's really useful not
     to have to worry about things like tensor dimensions and batch size etc.; this is handled for the user at graph
     building time. 
     
-    TODO(): To make this more explicit and debuggable, layer definitions should include a `Layer.computeOutputShape(Shape inputShape)`
+    TODO([#5]): To make this more explicit and debuggable, layer definitions should include a `Layer.computeOutputShape(Shape inputShape)`
     method definition.
     
 5. **Layer Types** Keras provides a large library of pre-defined Layers, including convolutional, dropout, recurrent layers.
     
-    TODO(): Add support for variety of Layer types.
+    TODO([#6]): Add support for variety of Layer types.
         
     Note: Not all layers, currently, can just be wrappers around TF operations. For example,
     tf.dropout doesn't seem to be implemented as a core tf operation in Java.
@@ -140,7 +140,7 @@ construction APIs provide concise ways to specify models.
                 .setActivation("softmax")
         );
 
-    TODO(): During `Model.compile`/`Layer.build`, the input shape of each layer should be automatically
+    TODO([#7]): During `Model.compile`/`Layer.build`, the input shape of each layer should be automatically
     obtained from the previous layer's output shape (with the exception of the first layer, whose input
     shape must be specified by the user.)
     
@@ -148,18 +148,18 @@ construction APIs provide concise ways to specify models.
     must be passed to this function. Currently, this means the whole dataset must be represented and iterated
     over in memory.
     
-    TODO(): Allow Stream-based iteration over batches during training.
+    TODO([#8]): Allow Stream-based iteration over batches during training.
 
 3. **Model Config** Keras objects (Optimizer, Layer, etc...) are fairly simple, and are nested in a clean way.
     Thus JSON would likely be a good method for representing serializable configurations of Models.
     
-    TODO(): Add support for model configuration (Perhaps using RapidJson or something similar)?
+    TODO([#9]): Add support for model configuration (Perhaps using RapidJson or something similar)?
     
 4. **Trained Model Serialization** Serializing a trained Model for later inference is very useful. This would likely
     entail both serializing the model config, as well as the trained weight tensors. Still need to decide on 
     a good way to do this.
     
-    TODO(): Add support for Model Serialization.
+    TODO([#10]): Add support for Model Serialization.
 
 Datasets
 --
@@ -197,11 +197,11 @@ Debuggability
 --    
 The ability to set breakpoints etc. within `Layer` class definitions would be very useful for debugging.
  
- TODO(): Add support for training in tensorflow eager mode.
+ TODO([#11]): Add support for training in tensorflow eager mode.
  
  Callbacks
  --
- TODO(): Add support for Keras callbacks. This would allow things like model checkpointing, early stopping,
+ TODO([#12]): Add support for Keras callbacks. This would allow things like model checkpointing, early stopping,
   Tensorboard integration, and other useful features.
   
   Scala/Kotlin
@@ -209,3 +209,16 @@ The ability to set breakpoints etc. within `Layer` class definitions would be ve
   One of the nice things about using the JVM is that we can have clean interface to other JVM languages like Scala and Kotlin, without having to re-implement everything.
   
   TODO: Would be nice to have nice Scala/Kotlin-esque interfaces for those languages in addition to the Java API.
+  
+[#1]: https://github.com/dhruvrajan/tensorflow-keras-java/issues/1
+[#2]: https://github.com/dhruvrajan/tensorflow-keras-java/issues/2
+[#3]: https://github.com/dhruvrajan/tensorflow-keras-java/issues/3
+[#4]: https://github.com/dhruvrajan/tensorflow-keras-java/issues/4
+[#5]: https://github.com/dhruvrajan/tensorflow-keras-java/issues/5
+[#6]: https://github.com/dhruvrajan/tensorflow-keras-java/issues/6
+[#7]: https://github.com/dhruvrajan/tensorflow-keras-java/issues/7
+[#8]: https://github.com/dhruvrajan/tensorflow-keras-java/issues/8
+[#9]: https://github.com/dhruvrajan/tensorflow-keras-java/issues/9
+[#10]: https://github.com/dhruvrajan/tensorflow-keras-java/issues/10
+[#11]: https://github.com/dhruvrajan/tensorflow-keras-java/issues/11
+[#12]: https://github.com/dhruvrajan/tensorflow-keras-java/issues/12

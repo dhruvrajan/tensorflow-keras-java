@@ -10,23 +10,7 @@
 //import java.io.IOException;
 //import java.util.List;
 //
-///**
-// * - Keras is a cool API, greatly simplifies ML training code in tensorflow.
-// * - In implementing Keras on TF Java, aim to have something as close as possible to the Python syntax.
-// * - Python has some features which don't directly map onto java (e.g. default arguments, direct numpy interoperability
-// * ); use builder pattern.
-// *    => The implementation's needed some tuning in order to get a clean-looking Java API.
-// *
-// * Focusing on Keras Model training API (keras has a variety of data-loading capabilies as well); Sequential and
-// * then Functional later. Will have a couple examples ready in the next week.
-// *  ==> Layers, Optimizers, Regularizers, Batching, Metrics, Losses
-// *
-// *  Split
-// *   => I think I need to develop a critical mass of working examples first, after which I'd love to collaborate
-// *   with anyone who's interested to fill out the remainder of the API.
-// *
-// */
-//
+
 //
 //public class BostonClassifier implements Runnable {
 //    private static final int FEATURES = 13;
