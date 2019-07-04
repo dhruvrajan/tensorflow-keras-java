@@ -1,6 +1,7 @@
 package io.gitlab.keras.activations;
 
 
+import io.gitlab.keras.mixin.ActivationFunction;
 import org.tensorflow.Operand;
 import org.tensorflow.op.Ops;
 import org.tensorflow.op.core.*;
@@ -10,7 +11,33 @@ import java.lang.FunctionalInterface;
 /**
  * Helper functions to compute activations using a TF Ops object.
  */
-public class Activations {
+public enum Activations {
+    sigmoid, tanh, relu, elu, selu, softmax, logsoftmax;
+
+    public static <T extends Number> Activation<T> select(String activation) {
+        return new Activation<>(Activations.select(Activations.valueOf(activation)));
+    }
+
+    public static <T extends Number> Activation<T> select(Activations type) {
+        switch (type) {
+            case sigmoid:
+                return new Activation<T>(Activations::sigmoid);
+            case tanh:
+                return new Activation<T>(Activations::tanh);
+            case relu:
+                return new Activation<T>(Activations::relu);
+            case elu:
+                return new Activation<T>(Activations::elu);
+            case selu:
+                return new Activation<T>(Activations::selu);
+            case softmax:
+                return new Activation<T>(Activations::softmax);
+            case logsoftmax:
+                return new Activation<T>(Activations::logSoftmax);
+            default:
+                throw new IllegalArgumentException("Invalid ActivationType");
+        }
+    }
     /**
      * Sigmoid activation function.
      */

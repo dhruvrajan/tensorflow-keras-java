@@ -25,21 +25,6 @@ public abstract class Loss implements MetricFunction {
     }
 
     public static Loss select(String lossName) {
-        return LossType.select(LossType.valueOf(lossName));
-    }
-
-    enum LossType {
-        mean_squared_error, softmax_crossentropy;
-
-        static Loss select(LossType lossType) {
-            switch (lossType) {
-                case mean_squared_error:
-                    return new MeanSquaredError();
-                case softmax_crossentropy:
-                    return new SoftmaxCrossEntropyLoss();
-                default:
-                    throw new IllegalArgumentException("Invalid loss type.");
-            }
-        }
+        return Losses.select(Losses.valueOf(lossName));
     }
 }

@@ -2,6 +2,7 @@ package io.gitlab.keras.layers;
 
 
 import io.gitlab.keras.activations.Activation;
+import io.gitlab.keras.activations.Activations;
 import org.tensorflow.Operand;
 import org.tensorflow.Shape;
 import org.tensorflow.op.Ops;
@@ -36,9 +37,12 @@ public class Dense extends Layer<Float> {
     }
 
     public Dense setActivation(String activationName) {
-        return setActivation(Activation.select(activationName));
+        return setActivation(Activations.select(activationName));
     }
 
+    public Dense setActivation(Activations activation) {
+        return setActivation(Activations.select(activation));
+    }
     public Dense setActivation(Activation activation) {
         this.activation = activation;
         return this;

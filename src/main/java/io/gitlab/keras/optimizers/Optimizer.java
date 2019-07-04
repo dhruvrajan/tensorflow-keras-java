@@ -16,29 +16,12 @@ public abstract class Optimizer<T> {
     }
 
     public static Optimizer<Float> select(String optimizerType) {
-        return OptimizerType.select(OptimizerType.valueOf(optimizerType));
+        return Optimizers.select(Optimizers.valueOf(optimizerType));
     }
 
     public List<Operand<Float>> trainingOps() {
         return targets;
     }
-
-    enum OptimizerType {
-        sgd,
-        adam,
-        adagrad,
-        adadelta;
-
-        static Optimizer<Float> select(OptimizerType optimizerType) {
-            switch (optimizerType) {
-                case sgd:
-                    return new GradientDescentOptimizer(0.01f);
-                default:
-                    throw new IllegalArgumentException("Invalid Optimizer Type.");
-            }
-        }
-    }
-
 }
 
 

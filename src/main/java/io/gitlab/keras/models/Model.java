@@ -3,9 +3,12 @@ package io.gitlab.keras.models;
 import io.gitlab.keras.data.Dataset;
 import io.gitlab.keras.layers.Layer;
 import io.gitlab.keras.losses.Loss;
+import io.gitlab.keras.losses.Losses;
 import io.gitlab.keras.metrics.Metric;
+import io.gitlab.keras.metrics.Metrics;
 import io.gitlab.keras.mixin.MetricFunction;
 import io.gitlab.keras.optimizers.Optimizer;
+import io.gitlab.keras.optimizers.Optimizers;
 import org.tensorflow.Graph;
 import org.tensorflow.op.Ops;
 
@@ -53,6 +56,9 @@ public abstract class Model<T> extends Layer<T> {
             this.metrics = metrics;
         }
 
+        public CompilerBuilder setLoss(Losses lossType) {
+            return setLoss(Losses.select(lossType));
+        }
         public CompilerBuilder setLoss(String lossName) {
             return setLoss(Loss.select(lossName));
         }
@@ -71,10 +77,18 @@ public abstract class Model<T> extends Layer<T> {
             return this;
         }
 
+        public CompilerBuilder setOptimizer(Optimizers optimizerType) {
+            return setOptimizer(optimizerType);
+        }
+
         public CompilerBuilder addMetric(String metricName) {
             return addMetric(Metric.select(metricName));
         }
 
+
+        public CompilerBuilder addMetric(Metrics metric) {
+            return addMetric(Metric.select(metrics.toString()));
+        }
         public CompilerBuilder addMetric(MetricFunction metric) {
             if (this.metrics == null) {
                 this.metrics = new ArrayList<>();
