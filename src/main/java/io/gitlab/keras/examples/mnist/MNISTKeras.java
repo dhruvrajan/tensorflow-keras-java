@@ -58,7 +58,7 @@ public class MNISTKeras {
 
             // Build Graph
             model.compile(tf,
-                    new Model.CompilerBuilder(graph)
+                    new Model.CompilerOptions(graph)
                             .setOptimizer(Optimizers.sgd)
                             .setLoss(Losses.softmax_crossentropy)
                             .addMetric(Metrics.accuracy));

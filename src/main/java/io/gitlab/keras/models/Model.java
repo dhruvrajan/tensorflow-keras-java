@@ -18,78 +18,78 @@ import java.util.List;
 public abstract class Model<T> extends Layer<T> {
 
     public abstract void compile(Ops tf, Optimizer optimizer, Loss loss, List<MetricFunction> metric) throws Exception;
-    public void compile(Ops tf, CompilerBuilder compilerBuilder) throws Exception {
+    public void compile(Ops tf, CompilerOptions compilerBuilder) throws Exception {
         compile(tf,compilerBuilder.optimizer, compilerBuilder.loss, compilerBuilder.metrics);
     }
 
     public abstract void fit(Graph graph, Dataset data, int epochs, int batchSize);
 //    public abstract void fit(Graph graph, List<float[][]> data, List<float[][]> labels, int epochs, int batchSize,
 //                             List<float[][]> validationData, List<float[][]> validationLabels);
-    public void fit(Graph graph, FitBuilder fitBuilder) {
+    public void fit(Graph graph, FitOptions fitBuilder) {
         fit(graph, fitBuilder.data, fitBuilder.epochs, fitBuilder.batchSize);
     }
 
 
-    public static class CompilerBuilder {
+    public static class CompilerOptions {
         private Graph graph;
         private List<MetricFunction> metrics;
         private Optimizer optimizer;
 
         private Loss loss;
 
-        public CompilerBuilder(Graph graph) {
+        public CompilerOptions(Graph graph) {
             this.graph = graph;
         }
 
-        public CompilerBuilder(Graph graph, Optimizer optimizer) {
+        public CompilerOptions(Graph graph, Optimizer optimizer) {
             this.optimizer = optimizer;
         }
 
-        public CompilerBuilder(Graph graph, Optimizer optimizer, Loss loss) {
+        public CompilerOptions(Graph graph, Optimizer optimizer, Loss loss) {
             this.optimizer = optimizer;
             this.loss = loss;
         }
 
-        public CompilerBuilder(Graph graph, Optimizer optimizer, Loss loss, List<MetricFunction> metrics) {
+        public CompilerOptions(Graph graph, Optimizer optimizer, Loss loss, List<MetricFunction> metrics) {
             this.optimizer = optimizer;
             this.loss = loss;
             this.metrics = metrics;
         }
 
-        public CompilerBuilder setLoss(Losses lossType) {
+        public CompilerOptions setLoss(Losses lossType) {
             return setLoss(Losses.select(lossType));
         }
-        public CompilerBuilder setLoss(String lossName) {
+        public CompilerOptions setLoss(String lossName) {
             return setLoss(Loss.select(lossName));
         }
 
-        public CompilerBuilder setLoss(Loss loss) {
+        public CompilerOptions setLoss(Loss loss) {
             this.loss = loss;
             return this;
         }
 
-        public CompilerBuilder setOptimizer(String optimizerName) {
+        public CompilerOptions setOptimizer(String optimizerName) {
             return setOptimizer(Optimizer.select(optimizerName));
         }
 
-        public CompilerBuilder setOptimizer(Optimizer optimizer) {
+        public CompilerOptions setOptimizer(Optimizer optimizer) {
             this.optimizer = optimizer;
             return this;
         }
 
-        public CompilerBuilder setOptimizer(Optimizers optimizerType) {
+        public CompilerOptions setOptimizer(Optimizers optimizerType) {
             return setOptimizer(optimizerType);
         }
 
-        public CompilerBuilder addMetric(String metricName) {
+        public CompilerOptions addMetric(String metricName) {
             return addMetric(Metric.select(metricName));
         }
 
 
-        public CompilerBuilder addMetric(Metrics metric) {
+        public CompilerOptions addMetric(Metrics metric) {
             return addMetric(Metric.select(metrics.toString()));
         }
-        public CompilerBuilder addMetric(MetricFunction metric) {
+        public CompilerOptions addMetric(MetricFunction metric) {
             if (this.metrics == null) {
                 this.metrics = new ArrayList<>();
             }
@@ -118,16 +118,16 @@ public abstract class Model<T> extends Layer<T> {
         }
     }
 
-    public static class FitBuilder {
+    public static class FitOptions {
         Dataset data;
         int epochs = 10;
         int batchSize = 1;
 
-        public FitBuilder() {
+        public FitOptions() {
 
         }
 
-        public FitBuilder(Dataset data) {
+        public FitOptions(Dataset data) {
             this.data = data;
         }
 
@@ -136,7 +136,7 @@ public abstract class Model<T> extends Layer<T> {
             return data;
         }
 
-        public FitBuilder setData(Dataset data) {
+        public FitOptions setData(Dataset data) {
             this.data = data;
             return this;
         }
@@ -145,7 +145,7 @@ public abstract class Model<T> extends Layer<T> {
             return epochs;
         }
 
-        public FitBuilder setEpochs(int epochs) {
+        public FitOptions setEpochs(int epochs) {
             this.epochs = epochs;
             return this;
         }
@@ -154,7 +154,7 @@ public abstract class Model<T> extends Layer<T> {
             return batchSize;
         }
 
-        public FitBuilder setBatchSize(int batchSize) {
+        public FitOptions setBatchSize(int batchSize) {
             this.batchSize = batchSize;
             return this;
         }
