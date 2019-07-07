@@ -1,13 +1,17 @@
 package io.gitlab.keras.models;
 
 import io.gitlab.keras.data.Dataset;
+import io.gitlab.keras.data.TensorDataset;
+import io.gitlab.keras.data.TensorSplit;
 import io.gitlab.keras.layers.InputLayer;
 import io.gitlab.keras.layers.Layer;
 import io.gitlab.keras.losses.Loss;
 import io.gitlab.keras.mixin.MetricFunction;
 import io.gitlab.keras.optimizers.Optimizer;
+import io.gitlab.keras.utils.SessionRunner;
 import org.tensorflow.*;
 import org.tensorflow.op.Ops;
+import org.tensorflow.op.core.Iterator;
 import org.tensorflow.op.core.Placeholder;
 import org.tensorflow.op.core.Variable;
 
@@ -15,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 public class Sequential extends Model<Float> {
     private InputLayer firstLayer;
@@ -65,32 +70,33 @@ public class Sequential extends Model<Float> {
     }
 
 
-    /**
-     * Basically, need to collect targets for session.run.
-     * @param graph
-     */
-    public void fit(Graph graph, int epochs) {
-
-        try (var session = new Session(graph)) {
-            // Initialize
-            var initializerOps = this.initializerOps();
-            addTargets(session.runner(), initializerOps).run();
-
-            // Train
-            for (int epoch = 0; epoch < epochs; epoch++) {
-                var trainingOps = optimizer.trainingOps();
-                var runner = addTargets(session.runner(), trainingOps);
-                runner = fetchOutputs(runner, metrics.stream().flatMap(m -> m.metricOps().stream()).collect(Collectors.toList()));
-                runner.run();
-            }
-
-            // Evaluate
-        }
-    }
-
     @Override
     public List<Operand<Float>> initializerOps() {
         return this.layers.stream().flatMap(l -> l.initializerOps().stream()).collect(Collectors.toList());
+    }
+
+    public <T extends Number> void fit(Ops tf, TensorDataset<T> data, int epochs, int batchSize) {
+        try (Session session = new Session(tf.scope().graph())) {
+            // Initialize weights
+            new SessionRunner(session.runner())
+                    .addTargets((Operand<?>[]) this.initializerOps().toArray())
+                    .run();
+
+            // Build training set
+            TensorSplit<T> trainSplit = data.getTrain();
+            trainSplit.build(tf, batchSize);
+
+
+            //
+            for (int epoch = 0; epoch < epochs; epoch++) {
+                for (int i = 0; i < trainSplit.numBatches(); i++) {
+
+                }
+            }
+
+
+
+        }
     }
 
 
@@ -150,7 +156,6 @@ public class Sequential extends Model<Float> {
                          Tensor<Float> yBatch = Tensors.create(testBatches.get(i).y)) {
 
                         List<Tensor<?>> values = testRunner
-
                                 .fetch(metricOp)
                                 .fetch(lossOp)
                                 .feed(firstLayer.iris.asOutput(), XBatch)

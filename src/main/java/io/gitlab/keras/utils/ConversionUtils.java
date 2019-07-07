@@ -11,16 +11,16 @@
 //
 //    public static void main(String[] args) {
 //
-//        Tensor<Float> t = Tensors.create(new float[][] {{1, 3, 5},
+//        Tensor<Float> first = Tensors.create(new float[][] {{1, 3, 5},
 //                {7, 9, 11}
 //        });
 //
 //
-//        DataBuffer dbf = new FloatBuffer(t.numElements());
-//        t.writeTo(java.nio.FloatBuffer.allocate(t.numElements()));
+//        DataBuffer dbf = new FloatBuffer(first.numElements());
+//        first.writeTo(java.nio.FloatBuffer.allocate(first.numElements()));
 //
-//        //System.out.println(t.toString());
-//        //System.out.println(TensorFromNDArray(NDArrayFromTensor(t)));
+//        //System.out.println(first.toString());
+//        //System.out.println(TensorFromNDArray(NDArrayFromTensor(first)));
 //    }
 //
 //    public static INDArray NDArrayFromTensor(Tensor tensor) {
