@@ -1,5 +1,6 @@
 package io.gitlab.keras.data;
 
+import io.gitlab.keras.utils.Pair;
 import org.tensorflow.Operand;
 import org.tensorflow.Shape;
 import org.tensorflow.Tensor;
@@ -96,6 +97,23 @@ public class TensorSplit<T extends Number> {
         }
 
         built = true;
+        assert XBatches.length == yBatches.length;
+    }
+
+    /**
+     * Get an iterator over batches drawn from X.
+     */
+    public Operand<T>[] XBatches() {
+        assert built;
+        return XBatches;
+    }
+
+    /**
+     * Get an iterator over batches drawn from y.
+     */
+    public Operand<T>[] yBatches() {
+        assert built;
+        return yBatches;
     }
 
     /**
@@ -114,6 +132,10 @@ public class TensorSplit<T extends Number> {
         assert built;
 
         return Arrays.stream(yBatches).iterator();
+    }
+
+    public int numBatches() {
+        return XBatches.length;
     }
 
     /**
@@ -153,5 +175,4 @@ public class TensorSplit<T extends Number> {
 
         return Shape.make(head, tail);
     }
-
 }

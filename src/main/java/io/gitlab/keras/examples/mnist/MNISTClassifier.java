@@ -55,7 +55,7 @@
 //            Operand<Long> expected = tf.argMax(labels, tf.constant(1));
 //            Operand<Float> accuracy = tf.mean(tf.cast(tf.equal(predicted, expected), Float.class), tf.constant(0));
 //
-//            Operand t = tf.print(accuracy, Collections.singletonList(accuracy));
+//            Operand first = tf.print(accuracy, Collections.singletonList(accuracy));
 //            Dataset data;
 //            try {
 //                data = MNISTLoader.loadData();
