@@ -6,10 +6,10 @@ package io.gitlab.keras.data;
  * @param <T> dtype for data values
  */
 public class TensorDataset<T extends Number> {
-    private TensorSplit<T> train;
-    private TensorSplit<T> val;
+    private CompactTensorSplit<T> train;
+    private CompactTensorSplit<T> val;
 
-    public TensorDataset(TensorSplit<T> train, TensorSplit<T> val) {
+    public TensorDataset(CompactTensorSplit<T> train, CompactTensorSplit<T> val) {
         this.train = train;
         this.val = val;
     }
@@ -17,14 +17,14 @@ public class TensorDataset<T extends Number> {
     /**
      * Retrieve the train split of this dataset.
      */
-    public TensorSplit<T> getTrain() {
+    public CompactTensorSplit<T> getTrain() {
         return train;
     }
 
     /**
      * Retrieve the validation split of this dataset
      */
-    public TensorSplit<T> getVal() {
+    public CompactTensorSplit<T> getVal() {
         return val;
     }
 }

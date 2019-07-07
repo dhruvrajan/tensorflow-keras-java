@@ -2,16 +2,13 @@ package io.gitlab.keras.models;
 
 import io.gitlab.keras.data.Dataset;
 import io.gitlab.keras.data.TensorDataset;
-import io.gitlab.keras.data.TensorSplit;
 import io.gitlab.keras.layers.InputLayer;
 import io.gitlab.keras.layers.Layer;
 import io.gitlab.keras.losses.Loss;
 import io.gitlab.keras.mixin.MetricFunction;
 import io.gitlab.keras.optimizers.Optimizer;
-import io.gitlab.keras.utils.SessionRunner;
 import org.tensorflow.*;
 import org.tensorflow.op.Ops;
-import org.tensorflow.op.core.Iterator;
 import org.tensorflow.op.core.Placeholder;
 import org.tensorflow.op.core.Variable;
 
@@ -19,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 public class Sequential extends Model<Float> {
     private InputLayer firstLayer;
@@ -46,6 +42,21 @@ public class Sequential extends Model<Float> {
         return this;
     }
 
+    @Override
+    public List<Operand<Float>> initializerOps() {
+        return this.layers.stream().flatMap(l -> l.initializerOps().stream()).collect(Collectors.toList());
+    }
+
+    @Override
+    public void build(Ops tf) {
+
+    }
+
+    @Override
+    public Operand<Float> call(Ops tf, Operand<Float> in) {
+        return null;
+    }
+
 
     public void compile(Ops tf, Optimizer optimizer, Loss loss, List<MetricFunction> metrics) throws Exception {
         Operand out = firstLayer.build(tf);
@@ -55,7 +66,8 @@ public class Sequential extends Model<Float> {
         this.optimizer = optimizer;
 
         for (Layer layer : layers) {
-            out = layer.build(tf, out);
+            layer.build(tf);
+            out = layer.call(tf, out);
         }
 
         lossOp = loss.build(tf, out, labels);
@@ -70,34 +82,61 @@ public class Sequential extends Model<Float> {
     }
 
 
-    @Override
-    public List<Operand<Float>> initializerOps() {
-        return this.layers.stream().flatMap(l -> l.initializerOps().stream()).collect(Collectors.toList());
-    }
+    /**
+     * Basically, need to collect targets for session.run.
+     */
+    public void fit(Ops tf, TensorDataset<Float> data, int epochs, int batchSize) {
 
-    public <T extends Number> void fit(Ops tf, TensorDataset<T> data, int epochs, int batchSize) {
-        try (Session session = new Session(tf.scope().graph())) {
-            // Initialize weights
-            new SessionRunner(session.runner())
-                    .addTargets((Operand<?>[]) this.initializerOps().toArray())
-                    .run();
+        try (var session = new Session(tf.scope().graph())) {
+            // Initialize
+            var initializerOps = this.initializerOps();
+            addTargets(session.runner(), initializerOps).run();
 
-            // Build training set
-            TensorSplit<T> trainSplit = data.getTrain();
-            trainSplit.build(tf, batchSize);
+            // Train
+            var train = data.getTrain();
+            train.build(tf, batchSize);
 
-
-            //
             for (int epoch = 0; epoch < epochs; epoch++) {
-                for (int i = 0; i < trainSplit.numBatches(); i++) {
+                for (int i = 0; i < train.numBatches(); i++) {
+                    // Load train batch
+                    Session.Runner runner = session.runner();
+                    addTargets(runner, train.loadBatch(tf, i));
 
+                    // Run training ops on train batch
+                    var trainingOps = optimizer.trainingOps();
+                    addTargets(session.runner(), trainingOps);
+                    fetchOutputs(runner, metrics.stream()
+                            .flatMap(m -> m.metricOps().stream())
+                            .collect(Collectors.toList()));
+
+                    // Collect metric output
+                    List<Tensor<?>> trainOutputs = runner.run();
                 }
             }
 
+            // Evaluate
+            var val = data.getVal();
+            val.build(tf, batchSize);
 
+            for (int epoch = 0; epoch < epochs; epoch++) {
+                for (int i = 0; i < val.numBatches(); i++) {
+                    // Load val batch
+                    Session.Runner runner = session.runner();
+                    addTargets(runner, val.loadBatch(tf, i));
 
+                    // Fetch metrics on val batch
+                    fetchOutputs(runner, metrics.stream()
+                            .flatMap(m -> m.metricOps().stream())
+                            .collect(Collectors.toList()));
+
+                    // Collect metric output
+                    List<Tensor<?>> valOutputs = runner.run();
+                }
+            }
         }
     }
+
+
 
 
     public void fit(Graph graph, Dataset data, int epochs, int batchSize) {
@@ -131,7 +170,7 @@ public class Sequential extends Model<Float> {
                         List<Tensor<?>> values = addTargets(batchRunner, optimizer.getTargets())
                                 .fetch(metricOp)
                                 .fetch(lossOp)
-                                .feed(firstLayer.iris.asOutput(), XBatch)
+                                .feed(firstLayer.input.asOutput(), XBatch)
                                 .feed(labels.asOutput(), yBatch)
                                 .run();
 
@@ -141,8 +180,6 @@ public class Sequential extends Model<Float> {
                         epochAccuracy += accuracy / trainBatches.size();
                         epochLoss += loss / trainBatches.size();
                     }
-
-
                 }
 
                 // Run Gradient Descent Ops
@@ -158,7 +195,7 @@ public class Sequential extends Model<Float> {
                         List<Tensor<?>> values = testRunner
                                 .fetch(metricOp)
                                 .fetch(lossOp)
-                                .feed(firstLayer.iris.asOutput(), XBatch)
+                                .feed(firstLayer.input.asOutput(), XBatch)
                                 .feed(labels.asOutput(), yBatch)
                                 .run();
 
@@ -191,7 +228,4 @@ public class Sequential extends Model<Float> {
         }
         return runner;
     }
-
-
-
 }

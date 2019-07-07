@@ -1,6 +1,7 @@
 package io.gitlab.keras.utils;
 
 import org.tensorflow.Operand;
+import org.tensorflow.Shape;
 import org.tensorflow.op.Ops;
 
 import java.io.File;
@@ -39,7 +40,16 @@ public class Keras {
     // Keras backend utilties
     //
 
-    public static Operand<Integer> constArray(Ops tf, int... i) {
+    public static <T>Operand<Integer> constArray(Ops tf, int... i) {
         return tf.constant(i);
+    }
+
+    public static Operand<Long> shapeOperand(Ops tf, Shape shape) {
+        long[] shapeArray = new long[shape.numDimensions()];
+        for (int i = 0; i < shapeArray.length; i++) {
+            shapeArray[i] = shape.size(i);
+        }
+
+        return tf.constant(shapeArray);
     }
 }

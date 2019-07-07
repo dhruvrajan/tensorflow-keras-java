@@ -1,13 +1,15 @@
 package io.gitlab.keras.layers;
 
+import io.gitlab.keras.initializers.Initializer;
 import org.tensorflow.Operand;
 import org.tensorflow.op.Ops;
 import org.tensorflow.op.core.Assign;
-import org.tensorflow.op.core.Shape;
 import org.tensorflow.op.core.Variable;
 
-import java.util.*;
-import java.util.function.Function;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Base layer class.
@@ -20,10 +22,11 @@ import java.util.function.Function;
  */
 public abstract class Layer<T> {
     private static int ID_COUNTER = 0;
+    protected boolean built = false;
     int id;
 
     public Map<String, Variable<T>> weights;
-    public  Map<String, Operand<T>> initializers;
+    public Map<String, Initializer<T>> initializers;
 
     public Layer() {
         this.id = ID_COUNTER++;
@@ -48,20 +51,25 @@ public abstract class Layer<T> {
      * @param initializer initializer op to add
      * @return
      */
-    public Assign<T> addInitializer(String name, Assign<T> initializer) {
+    public Initializer<T> addInitializer(String name, Initializer<T> initializer) {
         this.initializers.put(name, initializer);
         return initializer;
     }
 
     public Collection<Operand<T>> initializerOps() {
-        return this.initializers.values();
+        return this.initializers.values().stream()
+                .filter(Initializer::isBuilt)
+                .map(Initializer::getInitializerOp)
+                .collect(Collectors.toList());
     }
 
     public Collection<Variable<T>> trainableWeights() {
         return this.weights.values();
     }
 
-    public Operand<T> build(Ops tf, Operand<T> in) {
-        return null;
+    public abstract void build(Ops tf);
+    public abstract Operand<T> call(Ops tf, Operand<T> in);
+    public boolean isBuilt() {
+        return this.built;
     }
 }

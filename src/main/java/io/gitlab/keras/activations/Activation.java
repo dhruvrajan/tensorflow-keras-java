@@ -18,13 +18,17 @@ public class Activation<T extends Number> extends Layer<T> implements Activation
         this.activation = activation;
     }
 
-    public Operand<T> build(Ops tf, Operand<T> inputs) {
+    public Operand<T> build(Ops tf, Operand<T> in) {
+        return null;
+    }
+
+    public Operand<T> call(Ops tf, Operand<T> inputs) {
         return this.activation.apply(tf, inputs);
     }
 
     @Override
     public Operand apply(Ops tf, Operand features) {
-        return build(tf, features);
+        return call(tf, features);
     }
 
 }

@@ -17,12 +17,12 @@ import java.util.List;
 
 public class Iris {
     private static final String IRIS_ORIGIN =
-            "https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data";
+            "https://archive.ics.uci.edu/ml/machine-learning-databases/input/input.data";
     private static final int NUM_EXAMPLES = 151;
     private static final int INPUT_LENGTH = 4;
     private static final int OUTPUT_LENGTH = 3;
-    private static final String LOCAL_PREFIX = "datasets/iris/";
-    private static final String LOCAL_FILE = "iris.data";
+    private static final String LOCAL_PREFIX = "datasets/input/";
+    private static final String LOCAL_FILE = "input.data";
 
     private enum COLOR {
         setosa(0), versicolor(1), virginica(2);
