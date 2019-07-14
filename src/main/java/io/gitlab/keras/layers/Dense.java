@@ -5,6 +5,7 @@ import io.gitlab.keras.activations.Activation;
 import io.gitlab.keras.activations.Activations;
 import io.gitlab.keras.initializers.Initializer;
 import io.gitlab.keras.initializers.Initializers;
+import io.gitlab.keras.utils.TensorShape;
 import org.tensorflow.Operand;
 import org.tensorflow.Shape;
 import org.tensorflow.op.Ops;
@@ -14,7 +15,6 @@ import org.tensorflow.op.core.Variable;
 public class Dense extends Layer<Float> {
     private static int DENSE_INPUT_LENGTH = 1;
     private int units;
-    private Shape inputShape;
 
     private String KERNEL = "kernel";
     private String KERNEL_INIT = "kernelInit";
@@ -33,9 +33,8 @@ public class Dense extends Layer<Float> {
     private Activation<Float> activation;
 
 
-    public Dense(int units, Shape inputShape) {
+    public Dense(int units) {
         super(DENSE_INPUT_LENGTH);
-        this.inputShape = inputShape;
         this.units = units;
     }
 
@@ -59,9 +58,12 @@ public class Dense extends Layer<Float> {
         return this;
     }
 
-
-    public void build(Ops tf) {
+    public void build(Ops tf, Shape inputShape) {
         tf = tf.withName("Dense_Layer_" + this.id);
+
+        TensorShape tensorShape = new TensorShape(inputShape);
+        tensorShape.assertKnown(tensorShape.numDimensions() - 1);
+
         Shape kernelShape = Shape.make(
                 inputShape.size(inputShape.numDimensions() - 1),
                 this.units
@@ -86,10 +88,17 @@ public class Dense extends Layer<Float> {
         this.built = true;
     }
 
+    public Shape computeOutputShape(Shape inputShape) {
+        return new TensorShape(inputShape)
+                .replaceLast(this.units)
+                .toShape();
+    }
+
     @SafeVarargs
     public final Operand<Float> call(Ops tf, Operand<Float>... inputs) {
         return this.call(tf, inputs[0]);
     }
+
 
     private Operand<Float> call(Ops tf, Operand<Float> input) {
         Operand<Float> signal = tf.math.add(tf.linalg.matMul(input, this.kernel), this.bias);

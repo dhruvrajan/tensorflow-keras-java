@@ -8,21 +8,20 @@ import org.tensorflow.op.core.Placeholder;
 public class InputLayer extends Layer<Float> {
     public Placeholder<Float> input;
     private int length;
-    private int batchSize;
 
-    public InputLayer(int length, int batchSize) {
+    public InputLayer(int length) {
+        super(0);
         this.length = length;
-        this.batchSize = batchSize;
-
     }
 
     @Override
-    public void build(Ops tf) {
-        input = tf.placeholder(Float.class, Placeholder.shape(Shape.make(batchSize, length)));
+    public void build(Ops tf, Shape inputShape) {
+        this.input = tf.placeholder(Float.class, Placeholder.shape(Shape.make(-1, length)));
+        this.built = true;
     }
 
-    @Override
-    public Operand<Float> call(Ops tf, Operand<Float> in) {
+    @SafeVarargs
+    public final Operand<Float> call(Ops tf, Operand<Float>... inputs) {
         return input;
     }
 }

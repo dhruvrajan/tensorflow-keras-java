@@ -4,6 +4,7 @@ import io.gitlab.keras.initializers.Initializer;
 import io.gitlab.keras.mixin.LayerFunction;
 import org.graalvm.compiler.api.replacements.Snippet;
 import org.tensorflow.Operand;
+import org.tensorflow.Shape;
 import org.tensorflow.op.Ops;
 import org.tensorflow.op.core.Variable;
 
@@ -34,15 +35,18 @@ public abstract class Layer<T> implements LayerFunction<T> {
 
     public Layer(int inputsLength) {
         this.INPUTS_LENGTH = inputsLength;
-        this.id = ID_COUNTER++;
         weights = new HashMap<>();
         initializers = new HashMap<>();
+        this.id = ID_COUNTER++;
     }
 
     /**
      * Override build(Ops) to add variables (weight tensors) to the layer.
      */
-    public abstract void build(Ops tf);
+    public abstract void build(Ops tf, Shape inputShape);
+
+    public abstract Shape computeOutputShape(Shape inputShape);
+
 
     /**
      * Defines the layer's logic, in terms of input operands, and variables.

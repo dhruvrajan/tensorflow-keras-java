@@ -1,6 +1,5 @@
 package io.gitlab.keras.data;
 
-import io.gitlab.keras.utils.Pair;
 import org.tensorflow.Operand;
 import org.tensorflow.Shape;
 import org.tensorflow.Tensor;

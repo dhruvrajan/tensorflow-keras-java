@@ -22,7 +22,6 @@ public class MNISTKeras {
             Ops tf = Ops.create(graph);
 
             TensorDataset<Float> data = MNISTLoader.loadData();
-
             Sequential model = new Sequential(
                     new InputLayer(28 * 28, 100),
                     new Dense(10, Shape.make(100, 28 * 28))
@@ -32,11 +31,10 @@ public class MNISTKeras {
             );
 
             // Build Graph
-            model.compile(tf,
-                    new Model.CompilerOptions(graph)
-                            .setOptimizer(Optimizers.sgd)
-                            .setLoss(Losses.softmax_crossentropy)
-                            .addMetric(Metrics.accuracy));
+            model.compile(tf, new Model.CompilerOptions(graph)
+                    .setOptimizer(Optimizers.sgd)
+                    .setLoss(Losses.softmax_crossentropy)
+                    .addMetric(Metrics.accuracy));
 
             // Run training and evaluation
             model.fit(tf, data, 100, 100);
