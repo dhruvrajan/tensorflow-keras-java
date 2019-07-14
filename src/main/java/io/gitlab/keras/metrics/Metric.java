@@ -12,6 +12,10 @@ import java.util.List;
 public abstract class Metric extends Layer<Float> implements MetricFunction {
     private Operand<Float> outputOp;
 
+    public Metric() {
+        super(2);
+    }
+
     public static Metric select(String s) { return select(Metrics.valueOf(s)); }
 
     private static Metric select(Metrics metricType) {
@@ -29,16 +33,15 @@ public abstract class Metric extends Layer<Float> implements MetricFunction {
         return call(tf, ops[0], ops[1]);
     }
 
-    public abstract Operand<Float> call(Ops tf, Operand<Float> output, Operand<Float> label);
+    public abstract Operand<Float> call(Ops tf, Operand<Float> output, Placeholder<Float> label);
 
     @Override
-    public Operand<Float> apply(Ops tf, Operand<Float> output, Placeholder<Float> label) throws Exception {
-        outputOp =  call(tf, output, label);
-        return outputOp;
+    public Operand<Float> apply(Ops tf, Operand<Float> output, Placeholder<Float> label)  {
+        return this.apply(tf, output, (Operand<Float>) label);
     }
 
-    @Override
-    public List<Operand<Float>> metricOps() {
-        return Collections.singletonList(outputOp);
-    }
+//    @Override
+//    public List<Operand<Float>> metricOps() {
+//        return Collections.singletonList(outputOp);
+//    }
 }
