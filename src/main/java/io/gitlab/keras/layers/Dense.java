@@ -12,6 +12,7 @@ import org.tensorflow.op.core.Variable;
 
 
 public class Dense extends Layer<Float> {
+    private static int DENSE_INPUT_LENGTH = 1;
     private int units;
     private Shape inputShape;
 
@@ -33,7 +34,7 @@ public class Dense extends Layer<Float> {
 
 
     public Dense(int units, Shape inputShape) {
-        super();
+        super(DENSE_INPUT_LENGTH);
         this.inputShape = inputShape;
         this.units = units;
     }
@@ -41,9 +42,11 @@ public class Dense extends Layer<Float> {
     public Dense setActivation(String activationName) {
         return setActivation(Activations.select(activationName));
     }
+
     public Dense setActivation(Activations activation) {
         return setActivation(Activations.select(activation));
     }
+
     public Dense setActivation(Activation<Float> activation) { this.activation = activation; return this; }
 
     public Dense setKernelInitializer(Initializers initializer) {
@@ -85,16 +88,11 @@ public class Dense extends Layer<Float> {
 
     @SafeVarargs
     public final Operand<Float> call(Ops tf, Operand<Float>... inputs) {
-        if (inputs.length != 1) {
-            throw new IllegalArgumentException(
-                    "Dense Layer call() has only 1 input operand; received " + inputs.length + ".");
-        }
-
-        return call(tf, inputs[0]);
+        return this.call(tf, inputs[0]);
     }
 
     private Operand<Float> call(Ops tf, Operand<Float> input) {
-        Operand<Float> signal = tf.add(tf.matMul(input, this.kernel), this.bias);
+        Operand<Float> signal = tf.math.add(tf.linalg.matMul(input, this.kernel), this.bias);
         return this.activation.call(tf, signal);
     }
 }

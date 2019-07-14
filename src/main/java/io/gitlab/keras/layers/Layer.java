@@ -1,6 +1,7 @@
 package io.gitlab.keras.layers;
 
 import io.gitlab.keras.initializers.Initializer;
+import io.gitlab.keras.mixin.LayerFunction;
 import org.graalvm.compiler.api.replacements.Snippet;
 import org.tensorflow.Operand;
 import org.tensorflow.op.Ops;
@@ -20,7 +21,10 @@ import java.util.stream.Collectors;
  *
  * @param <T> Numeric type of the output (Float, Double)
  */
-public abstract class Layer<T> {
+
+
+public abstract class Layer<T> implements LayerFunction<T> {
+    private int INPUTS_LENGTH;
     private static int ID_COUNTER = 0;
     protected boolean built = false;
     int id;
@@ -28,7 +32,8 @@ public abstract class Layer<T> {
     public Map<String, Variable<T>> weights;
     public Map<String, Initializer<T>> initializers;
 
-    public Layer() {
+    public Layer(int inputsLength) {
+        this.INPUTS_LENGTH = inputsLength;
         this.id = ID_COUNTER++;
         weights = new HashMap<>();
         initializers = new HashMap<>();
@@ -45,13 +50,26 @@ public abstract class Layer<T> {
     @SuppressWarnings("unchecked")
     public abstract Operand<T> call(Ops tf, Operand<T>... inputs);
 
+    @SafeVarargs
+    public final Operand<T> apply(Ops tf, Operand<T>... inputs) {
+        if (!this.built) {
+            throw new IllegalStateException("Layer.call() cannot be called before the layer is built (Layer.build())");
+        }
+
+        if (inputs.length != INPUTS_LENGTH) {
+            throw new IllegalArgumentException("Layer call() expected " + INPUTS_LENGTH + "inputs; received " + inputs.length + ".");
+        }
+
+        return this.call(tf, inputs);
+    }
+
     /**
      * Adds a new weight tensor to the layer
      * @param name variable name
      * @param variable variable to add
      * @return the created variable.
      */
-    public Variable<T> addWeight(String name, Variable<T> variable) {
+    protected Variable<T> addWeight(String name, Variable<T> variable) {
        this.weights.put(name, variable);
        return variable;
     }
@@ -62,10 +80,11 @@ public abstract class Layer<T> {
      * @param initializer initializer op to add
      * @return
      */
-    public Initializer<T> addInitializer(String name, Initializer<T> initializer) {
+    protected Initializer<T> addInitializer(String name, Initializer<T> initializer) {
         this.initializers.put(name, initializer);
         return initializer;
     }
+
 
     public Collection<Operand<T>> initializerOps() {
         return this.initializers.values().stream()
