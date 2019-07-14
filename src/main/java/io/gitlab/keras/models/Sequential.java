@@ -28,18 +28,31 @@ public class Sequential extends Model<Float> {
     private Loss loss;
     private List<MetricFunction> metrics;
 
-    public Sequential() {
-
-    }
-
-    public Sequential(InputLayer firstLayer, Layer... layers) {
+    @SafeVarargs
+    public Sequential(InputLayer firstLayer, Layer<Float>... layers) {
         this.firstLayer = firstLayer;
         this.layers = Arrays.asList(layers);
     }
 
-    public Sequential addLayer(Layer layer) {
+    public Sequential addLayer(Layer<Float> layer) {
         layers.add(layer);
         return this;
+    }
+
+
+    @Override
+    public Shape computeOutputShape(Shape inputShape) {
+        return null;
+    }
+
+    @Override
+    @SafeVarargs
+    public final Operand<Float> call(Ops tf, Operand<Float>... inputs) {
+        return this.call(tf, inputs[0]);
+    }
+
+    public Operand<Float> call(Ops tf, Operand<Float> in) {
+        throw new UnsupportedOperationException("Cannot call a sequential model.");
     }
 
     @Override
@@ -47,18 +60,29 @@ public class Sequential extends Model<Float> {
         return this.layers.stream().flatMap(l -> l.initializerOps().stream()).collect(Collectors.toList());
     }
 
-    @Override
-    public void build(Ops tf) {
-
-    }
-
-    @Override
-    public Operand<Float> call(Ops tf, Operand<Float> in) {
-        return null;
-    }
-
-
     public void compile(Ops tf, Optimizer optimizer, Loss loss, List<MetricFunction> metrics) throws Exception {
+        this.loss = loss;
+        this.metrics = metrics;
+        this.optimizer = optimizer;
+        this.labels = tf.placeholder(Float.class);
+
+        // Build layers
+        this.firstLayer.build(tf);
+        Shape inputShape = firstLayer.computeOutputShape();
+
+        for (Layer layer : layers) {
+            layer.build(tf, inputShape);
+            inputShape = layer.computeOutputShape(inputShape);
+        }
+
+        // Build optimizer
+        for (Layer layer : layers) {
+            optimizer.build(tf, new ArrayList<Variable<Float>>(layer.weights.values()), lossOp);
+        }
+    }
+
+
+    public void compile2(Ops tf, Optimizer optimizer, Loss loss, List<MetricFunction> metrics) throws Exception {
         Operand out = firstLayer.build(tf);
         this.loss = loss;
         this.metrics = metrics;

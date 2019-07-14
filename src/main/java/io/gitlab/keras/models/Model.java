@@ -10,12 +10,18 @@ import io.gitlab.keras.mixin.MetricFunction;
 import io.gitlab.keras.optimizers.Optimizer;
 import io.gitlab.keras.optimizers.Optimizers;
 import org.tensorflow.Graph;
+import org.tensorflow.Shape;
 import org.tensorflow.op.Ops;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Model<T> extends Layer<T> {
+
+    public Model() {
+        // TODO:  For now, models take in only 1 input
+        super(1);
+    }
 
     public abstract void compile(Ops tf, Optimizer optimizer, Loss loss, List<MetricFunction> metric) throws Exception;
     public void compile(Ops tf, CompilerOptions compilerBuilder) throws Exception {
@@ -27,6 +33,11 @@ public abstract class Model<T> extends Layer<T> {
 //                             List<float[][]> validationData, List<float[][]> validationLabels);
     public void fit(Graph graph, FitOptions fitBuilder) {
         fit(graph, fitBuilder.data, fitBuilder.epochs, fitBuilder.batchSize);
+    }
+
+    @Override
+    public final void build(Ops tf, Shape inputShape) {
+        throw new UnsupportedOperationException("Cannot build a Sequential model with inputShape");
     }
 
 
