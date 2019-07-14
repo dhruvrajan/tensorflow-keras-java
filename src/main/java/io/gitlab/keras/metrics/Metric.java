@@ -10,9 +10,7 @@ import java.util.Collections;
 import java.util.List;
 
 public abstract class Metric extends Layer<Float> implements MetricFunction {
-    Operand<Float> outputOp;
-
-    public abstract Operand<Float> build(Ops tf, Operand<Float> output, Placeholder<Float> label) throws Exception;
+    private Operand<Float> outputOp;
 
     public static Metric select(String s) { return select(Metrics.valueOf(s)); }
 
@@ -21,8 +19,21 @@ public abstract class Metric extends Layer<Float> implements MetricFunction {
     }
 
     @Override
+    @SafeVarargs
+    public final Operand<Float> call(Ops tf, Operand<Float>... ops) {
+        if (ops.length != 2) {
+            throw new IllegalArgumentException("Metric type " + "'" + this.getClass().getName() + "'" +
+                    " call() takes 2 Operand<Float> objects as input. " + "Recevied " + ops.length + ".");
+        }
+
+        return call(tf, ops[0], ops[1]);
+    }
+
+    public abstract Operand<Float> call(Ops tf, Operand<Float> output, Operand<Float> label);
+
+    @Override
     public Operand<Float> apply(Ops tf, Operand<Float> output, Placeholder<Float> label) throws Exception {
-        outputOp =  build(tf, output, label);
+        outputOp =  call(tf, output, label);
         return outputOp;
     }
 

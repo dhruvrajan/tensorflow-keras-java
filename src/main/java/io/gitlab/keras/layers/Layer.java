@@ -1,9 +1,9 @@
 package io.gitlab.keras.layers;
 
 import io.gitlab.keras.initializers.Initializer;
+import org.graalvm.compiler.api.replacements.Snippet;
 import org.tensorflow.Operand;
 import org.tensorflow.op.Ops;
-import org.tensorflow.op.core.Assign;
 import org.tensorflow.op.core.Variable;
 
 import java.util.Collection;
@@ -33,6 +33,17 @@ public abstract class Layer<T> {
         weights = new HashMap<>();
         initializers = new HashMap<>();
     }
+
+    /**
+     * Override build(Ops) to add variables (weight tensors) to the layer.
+     */
+    public abstract void build(Ops tf);
+
+    /**
+     * Defines the layer's logic, in terms of input operands, and variables.
+     */
+    @SuppressWarnings("unchecked")
+    public abstract Operand<T> call(Ops tf, Operand<T>... inputs);
 
     /**
      * Adds a new weight tensor to the layer
@@ -66,9 +77,6 @@ public abstract class Layer<T> {
     public Collection<Variable<T>> trainableWeights() {
         return this.weights.values();
     }
-
-    public abstract void build(Ops tf);
-    public abstract Operand<T> call(Ops tf, Operand<T> in);
     public boolean isBuilt() {
         return this.built;
     }

@@ -83,11 +83,19 @@ public class Dense extends Layer<Float> {
         this.built = true;
     }
 
-    public Operand call(Ops tf, Operand<Float> input) {
+    @SafeVarargs
+    public final Operand<Float> call(Ops tf, Operand<Float>... inputs) {
+        if (inputs.length != 1) {
+            throw new IllegalArgumentException(
+                    "Dense Layer call() has only 1 input operand; received " + inputs.length + ".");
+        }
+
+        return call(tf, inputs[0]);
+    }
+
+    private Operand<Float> call(Ops tf, Operand<Float> input) {
         Operand<Float> signal = tf.add(tf.matMul(input, this.kernel), this.bias);
         return this.activation.call(tf, signal);
     }
-
-
 }
 
