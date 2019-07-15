@@ -30,6 +30,14 @@ public class SessionRunner {
         return this;
     }
 
+    public <T> SessionRunner addTargets(List<Operand<T>> operands) {
+        for (Operand<?> operand : operands) {
+            this.runner.addTarget(operand);
+        }
+        return this;
+    }
+
+
     public SessionRunner addTargets(String... targets) {
         for (String target : targets) {
             this.runner.addTarget(target);
@@ -61,6 +69,14 @@ public class SessionRunner {
         }
         return this;
     }
+
+    public <T> SessionRunner fetch(List<Operand<T>> operands) {
+        for (Operand<?> operand : operands) {
+            this.runner.fetch(operand);
+        }
+        return this;
+    }
+
 
     public List<Tensor<?>> run() {
         return this.runner.run();

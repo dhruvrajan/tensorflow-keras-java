@@ -16,6 +16,19 @@ public class InputLayer extends Layer<Float> {
 
     @Override
     public void build(Ops tf, Shape inputShape) {
+        throw new UnsupportedOperationException("Cannot call build(Ops, Shape) on input layer with an input shape. Use build(Ops).");
+    }
+
+    @Override
+    public Shape computeOutputShape(Shape inputShape) {
+        throw new UnsupportedOperationException("Cannot call build(Ops, Shape) on input layer with an input shape. Use build(Ops).");
+    }
+
+    public Shape computeOutputShape() {
+        return input.asOutput().shape();
+    }
+
+    public void build(Ops tf) {
         this.input = tf.placeholder(Float.class, Placeholder.shape(Shape.make(-1, length)));
         this.built = true;
     }

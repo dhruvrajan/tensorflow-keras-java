@@ -7,6 +7,7 @@ import io.gitlab.keras.layers.Layer;
 import io.gitlab.keras.losses.Loss;
 import io.gitlab.keras.mixin.MetricFunction;
 import io.gitlab.keras.optimizers.Optimizer;
+import io.gitlab.keras.utils.SessionRunner;
 import org.tensorflow.*;
 import org.tensorflow.op.Ops;
 import org.tensorflow.op.core.Placeholder;
@@ -20,13 +21,15 @@ import java.util.stream.Collectors;
 public class Sequential extends Model<Float> {
     private InputLayer firstLayer;
     private Placeholder<Float> labels;
-    private Operand<Float> lossOp;
-    private Operand<Float> metricOp;
     private Optimizer<Float> optimizer;
     private List<Layer<Float>> layers;
 
     private Loss loss;
     private List<MetricFunction> metrics;
+    private Operand<Float> lossOp;
+    private Operand<Float> metricOp;
+
+    List<Variable<Float>> trainableVars;
 
     @SafeVarargs
     public Sequential(InputLayer firstLayer, Layer<Float>... layers) {
@@ -52,7 +55,11 @@ public class Sequential extends Model<Float> {
     }
 
     public Operand<Float> call(Ops tf, Operand<Float> in) {
-        throw new UnsupportedOperationException("Cannot call a sequential model.");
+        Operand<Float> out = in;
+        for (Layer<Float> layer: this.layers) {
+            out = layer.call(tf, out);
+        }
+        return out;
     }
 
     @Override
@@ -70,38 +77,10 @@ public class Sequential extends Model<Float> {
         this.firstLayer.build(tf);
         Shape inputShape = firstLayer.computeOutputShape();
 
-        for (Layer layer : layers) {
+        for (Layer<Float> layer : layers) {
             layer.build(tf, inputShape);
+            this.trainableVars.addAll(layer.trainableWeights());
             inputShape = layer.computeOutputShape(inputShape);
-        }
-
-        // Build optimizer
-        for (Layer layer : layers) {
-            optimizer.build(tf, new ArrayList<Variable<Float>>(layer.weights.values()), lossOp);
-        }
-    }
-
-
-    public void compile2(Ops tf, Optimizer optimizer, Loss loss, List<MetricFunction> metrics) throws Exception {
-        Operand out = firstLayer.build(tf);
-        this.loss = loss;
-        this.metrics = metrics;
-        labels = tf.placeholder(Float.class);
-        this.optimizer = optimizer;
-
-        for (Layer layer : layers) {
-            layer.build(tf);
-            out = layer.call(tf, out);
-        }
-
-        lossOp = loss.build(tf, out, labels);
-
-        for (Layer layer : layers) {
-            optimizer.build(tf, new ArrayList<Variable<Float>>(layer.weights.values()), lossOp);
-        }
-
-        for (MetricFunction metric : this.metrics) {
-            metricOp = metric.apply(tf, out, labels);
         }
     }
 
@@ -109,9 +88,9 @@ public class Sequential extends Model<Float> {
     /**
      * Basically, need to collect targets for session.run.
      */
-    public void fit(Ops tf, TensorDataset<Float> data, int epochs, int batchSize) {
+    public void fit(Ops tf, Graph graph, TensorDataset<Float> data, int epochs, int batchSize) {
 
-        try (var session = new Session(tf.scope().graph())) {
+        try (var session = new Session(graph)) {
             // Initialize
             var initializerOps = this.initializerOps();
             addTargets(session.runner(), initializerOps).run();
@@ -122,39 +101,52 @@ public class Sequential extends Model<Float> {
 
             for (int epoch = 0; epoch < epochs; epoch++) {
                 for (int i = 0; i < train.numBatches(); i++) {
-                    // Load train batch
-                    Session.Runner runner = session.runner();
-                    addTargets(runner, train.loadBatch(tf, i));
+                    // Training Loop
+                    var trainBatch = train.loadBatch(tf, i);
+                    var inputData = trainBatch.get(0);
+                    var actual = trainBatch.get(1);
 
-                    // Run training ops on train batch
-                    var trainingOps = optimizer.trainingOps();
-                    addTargets(session.runner(), trainingOps);
-                    fetchOutputs(runner, metrics.stream()
-                            .flatMap(m -> m.metricOps().stream())
-                            .collect(Collectors.toList()));
+                    var predicted = this.call(tf, inputData);
+                    var loss = this.loss.apply(tf, predicted, actual);
 
-                    // Collect metric output
-                    List<Tensor<?>> trainOutputs = runner.run();
+                    var metrics = this.metrics
+                            .stream()
+                            .map(m -> m.apply(tf, predicted, actual))
+                            .collect(Collectors.toList());
+
+                    // Run training loop
+                    List<Tensor<?>> trainOutputs =
+                            new SessionRunner(session.runner())
+                                    .addTargets(inputData, actual)
+                                    .addTargets(optimizer.minimize(tf, loss, this.trainableVars))
+                                    .fetch(metrics)
+                                    .run();
                 }
             }
 
-            // Evaluate
+            // Validate
             var val = data.getVal();
             val.build(tf, batchSize);
 
             for (int epoch = 0; epoch < epochs; epoch++) {
                 for (int i = 0; i < val.numBatches(); i++) {
-                    // Load val batch
-                    Session.Runner runner = session.runner();
-                    addTargets(runner, val.loadBatch(tf, i));
+                    // Training Loop
+                    var valBatch = val.loadBatch(tf, i);
+                    var inputData = valBatch.get(0);
+                    var actual = valBatch.get(1);
 
-                    // Fetch metrics on val batch
-                    fetchOutputs(runner, metrics.stream()
-                            .flatMap(m -> m.metricOps().stream())
-                            .collect(Collectors.toList()));
+                    var predicted = this.call(tf, inputData);
+                    var metrics = this.metrics
+                            .stream()
+                            .map(m -> m.apply(tf, predicted, actual))
+                            .collect(Collectors.toList());
 
-                    // Collect metric output
-                    List<Tensor<?>> valOutputs = runner.run();
+                    // Collect validation metrics
+                    List<Tensor<?>> valOutputs =
+                            new SessionRunner(session.runner())
+                                    .addTargets(inputData, actual)
+                                    .fetch(metrics)
+                                    .run();
                 }
             }
         }

@@ -89,6 +89,7 @@ public class Dense extends Layer<Float> {
     }
 
     public Shape computeOutputShape(Shape inputShape) {
+        // leaves unknown dimensions unknown
         return new TensorShape(inputShape)
                 .replaceLast(this.units)
                 .toShape();

@@ -6,9 +6,7 @@ import org.tensorflow.op.core.Placeholder;
 
 import java.util.List;
 
-//@FunctionalInterface
+@FunctionalInterface
 public interface MetricFunction {
-    Operand<Float> apply(Ops tf, Operand<Float> output, Placeholder<Float> label) throws Exception;
-
-    List<Operand<Float>> metricOps();
+    Operand<Float> apply(Ops tf, Operand<Float> output, Operand<Float> label);
 }
