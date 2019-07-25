@@ -1,12 +1,14 @@
 package io.gitlab.keras.initializers;
 
+import java.nio.FloatBuffer;
+
 public enum Initializers {
     zeros;
 
-    public static <T> Initializer<T> select(Initializers initializer) {
+    public static Initializer<Float> select(Initializers initializer) {
         switch (initializer) {
             case zeros:
-                return new Zeros<>();
+                return new Zeros<Float>().dtype(Float.class);
             default:
                 throw new IllegalArgumentException("invalid initializer type");
         }

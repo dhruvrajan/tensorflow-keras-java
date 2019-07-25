@@ -28,12 +28,12 @@ public abstract class Model<T> extends Layer<T> {
         compile(tf,compilerBuilder.optimizer, compilerBuilder.loss, compilerBuilder.metrics);
     }
 
-    public abstract void fit(Graph graph, Dataset data, int epochs, int batchSize);
+//    public abstract void fit(Graph graph, Dataset data, int epochs, int batchSize);
 //    public abstract void fit(Graph graph, List<float[][]> data, List<float[][]> labels, int epochs, int batchSize,
 //                             List<float[][]> validationData, List<float[][]> validationLabels);
-    public void fit(Graph graph, FitOptions fitBuilder) {
-        fit(graph, fitBuilder.data, fitBuilder.epochs, fitBuilder.batchSize);
-    }
+//    public void fit(Graph graph, FitOptions fitBuilder) {
+//        fit(graph, fitBuilder.data, fitBuilder.epochs, fitBuilder.batchSize);
+//    }
 
     @Override
     public final void build(Ops tf, Shape inputShape) {
@@ -70,9 +70,9 @@ public abstract class Model<T> extends Layer<T> {
         public CompilerOptions setLoss(Losses lossType) {
             return setLoss(Losses.select(lossType));
         }
-        public CompilerOptions setLoss(String lossName) {
-            return setLoss(Loss.select(lossName));
-        }
+//        public CompilerOptions setLoss(String lossName) {
+//            return setLoss(Losses.select(lossName));
+//        }
 
         public CompilerOptions setLoss(Loss loss) {
             this.loss = loss;
@@ -89,7 +89,7 @@ public abstract class Model<T> extends Layer<T> {
         }
 
         public CompilerOptions setOptimizer(Optimizers optimizerType) {
-            return setOptimizer(optimizerType);
+            return setOptimizer(Optimizers.select(optimizerType));
         }
 
         public CompilerOptions addMetric(String metricName) {
@@ -98,7 +98,7 @@ public abstract class Model<T> extends Layer<T> {
 
 
         public CompilerOptions addMetric(Metrics metric) {
-            return addMetric(Metric.select(metrics.toString()));
+            return addMetric(Metrics.select(metric));
         }
         public CompilerOptions addMetric(MetricFunction metric) {
             if (this.metrics == null) {

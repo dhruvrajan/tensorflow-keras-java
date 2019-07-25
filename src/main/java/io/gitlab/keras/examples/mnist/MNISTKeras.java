@@ -10,10 +10,9 @@ import io.gitlab.keras.losses.Losses;
 import io.gitlab.keras.metrics.Metrics;
 import io.gitlab.keras.models.Model;
 import io.gitlab.keras.models.Sequential;
-import org.tensorflow.Graph;
-import org.tensorflow.Shape;
-import org.tensorflow.op.Ops;
 import io.gitlab.keras.optimizers.Optimizers;
+import org.tensorflow.Graph;
+import org.tensorflow.op.Ops;
 
 public class MNISTKeras {
 
@@ -23,8 +22,8 @@ public class MNISTKeras {
 
             TensorDataset<Float> data = MNISTLoader.loadData();
             Sequential model = new Sequential(
-                    new InputLayer(28 * 28, 100),
-                    new Dense(10, Shape.make(100, 28 * 28))
+                    new InputLayer(28 * 28),
+                    new Dense(10)
                             .setActivation(Activations.softmax)
                             .setKernelInitializer(Initializers.zeros)
                             .setBiasInitializer(Initializers.zeros)
@@ -37,7 +36,7 @@ public class MNISTKeras {
                     .addMetric(Metrics.accuracy));
 
             // Run training and evaluation
-            model.fit(tf, data, 100, 100);
+            model.fit(tf, graph, data, 100, 100);
         }
     }
 

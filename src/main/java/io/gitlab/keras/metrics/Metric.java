@@ -36,7 +36,7 @@ public abstract class Metric extends Layer<Float> implements MetricFunction {
     public abstract Operand<Float> call(Ops tf, Operand<Float> output, Placeholder<Float> label);
 
     @Override
-    public Operand<Float> apply(Ops tf, Operand<Float> output, Placeholder<Float> label)  {
+    public Operand<Float> apply(Ops tf, Operand<Float> output, Operand<Float> label)  {
         return this.apply(tf, output, (Operand<Float>) label);
     }
 

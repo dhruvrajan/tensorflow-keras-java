@@ -26,7 +26,7 @@ public abstract class Loss extends Layer<Float> implements MetricFunction {
     }
 
     @Override
-    public Operand<Float> apply(Ops tf, Operand<Float> output, Placeholder<Float> label) {
+    public Operand<Float> apply(Ops tf, Operand<Float> output, Operand<Float> label) {
         // Call Layer.apply
         return this.apply(tf, output, (Operand<Float>) label);
     }

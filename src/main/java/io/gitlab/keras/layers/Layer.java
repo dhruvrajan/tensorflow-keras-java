@@ -2,7 +2,7 @@ package io.gitlab.keras.layers;
 
 import io.gitlab.keras.initializers.Initializer;
 import io.gitlab.keras.mixin.LayerFunction;
-import org.graalvm.compiler.api.replacements.Snippet;
+
 import org.tensorflow.Operand;
 import org.tensorflow.Shape;
 import org.tensorflow.op.Ops;
