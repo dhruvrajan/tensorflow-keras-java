@@ -10,10 +10,10 @@ public class Accuracy extends Metric {
 
     @Override
     public Operand<Float> call(Ops tf, Operand<Float> output, Placeholder<Float> label) {
-        Operand<Long> predicted = tf.math.argMax(output, tf.constant(1));
-        Operand<Long> expected = tf.math.argMax(label, tf.constant(1));
+        Operand<Long> predicted = tf.argMax(output, tf.constant(1));
+        Operand<Long> expected = tf.argMax(label, tf.constant(1));
 
-        return tf.math.mean(tf.dtypes.cast(tf.math.equal(predicted, expected), Float.class), tf.constant(0));
+        return tf.mean(tf.cast(tf.equal(predicted, expected), Float.class), tf.constant(0));
     }
 
     @Override

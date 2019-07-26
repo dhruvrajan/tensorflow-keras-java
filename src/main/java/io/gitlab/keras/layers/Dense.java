@@ -102,7 +102,7 @@ public class Dense extends Layer<Float> {
 
 
     private Operand<Float> call(Ops tf, Operand<Float> input) {
-        Operand<Float> signal = tf.math.add(tf.linalg.matMul(input, this.kernel), this.bias);
+        Operand<Float> signal = tf.add(tf.matMul(input, this.kernel), this.bias);
         return this.activation.call(tf, signal);
     }
 }

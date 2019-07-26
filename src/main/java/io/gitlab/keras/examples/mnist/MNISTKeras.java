@@ -1,6 +1,7 @@
 package io.gitlab.keras.examples.mnist;
 
 import io.gitlab.keras.activations.Activations;
+import io.gitlab.keras.data.Dataset;
 import io.gitlab.keras.data.TensorDataset;
 import io.gitlab.keras.datasets.MNISTLoader;
 import io.gitlab.keras.initializers.Initializers;
@@ -20,7 +21,7 @@ public class MNISTKeras {
         try (Graph graph = new Graph()) {
             Ops tf = Ops.create(graph);
 
-            TensorDataset<Float> data = MNISTLoader.loadData();
+            Dataset data = MNISTLoader.loadDataset();
             Sequential model = new Sequential(
                     new InputLayer(28 * 28),
                     new Dense(10)
@@ -36,7 +37,7 @@ public class MNISTKeras {
                     .addMetric(Metrics.accuracy));
 
             // Run training and evaluation
-            model.fit(tf, graph, data, 100, 100);
+            model.fit(tf, data, 100, 100);
         }
     }
 

@@ -17,7 +17,7 @@ public class SoftmaxCrossEntropyLoss extends Loss {
 
     @Override
     protected Operand<Float> call(Ops tf, Operand<Float> actual, Placeholder<Float> labels) {
-        loss = tf.math.mean(tf.nn.softmaxCrossEntropyWithLogits(actual, labels).loss(), tf.constant(0));
+        loss = tf.mean(tf.softmaxCrossEntropyWithLogits(actual, labels).loss(), tf.constant(0));
 //        lossPrintOp = tf.print(loss, Collections.singletonList(loss));
         return loss;
     }

@@ -2,6 +2,7 @@ package io.gitlab.keras.datasets;
 
 
 import io.gitlab.keras.data.CompactTensorSplit;
+import io.gitlab.keras.data.Dataset;
 import io.gitlab.keras.data.TensorDataset;
 import io.gitlab.keras.data.TensorSplit;
 import org.tensorflow.Tensors;
@@ -36,9 +37,17 @@ public class MNISTLoader {
         float[][] testLabels = readLabelsOneHot(TEST_LABEL_PATH);
 
         return new TensorDataset<>(
-                new CompactTensorSplit<>(Tensors.create(trainImages), Tensors.create(trainLabels), Float.class),
-                new CompactTensorSplit<>(Tensors.create(testImages), Tensors.create(testLabels), Float.class)
+                new TensorSplit<>(Tensors.create(trainImages), Tensors.create(trainLabels), Float.class),
+                new TensorSplit<>(Tensors.create(testImages), Tensors.create(testLabels), Float.class)
         );
+    }
+    public static Dataset loadDataset() throws IOException {
+        float[][] trainImages = readImages(TRAIN_IMAGE_PATH);
+        float[][] trainLabels = readLabelsOneHot(TRAIN_LABEL_PATH);
+        float[][] testImages = readImages(TEST_IMAGE_PATH);
+        float[][] testLabels = readLabelsOneHot(TEST_LABEL_PATH);
+
+        return new Dataset(trainImages, trainLabels, testImages, testLabels);
     }
 
     private static float[][] readImages(String imagesPath) throws IOException {

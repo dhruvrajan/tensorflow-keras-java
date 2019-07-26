@@ -9,10 +9,10 @@ public class CategoricalAccuracy extends Metric {
 
     @Override
     public Operand<Float> call(Ops tf, Operand<Float> output, Placeholder<Float> label) {
-        Operand<Long> trueLabel = tf.math.argMax(label, tf.constant(-1));
-        Operand<Long> predLabel = tf.math.argMax(output, tf.constant(-1));
+        Operand<Long> trueLabel = tf.argMax(label, tf.constant(-1));
+        Operand<Long> predLabel = tf.argMax(output, tf.constant(-1));
 
-        return tf.dtypes.cast(tf.math.equal(trueLabel, predLabel).asOutput(), Float.class);
+        return tf.cast(tf.equal(trueLabel, predLabel).asOutput(), Float.class);
     }
 
     @Override

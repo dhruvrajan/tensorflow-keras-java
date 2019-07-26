@@ -21,7 +21,7 @@ public class GradientDescentOptimizer extends Optimizer<Float> {
 
         Constant<Float> alpha = tf.constant(LEARNING_RATE);
         for (int i = 0; i < weights.size(); i++) {
-            targets.add(tf.train.applyGradientDescent(weights.get(i), alpha, gradients.dy(i)));
+            targets.add(tf.applyGradientDescent(weights.get(i), alpha, gradients.dy(i)));
         }
 
         return targets;

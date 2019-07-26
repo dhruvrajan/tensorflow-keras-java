@@ -9,7 +9,7 @@ import org.tensorflow.op.core.Placeholder;
 public class MeanSquaredError extends Loss {
     @Override
     protected Operand<Float> call(Ops tf, Operand<Float> actual, Placeholder<Float> labels) {
-        return tf.math.mean(tf.math.squaredDifference(actual, labels), tf.constant(-1));
+        return tf.mean(tf.squaredDifference(actual, labels), tf.constant(-1));
     }
 
     @Override
