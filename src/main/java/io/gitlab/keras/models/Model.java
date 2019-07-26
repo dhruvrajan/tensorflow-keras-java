@@ -1,16 +1,12 @@
 package io.gitlab.keras.models;
 
-import io.gitlab.keras.data.Dataset;
+import io.gitlab.keras.datasets.Dataset;
 import io.gitlab.keras.layers.Layer;
 import io.gitlab.keras.losses.Loss;
-import io.gitlab.keras.losses.Losses;
 import io.gitlab.keras.metrics.Metric;
-import io.gitlab.keras.metrics.Metrics;
 import io.gitlab.keras.mixin.MetricFunction;
 import io.gitlab.keras.optimizers.Optimizer;
-import io.gitlab.keras.optimizers.Optimizers;
 import org.tensorflow.Graph;
-import org.tensorflow.Shape;
 import org.tensorflow.op.Ops;
 
 import java.util.ArrayList;
@@ -18,89 +14,68 @@ import java.util.List;
 
 public abstract class Model<T> extends Layer<T> {
 
-    public Model() {
-        // TODO:  For now, models take in only 1 input
-        super(1);
-    }
-
     public abstract void compile(Ops tf, Optimizer optimizer, Loss loss, List<MetricFunction> metric) throws Exception;
-    public void compile(Ops tf, CompilerOptions compilerBuilder) throws Exception {
+    public void compile(Ops tf, CompilerBuilder compilerBuilder) throws Exception {
         compile(tf,compilerBuilder.optimizer, compilerBuilder.loss, compilerBuilder.metrics);
     }
 
-//    public abstract void fit(Graph graph, Dataset data, int epochs, int batchSize);
+    public abstract void fit(Graph graph, Dataset data, int epochs, int batchSize);
 //    public abstract void fit(Graph graph, List<float[][]> data, List<float[][]> labels, int epochs, int batchSize,
 //                             List<float[][]> validationData, List<float[][]> validationLabels);
-//    public void fit(Graph graph, FitOptions fitBuilder) {
-//        fit(graph, fitBuilder.data, fitBuilder.epochs, fitBuilder.batchSize);
-//    }
-
-    @Override
-    public final void build(Ops tf, Shape inputShape) {
-        throw new UnsupportedOperationException("Cannot build a Sequential model with inputShape");
+    public void fit(Graph graph, FitBuilder fitBuilder) {
+        fit(graph, fitBuilder.data, fitBuilder.epochs, fitBuilder.batchSize);
     }
 
 
-    public static class CompilerOptions {
+    public static class CompilerBuilder {
         private Graph graph;
         private List<MetricFunction> metrics;
         private Optimizer optimizer;
 
         private Loss loss;
 
-        public CompilerOptions(Graph graph) {
+        public CompilerBuilder(Graph graph) {
             this.graph = graph;
         }
 
-        public CompilerOptions(Graph graph, Optimizer optimizer) {
+        public CompilerBuilder(Graph graph, Optimizer optimizer) {
             this.optimizer = optimizer;
         }
 
-        public CompilerOptions(Graph graph, Optimizer optimizer, Loss loss) {
+        public CompilerBuilder(Graph graph, Optimizer optimizer, Loss loss) {
             this.optimizer = optimizer;
             this.loss = loss;
         }
 
-        public CompilerOptions(Graph graph, Optimizer optimizer, Loss loss, List<MetricFunction> metrics) {
+        public CompilerBuilder(Graph graph, Optimizer optimizer, Loss loss, List<MetricFunction> metrics) {
             this.optimizer = optimizer;
             this.loss = loss;
             this.metrics = metrics;
         }
 
-        public CompilerOptions setLoss(Losses lossType) {
-            return setLoss(Losses.select(lossType));
+        public CompilerBuilder setLoss(String lossName) {
+            return setLoss(Loss.select(lossName));
         }
-//        public CompilerOptions setLoss(String lossName) {
-//            return setLoss(Losses.select(lossName));
-//        }
 
-        public CompilerOptions setLoss(Loss loss) {
+        public CompilerBuilder setLoss(Loss loss) {
             this.loss = loss;
             return this;
         }
 
-        public CompilerOptions setOptimizer(String optimizerName) {
+        public CompilerBuilder setOptimizer(String optimizerName) {
             return setOptimizer(Optimizer.select(optimizerName));
         }
 
-        public CompilerOptions setOptimizer(Optimizer optimizer) {
+        public CompilerBuilder setOptimizer(Optimizer optimizer) {
             this.optimizer = optimizer;
             return this;
         }
 
-        public CompilerOptions setOptimizer(Optimizers optimizerType) {
-            return setOptimizer(Optimizers.select(optimizerType));
-        }
-
-        public CompilerOptions addMetric(String metricName) {
+        public CompilerBuilder addMetric(String metricName) {
             return addMetric(Metric.select(metricName));
         }
 
-
-        public CompilerOptions addMetric(Metrics metric) {
-            return addMetric(Metrics.select(metric));
-        }
-        public CompilerOptions addMetric(MetricFunction metric) {
+        public CompilerBuilder addMetric(MetricFunction metric) {
             if (this.metrics == null) {
                 this.metrics = new ArrayList<>();
             }
@@ -129,16 +104,16 @@ public abstract class Model<T> extends Layer<T> {
         }
     }
 
-    public static class FitOptions {
+    public static class FitBuilder {
         Dataset data;
         int epochs = 10;
         int batchSize = 1;
 
-        public FitOptions() {
+        public FitBuilder() {
 
         }
 
-        public FitOptions(Dataset data) {
+        public FitBuilder(Dataset data) {
             this.data = data;
         }
 
@@ -147,7 +122,7 @@ public abstract class Model<T> extends Layer<T> {
             return data;
         }
 
-        public FitOptions setData(Dataset data) {
+        public FitBuilder setData(Dataset data) {
             this.data = data;
             return this;
         }
@@ -156,7 +131,7 @@ public abstract class Model<T> extends Layer<T> {
             return epochs;
         }
 
-        public FitOptions setEpochs(int epochs) {
+        public FitBuilder setEpochs(int epochs) {
             this.epochs = epochs;
             return this;
         }
@@ -165,7 +140,7 @@ public abstract class Model<T> extends Layer<T> {
             return batchSize;
         }
 
-        public FitOptions setBatchSize(int batchSize) {
+        public FitBuilder setBatchSize(int batchSize) {
             this.batchSize = batchSize;
             return this;
         }

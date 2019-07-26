@@ -1,13 +1,11 @@
 package io.gitlab.keras.models;
 
-import io.gitlab.keras.data.Dataset;
-import io.gitlab.keras.data.TensorDataset;
+import io.gitlab.keras.datasets.Dataset;
 import io.gitlab.keras.layers.InputLayer;
 import io.gitlab.keras.layers.Layer;
 import io.gitlab.keras.losses.Loss;
 import io.gitlab.keras.mixin.MetricFunction;
 import io.gitlab.keras.optimizers.Optimizer;
-import io.gitlab.keras.utils.SessionRunner;
 import org.tensorflow.*;
 import org.tensorflow.op.Ops;
 import org.tensorflow.op.core.Placeholder;
@@ -16,252 +14,140 @@ import org.tensorflow.op.core.Variable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Sequential extends Model<Float> {
     private InputLayer firstLayer;
     private Placeholder<Float> labels;
-    private Optimizer<Float> optimizer;
-    private List<Layer<Float>> layers;
+    private Operand<Float> lossOp;
+    private Operand<Float> metricOp;
+    private Optimizer optimizer;
+    private List<Layer> layers;
 
     private Loss loss;
     private List<MetricFunction> metrics;
-    private Operand<Float> lossOp;
-    private Operand<Float> metricOp;
 
-    private List<Variable<Float>> trainableVars;
-    private List<Operand<Float>> initializerOps;
+    public Sequential() {
 
-    @SafeVarargs
-    public Sequential(InputLayer firstLayer, Layer<Float>... layers) {
+    }
+
+    public Sequential(InputLayer firstLayer, Layer... layers) {
         this.firstLayer = firstLayer;
         this.layers = Arrays.asList(layers);
     }
 
-    public Sequential addLayer(Layer<Float> layer) {
+    public Sequential addLayer(Layer layer) {
         layers.add(layer);
         return this;
     }
 
-    @Override
-    public Shape computeOutputShape(Shape inputShape) {
-        throw new UnsupportedOperationException("Can't call computeOutputShape on Model");
-    }
-
-    @Override
-    @SafeVarargs
-    public final Operand<Float> call(Ops tf, Operand<Float>... inputs) {
-        return this.call(tf, inputs[0]);
-    }
-
-    public Operand<Float> call(Ops tf, Operand<Float> in) {
-        Operand<Float> out = in;
-        for (Layer<Float> layer: this.layers) {
-            out = layer.call(tf, out);
-        }
-        return out;
-    }
-
     public void compile(Ops tf, Optimizer optimizer, Loss loss, List<MetricFunction> metrics) throws Exception {
+        Operand out = firstLayer.build(tf);
         this.loss = loss;
         this.metrics = metrics;
+        labels = tf.placeholder(Float.class);
         this.optimizer = optimizer;
-        this.labels = tf.placeholder(Float.class);
 
-        // Targets for training loop
-        this.trainableVars = new ArrayList<>();
-        this.initializerOps = new ArrayList<>();
+        for (Layer layer : layers) {
+            out = layer.build(tf, out);
+        }
 
-        // Build layers
-        this.firstLayer.build(tf);
-        Shape inputShape = firstLayer.computeOutputShape();
+        lossOp = loss.build(tf, out, labels);
 
-        for (Layer<Float> layer : layers) {
-            layer.build(tf, inputShape);
-            this.trainableVars.addAll(layer.trainableWeights());
-            this.initializerOps.addAll(layer.initializerOps());
-            inputShape = layer.computeOutputShape(inputShape);
+        for (Layer layer : layers) {
+            optimizer.build(tf, new ArrayList<Variable<Float>>(layer.weights.values()), lossOp);
+        }
+
+        for (MetricFunction metric : this.metrics) {
+            metricOp = metric.apply(tf, out, labels);
         }
     }
 
+    public void fit(Graph graph, Dataset data, int epochs, int batchSize) {
 
-    /**
-     * Basically, need to collect targets for session.run.
-     */
-    public void fit(Ops tf, Graph graph, TensorDataset<Float> data, int epochs, int batchSize) {
-        try (var session = new Session(graph)) {
+        List<Dataset.Split> trainBatches = data.trainBatches(batchSize);
+        List<Dataset.Split> testBatches = data.testBatches(batchSize);
 
-            // Initialize
-            new SessionRunner(session.runner())
-                    .addTargets(this.initializerOps)
-                    .run();
+        try (Session session = new Session(graph)) {
 
-            // Train
-            var train = data.getTrain();
-            train.build(tf, batchSize);
-
-            double epochAccuracy = 0;
-            double epochLoss = 0;
-
-            for (int epoch = 0; epoch < epochs; epoch++) {
-                for (int i = 0; i < train.numBatches(); i++) {
-                    // Training Loop
-                    var trainBatch = train.loadBatch(tf, i);
-                    var inputData = trainBatch.get(0);
-                    var actual = trainBatch.get(1);
-
-                    var predicted = this.apply(tf, inputData);
-                    var loss = this.loss.apply(tf, predicted, actual);
-                    var metrics = this.metrics
-                            .stream()
-                            .map(m -> m.apply(tf, predicted, actual))
-                            .collect(Collectors.toList());
-
-                    // Run training loop
-                    List<Tensor<?>> trainOutputs =
-                            new SessionRunner(session.runner())
-                                    .addTargets(inputData, actual)
-                                    .addTargets(optimizer.minimize(tf, loss, this.trainableVars))
-                                    .fetch(metrics)
-                                    .run();
-
-                    double accuracy = trainOutputs.get(0).floatValue();
-                    double batchLoss = trainOutputs.get(1).floatValue();
-
-
-                    epochAccuracy += accuracy / train.numBatches();
-                    epochLoss += batchLoss / train.numBatches();
-                }
-
-                System.out.println("Loss on epoch " + epoch + " is: loss=" + epochLoss + "    accuracy=" + epochAccuracy);
+            // initialize weights
+            Session.Runner initRunner = session.runner();
+            addTargets(initRunner, new ArrayList<Operand<Float>>(firstLayer.initializers.values()));
+            for (Layer layer : this.layers) {
+                addTargets(initRunner, new ArrayList<Operand<Float>>(layer.initializers.values()));
             }
+            initRunner.run();
 
-            // Validate
-            var val = data.getVal();
-            val.build(tf, batchSize);
+            for (int e = 0; e < epochs; e++) {
 
-            double valLoss = 0;
-            double valAccuracy = 0;
-            for (int i = 0; i < val.numBatches(); i++) {
-                // Training Loop
-                var valBatch = val.loadBatch(tf, i);
-                var inputData = valBatch.get(0);
-                var actual = valBatch.get(1);
+                double epochAccuracy = 0;
+                double epochLoss = 0;
 
-                var predicted = this.call(tf, inputData);
-                var metrics = this.metrics
-                        .stream()
-                        .map(m -> m.apply(tf, predicted, actual))
-                        .collect(Collectors.toList());
+                // train batches
+                for (int i = 0; i < trainBatches.size(); i++) {
+                    Session.Runner batchRunner = session.runner();
 
-                // Collect validation metrics
-                List<Tensor<?>> valOutputs =
-                        new SessionRunner(session.runner())
-                                .addTargets(inputData, actual)
-                                .fetch(metrics)
+                    // Run Gradient Descent Ops
+                    try (Tensor<Float> XBatch = Tensors.create(trainBatches.get(i).X);
+                         Tensor<Float> yBatch = Tensors.create(trainBatches.get(i).y)) {
+
+                        List<Tensor<?>> values = addTargets(batchRunner, optimizer.getTargets())
+                                .fetch(metricOp)
+                                .fetch(lossOp)
+                                .feed(firstLayer.iris.asOutput(), XBatch)
+                                .feed(labels.asOutput(), yBatch)
                                 .run();
 
-                double batchAccuracy = valOutputs.get(0).floatValue();
-                double batchLoss = valOutputs.get(1).floatValue();
+                        double accuracy = values.get(0).floatValue();
+                        double loss = values.get(1).floatValue();
 
-                valLoss += batchLoss / val.numBatches();
-                valAccuracy += batchAccuracy / val.numBatches();
+                        epochAccuracy += accuracy / trainBatches.size();
+                        epochLoss += loss / trainBatches.size();
+                    }
+
+
+                }
+
+                // Run Gradient Descent Ops
+                epochAccuracy = 0;
+                epochLoss = 0;
+
+                for (int i = 0; i < testBatches.size(); i++) {
+                    Session.Runner testRunner = session.runner();
+
+                    try (Tensor<Float> XBatch = Tensors.create(testBatches.get(i).X);
+                         Tensor<Float> yBatch = Tensors.create(testBatches.get(i).y)) {
+
+                        List<Tensor<?>> values = testRunner
+
+                                .fetch(metricOp)
+                                .fetch(lossOp)
+                                .feed(firstLayer.iris.asOutput(), XBatch)
+                                .feed(labels.asOutput(), yBatch)
+                                .run();
+
+                        double accuracy = values.get(0).floatValue();
+                        double loss = values.get(1).floatValue();
+
+                        epochAccuracy += accuracy / testBatches.size();
+                        epochLoss += loss / testBatches.size();
+
+                    }
+                }
+
+                System.out.println("(Test) Epoch " + e + " accuracy: " + epochAccuracy + "loss: " + epochLoss);
             }
-
-            System.out.println("Val loss is loss=" + valLoss + "accuracy=" + valAccuracy);
         }
     }
 
 
 
-//
-//    public void fit(Graph graph, Dataset data, int epochs, int batchSize) {
-//
-//        List<Dataset.Split> trainBatches = data.trainBatches(batchSize);
-//        List<Dataset.Split> testBatches = data.testBatches(batchSize);
-//
-//        try (Session session = new Session(graph)) {
-//
-//            // initialize weights
-//            Session.Runner initRunner = session.runner();
-//            addTargets(initRunner, new ArrayList<Operand<Float>>(firstLayer.initializers.values()));
-//            for (Layer layer : this.layers) {
-//                addTargets(initRunner, new ArrayList<Operand<Float>>(layer.initializers.values()));
-//            }
-//            initRunner.run();
-//
-//            for (int e = 0; e < epochs; e++) {
-//
-//                double epochAccuracy = 0;
-//                double epochLoss = 0;
-//
-//                // train batches
-//                for (int i = 0; i < trainBatches.size(); i++) {
-//                    Session.Runner batchRunner = session.runner();
-//
-//                    // Run Gradient Descent Ops
-//                    try (Tensor<Float> XBatch = Tensors.create(trainBatches.get(i).X);
-//                         Tensor<Float> yBatch = Tensors.create(trainBatches.get(i).y)) {
-//
-//                        List<Tensor<?>> values = addTargets(batchRunner, optimizer.getTargets())
-//                                .fetch(metricOp)
-//                                .fetch(lossOp)
-//                                .feed(firstLayer.input.asOutput(), XBatch)
-//                                .feed(labels.asOutput(), yBatch)
-//                                .run();
-//
-//                        double accuracy = values.get(0).floatValue();
-//                        double loss = values.get(1).floatValue();
-//
-//                        epochAccuracy += accuracy / trainBatches.size();
-//                        epochLoss += loss / trainBatches.size();
-//                    }
-//                }
-//
-//                // Run Gradient Descent Ops
-//                epochAccuracy = 0;
-//                epochLoss = 0;
-//
-//                for (int i = 0; i < testBatches.size(); i++) {
-//                    Session.Runner testRunner = session.runner();
-//
-//                    try (Tensor<Float> XBatch = Tensors.create(testBatches.get(i).X);
-//                         Tensor<Float> yBatch = Tensors.create(testBatches.get(i).y)) {
-//
-//                        List<Tensor<?>> values = testRunner
-//                                .fetch(metricOp)
-//                                .fetch(lossOp)
-//                                .feed(firstLayer.input.asOutput(), XBatch)
-//                                .feed(labels.asOutput(), yBatch)
-//                                .run();
-//
-//                        double accuracy = values.get(0).floatValue();
-//                        double loss = values.get(1).floatValue();
-//
-//                        epochAccuracy += accuracy / testBatches.size();
-//                        epochLoss += loss / testBatches.size();
-//
-//                    }
-//                }
-//
-//                System.out.println("(Test) Epoch " + e + " accuracy: " + epochAccuracy + "loss: " + epochLoss);
-//            }
-//        }
-//    }
-//
-//
-//
-//    private Session.Runner addTargets(Session.Runner runner, List<Operand<Float>> targets) {
-//        for (Operand target : targets) {
-//            runner.addTarget(target);
-//        }
-//        return runner;
-//    }
-//
-//    private Session.Runner fetchOutputs(Session.Runner runner, List<Operand<Float>> outputs) {
-//        for (Operand<Float> output : outputs) {
-//            runner.fetch(output.asOutput());
-//        }
-//        return runner;
-//    }
+    Session.Runner addTargets(Session.Runner runner, List<Operand<Float>> targets) {
+        for (Operand target : targets) {
+            runner.addTarget(target);
+        }
+        return runner;
+    }
+
+
+
 }

@@ -1,16 +1,12 @@
 package io.gitlab.keras.datasets;
 
 
-import io.gitlab.keras.data.CompactTensorSplit;
-import io.gitlab.keras.data.TensorDataset;
-import io.gitlab.keras.data.TensorSplit;
-import org.tensorflow.Tensors;
-
 import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.FloatBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -23,22 +19,23 @@ public class MNISTLoader {
     private static final int LABELS_MAGIC = 2049;
     private static final int OUTPUT_CLASSES = 10;
 
-    private static String TEST_IMAGE_PATH = "C:\\Users\\dhruv\\data\\mnist\\t10k-images-idx3-ubyte.gz";
-    private static String TRAIN_IMAGE_PATH = "C:\\Users\\dhruv\\data\\mnist\\train-images-idx3-ubyte.gz";
-    private static String TEST_LABEL_PATH = "C:\\Users\\dhruv\\data\\mnist\\t10k-labels-idx1-ubyte.gz";
-    private static String TRAIN_LABEL_PATH = "C:\\Users\\dhruv\\data\\mnist\\train-labels-idx1-ubyte.gz";
+    public static String TEST_IMAGE_PATH = "C:\\Users\\dhruv\\data\\mnist\\t10k-images-idx3-ubyte.gz";
+    public static String TRAIN_IMAGE_PATH = "C:\\Users\\dhruv\\data\\mnist\\train-images-idx3-ubyte.gz";
+    public static String TEST_LABEL_PATH = "C:\\Users\\dhruv\\data\\mnist\\t10k-labels-idx1-ubyte.gz";
+    public static String TRAIN_LABEL_PATH = "C:\\Users\\dhruv\\data\\mnist\\train-labels-idx1-ubyte.gz";
 
 
-    public static TensorDataset<Float> loadData() throws IOException {
+    public static void main(String[] args) throws IOException {
+        MNISTLoader.loadData().trainBatches(100);
+    }
+
+    public static Dataset loadData() throws IOException {
         float[][] trainImages = readImages(TRAIN_IMAGE_PATH);
         float[][] trainLabels = readLabelsOneHot(TRAIN_LABEL_PATH);
         float[][] testImages = readImages(TEST_IMAGE_PATH);
         float[][] testLabels = readLabelsOneHot(TEST_LABEL_PATH);
 
-        return new TensorDataset<>(
-                new CompactTensorSplit<>(Tensors.create(trainImages), Tensors.create(trainLabels), Float.class),
-                new CompactTensorSplit<>(Tensors.create(testImages), Tensors.create(testLabels), Float.class)
-        );
+        return new Dataset(trainImages, trainLabels, testImages, testLabels);
     }
 
     private static float[][] readImages(String imagesPath) throws IOException {

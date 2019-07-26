@@ -1,12 +1,11 @@
-package io.gitlab.keras.data;
+package io.gitlab.keras.datasets;
 
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
-/**
- * Batched Da
- */
 public class Dataset {
     public static class Split {
         public float[][] X;

@@ -6,42 +6,46 @@ import org.tensorflow.Operand;
 import org.tensorflow.op.Ops;
 import org.tensorflow.op.core.Placeholder;
 
-import java.util.Collections;
-import java.util.List;
-
 public abstract class Metric extends Layer<Float> implements MetricFunction {
-    private Operand<Float> outputOp;
 
-    public Metric() {
-        super(2);
-    }
+    public abstract Operand<Float> build(Ops tf, Operand<Float> output, Placeholder<Float> label) throws Exception;
 
-    public static Metric select(String s) { return select(Metrics.valueOf(s)); }
+    public static Metric select(String s) { return select(MetricType.valueOf(s)); }
 
-    private static Metric select(Metrics metricType) {
-        return Metrics.select(metricType);
+    private static Metric select(MetricType metricType) {
+        return MetricType.select(metricType);
     }
 
     @Override
-    @SafeVarargs
-    public final Operand<Float> call(Ops tf, Operand<Float>... ops) {
-        if (ops.length != 2) {
-            throw new IllegalArgumentException("Metric type " + "'" + this.getClass().getName() + "'" +
-                    " call() takes 2 Operand<Float> objects as input. " + "Recevied " + ops.length + ".");
+    public Operand<Float> apply(Ops tf, Operand<Float> output, Placeholder<Float> label) throws Exception {
+        return build(tf, output, label);
+    }
+
+    public enum MetricType {
+        accuracy,
+        binary_accuracy,
+        categorical_accuracy,
+        sparse_categorical_accuracy,
+        top_k_categorical_accuracy,
+        sparse_top_k_categorical_accuracy;
+
+         static Metric select(MetricType metricType) {
+            switch (metricType) {
+                case accuracy:
+                    return new Accuracy();
+                case binary_accuracy:
+                    return new BinaryAccuracy();
+                case categorical_accuracy:
+                    return new CategoricalAccuracy();
+                case sparse_categorical_accuracy:
+                    return new SparseCategoricalAccuracy();
+                case top_k_categorical_accuracy:
+                    return new TopKCategoricalAccuracy();
+                case sparse_top_k_categorical_accuracy:
+                    return new SparseTopKCategoricalAccuracy();
+                default:
+                    throw new IllegalArgumentException("Invalid metric type");
+            }
         }
-
-        return call(tf, ops[0], ops[1]);
     }
-
-    public abstract Operand<Float> call(Ops tf, Operand<Float> output, Placeholder<Float> label);
-
-    @Override
-    public Operand<Float> apply(Ops tf, Operand<Float> output, Operand<Float> label)  {
-        return this.apply(tf, output, (Operand<Float>) label);
-    }
-
-//    @Override
-//    public List<Operand<Float>> metricOps() {
-//        return Collections.singletonList(outputOp);
-//    }
 }

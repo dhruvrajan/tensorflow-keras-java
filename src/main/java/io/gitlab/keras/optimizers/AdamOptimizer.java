@@ -35,6 +35,10 @@ public class AdamOptimizer {
         gradients = tf.gradients(loss, weights);
         Constant<Float> alpha = tf.constant(learningRate);
 
+        for (int i = 0; i < weights.size(); i++) {
+
+        }
+
     }
     private static Operand<Double> constArray(Ops tf, double... i) { return tf.constant(i); }
 

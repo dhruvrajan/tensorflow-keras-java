@@ -1,33 +1,34 @@
 package io.gitlab.keras.losses;
 
-import io.gitlab.keras.layers.Layer;
 import io.gitlab.keras.mixin.MetricFunction;
 import org.tensorflow.Operand;
 import org.tensorflow.op.Ops;
 import org.tensorflow.op.core.Placeholder;
 
-public abstract class Loss extends Layer<Float> implements MetricFunction {
-
-    public Loss() {
-        super(2);
-    }
-
-    /**
-     * Subclasses should override this method.
-     */
-    protected abstract Operand<Float> call(Ops tf, Operand<Float> actual, Placeholder<Float> labels);
-
-    @SafeVarargs
-    public final Operand<Float> call(Ops tf, Operand<Float>... inputs) {
-        if (!(inputs[1] instanceof Placeholder)) {
-            throw new IllegalArgumentException("Second input to loss must be a placeholder");
-        }
-        return this.call(tf, inputs[0], (Placeholder<Float>) inputs[1]);
-    }
+public abstract class Loss implements MetricFunction {
+    public abstract Operand<Float> build(Ops tf, Operand<Float> actual, Operand<Float> labels);
 
     @Override
-    public Operand<Float> apply(Ops tf, Operand<Float> output, Operand<Float> label) {
-        // Call Layer.apply
-        return this.apply(tf, output, (Operand<Float>) label);
+    public Operand<Float> apply(Ops tf, Operand<Float> output, Placeholder<Float> label) throws Exception {
+        return build(tf, output, label);
+    }
+
+    public static Loss select(String lossName) {
+        return LossType.select(LossType.valueOf(lossName));
+    }
+
+    enum LossType {
+        mean_squared_error, softmax_crossentropy;
+
+        static Loss select(LossType lossType) {
+            switch (lossType) {
+                case mean_squared_error:
+                    return new MeanSquaredError();
+                case softmax_crossentropy:
+                    return new SoftmaxCrossEntropyLoss();
+                default:
+                    throw new IllegalArgumentException("Invalid loss type.");
+            }
+        }
     }
 }

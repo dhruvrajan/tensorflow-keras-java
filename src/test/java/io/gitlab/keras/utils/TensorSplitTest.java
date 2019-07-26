@@ -1,18 +1,21 @@
-package io.gitlab.keras.data;
+package io.gitlab.keras.utils;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.tensorflow.*;
 import org.tensorflow.op.Ops;
 
 import java.nio.FloatBuffer;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.StreamSupport;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class TensorSplitTest {
     TensorSplit<Float> split;
+
 
     @Test
     public void setUp() {
@@ -64,8 +67,8 @@ class TensorSplitTest {
                 int xcount = 0;
                 for (Operand<Float> batch : batches) {
                     List<Tensor<?>> t = sess.runner()
-                            .feed(split.getXOp().asOutput(), split.getX())
-                            .feed(split.getyOp().asOutput(), split.getY())
+                            .feed(split.XOp.asOutput(), split.X)
+                            .feed(split.yOp.asOutput(), split.y)
                             .fetch(batch)
                             .run();
 
@@ -89,8 +92,8 @@ class TensorSplitTest {
                 Iterable<Operand<Float>> yBatches = () -> split.yBatchIterator();
                 for (Operand<Float> batch : yBatches) {
                     List<Tensor<?>> t = sess.runner()
-                            .feed(split.getXOp().asOutput(), split.getX())
-                            .feed(split.getyOp().asOutput(), split.getY())
+                            .feed(split.XOp.asOutput(), split.X)
+                            .feed(split.yOp.asOutput(), split.y)
                             .fetch(batch)
                             .run();
 

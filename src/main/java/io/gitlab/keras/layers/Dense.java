@@ -2,108 +2,72 @@ package io.gitlab.keras.layers;
 
 
 import io.gitlab.keras.activations.Activation;
-import io.gitlab.keras.activations.Activations;
-import io.gitlab.keras.initializers.Initializer;
-import io.gitlab.keras.initializers.Initializers;
-import io.gitlab.keras.utils.TensorShape;
 import org.tensorflow.Operand;
 import org.tensorflow.Shape;
+import org.tensorflow.op.Op;
 import org.tensorflow.op.Ops;
-import org.tensorflow.op.core.Variable;
+import org.tensorflow.op.core.*;
 
 
 public class Dense extends Layer<Float> {
-    private static int DENSE_INPUT_LENGTH = 1;
-    private int units;
+    int units;
+    Shape inputShape;
 
-    private String KERNEL = "kernel";
-    private String KERNEL_INIT = "kernelInit";
-    private String BIAS = "bias";
-    private String BIAS_INIT = "biasInit";
+    // kernel matrix
+    Variable<Float> kernel;
+    Assign<Float> kernelInit;
 
-    // weight tensors
-    private Variable<Float> kernel;
-    private Variable<Float> bias;
+    // bias
+    Variable<Float> bias;
+    Assign<Float> biasInit;
 
-    // initializers
-    private Initializer<Float> kernelInitializer;
-    private Initializer<Float> biasInitializer;
-
-    // activation function
-    private Activation<Float> activation;
+    // softmax
+    Sigmoid<Float> softmax;
+    Activation<Float> activation;
 
 
-    public Dense(int units) {
-        super(DENSE_INPUT_LENGTH);
+    public Dense(int units, Shape inputShape) {
+        super();
+        this.inputShape = inputShape;
         this.units = units;
+        System.out.println("dense layer " + this.id + " shape" + inputShape.toString());
+
     }
 
     public Dense setActivation(String activationName) {
-        return setActivation(Activations.select(activationName));
+        return setActivation(Activation.select(activationName));
     }
 
-    public Dense setActivation(Activations activation) {
-        return setActivation(Activations.select(activation));
-    }
-
-    public Dense setActivation(Activation<Float> activation) { this.activation = activation; return this; }
-
-    public Dense setKernelInitializer(Initializers initializer) {
-        this.kernelInitializer = Initializers.select(initializer);
+    public Dense setActivation(Activation activation) {
+        this.activation = activation;
         return this;
     }
 
-    public Dense setBiasInitializer(Initializers initializer) {
-        this.biasInitializer = Initializers.select(initializer);
-        return this;
-    }
-
-    public void build(Ops tf, Shape inputShape) {
-        tf = tf.withName("Dense_Layer_" + this.id);
-
-        TensorShape tensorShape = new TensorShape(inputShape);
-        tensorShape.assertKnown(tensorShape.numDimensions() - 1);
-
+    public Operand build(Ops tf, Operand iris) {
+        tf = tf.withName("Dense_Layer_ID_" + this.id);
         Shape kernelShape = Shape.make(
                 inputShape.size(inputShape.numDimensions() - 1),
                 this.units
         );
 
+        // Create dense kernel tensor
+        this.kernel = addWeight("kernel", tf.variable(kernelShape, Float.class));
+        this.kernelInit = addInitializer("kernelInit", tf.assign(this.kernel, tf.zeros(constArray(tf, kernelShape.size(0), kernelShape.size(1)), Float.class)));
+
+
         Shape biasShape = Shape.make(this.units);
 
-        // Create dense kernel tensor
-        this.kernel = addWeight(KERNEL, tf.variable(kernelShape, Float.class));
-        if (this.kernelInitializer != null) {
-            addInitializer(KERNEL_INIT, this.kernelInitializer);
-            this.kernelInitializer.build(tf, this.kernel);
-        }
-
         // Create bias tensor
-        this.bias = addWeight(BIAS, tf.variable(biasShape, Float.class));
-        if (this.biasInitializer != null) {
-            addInitializer(BIAS_INIT, this.biasInitializer);
-            this.biasInitializer.build(tf, this.bias);
-        }
+        System.out.println("-> " + this.id + " kernelShape " + kernelShape + " biasShape " + biasShape);
+        this.bias = addWeight("bias", tf.variable(biasShape, Float.class));
+        this.biasInit = addInitializer("biasInit", tf.assign(this.bias, tf.zeros(constArray(tf, biasShape.size(0)), Float.class)));
 
-        this.built = true;
+        // Apply activation
+        Operand<Float> signal = tf.add(tf.matMul(iris, this.kernel), this.bias);
+
+        return activation.build(tf, signal);
     }
 
-    public Shape computeOutputShape(Shape inputShape) {
-        // leaves unknown dimensions unknown
-        return new TensorShape(inputShape)
-                .replaceLast(this.units)
-                .toShape();
-    }
-
-    @SafeVarargs
-    public final Operand<Float> call(Ops tf, Operand<Float>... inputs) {
-        return this.call(tf, inputs[0]);
-    }
-
-
-    private Operand<Float> call(Ops tf, Operand<Float> input) {
-        Operand<Float> signal = tf.math.add(tf.linalg.matMul(input, this.kernel), this.bias);
-        return this.activation.call(tf, signal);
-    }
+    private static Operand constArray(Ops tf, long... i) { return tf.constant(i); }
 }
 
