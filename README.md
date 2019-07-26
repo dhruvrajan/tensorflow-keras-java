@@ -38,25 +38,26 @@ public class MNISTKeras {
         try (Graph graph = new Graph()) {
             Ops tf = Ops.create(graph);
 
-            TensorDataset<Float> data = MNISTLoader.loadData();
-
-            Model<Float> model = new Sequential(
-                    new InputLayer(28 * 28, 100),
-                    new Dense(10, Shape.make(100, 28 * 28))
-                        .setActivation("softmax")
+            Dataset data = MNISTLoader.loadDataset();
+            Sequential model = new Sequential(
+                    new InputLayer(28 * 28),
+                    new Dense(10)
+                            .setActivation(Activations.softmax)
+                            .setKernelInitializer(Initializers.zeros)
+                            .setBiasInitializer(Initializers.zeros)
             );
 
             // Build Graph
-            model.compile(tf,
-                    new Model.CompilerBuilder(graph)
-                            .setOptimizer("sgd")
-                            .setLoss("softmax_crossentropy")
-                            .addMetric("accuracy"));
+            model.compile(tf, new Model.CompilerOptions(graph)
+                    .setOptimizer(Optimizers.sgd)
+                    .setLoss(Losses.softmax_crossentropy)
+                    .addMetric(Metrics.accuracy));
 
-            // Run training and evaluation (100 epochs, batch size 100)
-            model.fit(graph, data, 100, 100);
+            // Run training and evaluation
+            model.fit(tf, data, 100, 100);
         }
     }
+
 }
 ```
 
