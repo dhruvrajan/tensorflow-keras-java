@@ -1,20 +1,21 @@
-//package io.gitlab.keras.datasets;
+// package io.gitlab.keras.datasets;
 //
-//import io.gitlab.keras.utils.DataUtils;
-//import io.gitlab.keras.utils.Keras;
-//import org.nd4j.linalg.api.ndarray.INDArray;
-//import org.nd4j.linalg.factory.Nd4j;
+// import io.gitlab.keras.utils.DataUtils;
+// import io.gitlab.keras.utils.Keras;
+// import org.nd4j.linalg.api.ndarray.INDArray;
+// import org.nd4j.linalg.factory.Nd4j;
 //
-//import java.io.BufferedReader;
-//import java.io.File;
-//import java.io.FileReader;
-//import java.io.IOException;
-//import java.util.Arrays;
-//import java.util.LinkedList;
-//import java.util.List;
+// import java.io.BufferedReader;
+// import java.io.File;
+// import java.io.FileReader;
+// import java.io.IOException;
+// import java.util.Arrays;
+// import java.util.LinkedList;
+// import java.util.List;
 //
-//public class BostonHousing {
-//    private static final String ORIGIN_PATH = "https://storage.googleapis.com/tensorflow/tf-keras-datasets/boston_housing.npz";
+// public class BostonHousing {
+//    private static final String ORIGIN_PATH =
+// "https://storage.googleapis.com/tensorflow/tf-keras-datasets/boston_housing.npz";
 //
 //    public static void download()throws IOException {
 //
@@ -107,4 +108,4 @@
 //        return batches;
 //    }
 //
-//}
+// }

@@ -1,18 +1,18 @@
-//package io.gitlab.keras.examples.mnist.naive;
+// package io.gitlab.keras.examples.mnist.naive;
 //
 //
-//import io.gitlab.keras.datasets.BostonHousing;
-//import io.gitlab.keras.data.Dataset;
-//import org.tensorflow.Shape;
-//import org.tensorflow.*;
-//import org.tensorflow.op.Ops;
-//import org.tensorflow.op.core.*;
-//import java.io.IOException;
-//import java.util.List;
+// import io.gitlab.keras.datasets.BostonHousing;
+// import io.gitlab.keras.data.Dataset;
+// import org.tensorflow.Shape;
+// import org.tensorflow.*;
+// import org.tensorflow.op.Ops;
+// import org.tensorflow.op.core.*;
+// import java.io.IOException;
+// import java.util.List;
 //
 
 //
-//public class BostonClassifier implements Runnable {
+// public class BostonClassifier implements Runnable {
 //    private static final int FEATURES = 13;
 //    private static final int BATCH_SIZE = 3;
 //    private static final float LEARNING_RATE = 0.2f;
@@ -30,11 +30,13 @@
 //    public void run() {
 //        try(Graph graph = new Graph()) {
 //            Ops tf = Ops.create(graph);
-//            Placeholder<Float> X = tf.placeholder(Float.class, Placeholder.shape(Shape.make(-1, FEATURES)));
+//            Placeholder<Float> X = tf.placeholder(Float.class, Placeholder.shape(Shape.make(-1,
+// FEATURES)));
 //            Placeholder<Float> y = tf.placeholder(Float.class);
 //
 //            Variable<Float> theta = tf.variable(Shape.make(FEATURES, BATCH_SIZE), Float.class);
-//            Assign<Float> thetaInit = tf.assign(theta, tf.zeros(constArray(tf, FEATURES, BATCH_SIZE), Float.class));
+//            Assign<Float> thetaInit = tf.assign(theta, tf.zeros(constArray(tf, FEATURES,
+// BATCH_SIZE), Float.class));
 //
 //            MatMul<Float> yPred = tf.matMul(X, theta);
 //            Sub<Float> error = tf.sub(yPred, y);
@@ -43,8 +45,10 @@
 //
 //
 //            tf.reduceMean(tf.square(error), tf.constant(0));
-//            Mul<Float> gradients = tf.mul(tf.constant((float) 2.0/FEATURES), tf.matMul(tf.transpose(X, tf.constant(new int[] {1, 0})), error));
-//            ApplyGradientDescent<Float> applyGradientDescent = tf.applyGradientDescent(theta,tf.constant((float) 1), gradients);
+//            Mul<Float> gradients = tf.mul(tf.constant((float) 2.0/FEATURES),
+// tf.matMul(tf.transpose(X, tf.constant(new int[] {1, 0})), error));
+//            ApplyGradientDescent<Float> applyGradientDescent =
+// tf.applyGradientDescent(theta,tf.constant((float) 1), gradients);
 //
 //            Dataset batches;
 //            try {
@@ -86,4 +90,4 @@
 //    private static Operand<Integer> constArray(Ops tf, int... i) {
 //        return tf.constant(i);
 //    }
-//}
+// }

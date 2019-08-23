@@ -6,18 +6,15 @@ import org.tensorflow.op.Ops;
 import org.tensorflow.op.core.Placeholder;
 
 public class SparseCategoricalAccuracy extends Metric {
-    public Operand<Float> call(Ops tf, Operand<Float> output, Placeholder<Float> label)  {
-        throw new UnsupportedOperationException("Sparse Categorical Accuracy is not yet implemented.");
-    }
+  public Operand<Float> call(Ops tf, Operand<Float> output, Placeholder<Float> label) {
+    throw new UnsupportedOperationException("Sparse Categorical Accuracy is not yet implemented.");
+  }
 
-    @Override
-    public void build(Ops tf, Shape inputShape) {
+  @Override
+  public void build(Ops tf, Shape inputShape) {}
 
-    }
-
-    @Override
-    public Shape computeOutputShape(Shape inputShape) {
-        return Shape.unknown();
-    }
+  @Override
+  public Shape computeOutputShape(Shape inputShape) {
+    return Shape.unknown();
+  }
 }
-

@@ -1,108 +1,102 @@
 package org.tensorflow.keras.data;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Batched Da
- */
+/** Batched Da */
 public class Dataset {
-    public static class Split {
-        public float[][] X;
-        public float[][] y;
+  public static class Split {
+    public float[][] X;
+    public float[][] y;
 
-        public Split(float[][] X, float[][] y) {
-            assert X.length == y.length;
+    public Split(float[][] X, float[][] y) {
+      assert X.length == y.length;
 
-            this.X = X;
-            this.y = y;
-        }
-
-        List<Split> batches(int batchSize) {
-            int numBatches = X.length / batchSize;
-
-            List<Split> batches = new ArrayList<>();
-
-            for (int i = 0; i < numBatches; i++) {
-                Split batch = getBatch(batchSize, i);
-                batches.add(batch);
-            }
-
-            return batches;
-        }
-
-        Iterable<Split> batchIterator(int batchSize) {
-            return () -> batches(batchSize).iterator();
-        }
-
-        /**
-         *  Retrieve a particular batch given a batch size
-         */
-        Split getBatch(int batchSize, int i) {
-            assert i < X.length / batchSize;
-            return extractRange(batchSize * i, batchSize);
-        }
-
-        int size() {
-            return X.length;
-        }
-
-        Split extractRange(int start, int length) {
-            float[][] XRange = new float[length][X[0].length];
-            float[][] YRange = new float[length][X[0].length];
-
-            for (int j = start; j < start + length; j++) {
-                XRange[j - start] = X[j];
-                YRange[j - start] = y[j];
-            }
-
-            return new Split(XRange, YRange);
-        }
-
-        Dataset divide(double splitFactor) {
-            int headSize = (int) splitFactor * size();
-            int tailSize = size() - headSize;
-
-            Split train = extractRange(0, headSize);
-            Split test = extractRange(headSize, tailSize);
-
-            return new Dataset(train, test);
-        }
+      this.X = X;
+      this.y = y;
     }
 
-    Split train;
-    Split test;
+    List<Split> batches(int batchSize) {
+      int numBatches = X.length / batchSize;
 
-    public Dataset(float[][] XTrain, float[][] YTrain, float[][] XTest, float[][] YTest) {
-        train = new Split(XTrain, YTrain);
-        test = new Split(XTest, YTest);
+      List<Split> batches = new ArrayList<>();
+
+      for (int i = 0; i < numBatches; i++) {
+        Split batch = getBatch(batchSize, i);
+        batches.add(batch);
+      }
+
+      return batches;
     }
 
-    public Dataset(Split train, Split test) {
-        this.train = train;
-        this.test = test;
+    Iterable<Split> batchIterator(int batchSize) {
+      return () -> batches(batchSize).iterator();
     }
 
-    public List<Split> trainBatches(int batchSize) {
-        return train.batches(batchSize);
+    /** Retrieve a particular batch given a batch size */
+    Split getBatch(int batchSize, int i) {
+      assert i < X.length / batchSize;
+      return extractRange(batchSize * i, batchSize);
     }
 
-    public Iterable<Split> trainBatchIterator(int batchSize) {
-        return train.batchIterator(batchSize);
+    int size() {
+      return X.length;
     }
 
-    public List<Split> testBatches(int batchSize) {
-        return test.batches(batchSize);
+    Split extractRange(int start, int length) {
+      float[][] XRange = new float[length][X[0].length];
+      float[][] YRange = new float[length][X[0].length];
+
+      for (int j = start; j < start + length; j++) {
+        XRange[j - start] = X[j];
+        YRange[j - start] = y[j];
+      }
+
+      return new Split(XRange, YRange);
     }
 
-    public Iterable<Split> testBatchIterator(int batchSize) {
-        return test.batchIterator(batchSize);
+    Dataset divide(double splitFactor) {
+      int headSize = (int) splitFactor * size();
+      int tailSize = size() - headSize;
+
+      Split train = extractRange(0, headSize);
+      Split test = extractRange(headSize, tailSize);
+
+      return new Dataset(train, test);
     }
+  }
+
+  Split train;
+  Split test;
+
+  public Dataset(float[][] XTrain, float[][] YTrain, float[][] XTest, float[][] YTest) {
+    train = new Split(XTrain, YTrain);
+    test = new Split(XTest, YTest);
+  }
+
+  public Dataset(Split train, Split test) {
+    this.train = train;
+    this.test = test;
+  }
+
+  public List<Split> trainBatches(int batchSize) {
+    return train.batches(batchSize);
+  }
+
+  public Iterable<Split> trainBatchIterator(int batchSize) {
+    return train.batchIterator(batchSize);
+  }
+
+  public List<Split> testBatches(int batchSize) {
+    return test.batches(batchSize);
+  }
+
+  public Iterable<Split> testBatchIterator(int batchSize) {
+    return test.batchIterator(batchSize);
+  }
 }
 
-
-//public class Dataset<X, Y> {
+// public class Dataset<X, Y> {
 //    public static class Split<X, Y> {
 //        public X[] X;
 //        public Y[] y;
@@ -194,4 +188,4 @@ public class Dataset {
 //    public Iterable<Split<X, Y>> testBatchIterator(int batchSize) {
 //        return test.batchIterator(batchSize);
 //    }
-//}
+// }

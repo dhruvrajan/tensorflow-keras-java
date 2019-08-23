@@ -1,19 +1,19 @@
-//package io.gitlab.keras.datasets;
+// package io.gitlab.keras.datasets;
 //
-//import io.gitlab.keras.utils.DataUtils;
-//import io.gitlab.keras.utils.Keras;
+// import io.gitlab.keras.utils.DataUtils;
+// import io.gitlab.keras.utils.Keras;
 //
-//import java.io.DataInputStream;
-//import java.io.FileInputStream;
-//import java.io.IOException;
-//import java.util.ArrayList;
-//import java.util.Arrays;
-//import java.util.List;
-//import java.util.zip.GZIPInputStream;
+// import java.io.DataInputStream;
+// import java.io.FileInputStream;
+// import java.io.IOException;
+// import java.util.ArrayList;
+// import java.util.Arrays;
+// import java.util.List;
+// import java.util.zip.GZIPInputStream;
 //
 //
 //
-//public class MNIST {
+// public class MNIST {
 //    // File names and directory structure
 //    private static final String TRAIN_IMAGES = "train-images-idx3-ubyte.gz";
 //    private static final String TRAIN_LABELS = "train-labels-idx1-ubyte.gz";
@@ -46,16 +46,22 @@
 //    }
 //
 //    public static Dataset<List<float[][]>, List<float[][]>> loadData() throws IOException {
-//        List<float[][]> TRAIN_IMAGE_PATH = readImages(Keras.kerasPath(LOCAL_PREFIX, TRAIN_IMAGES).toString(), 100);
-//        List<float[][]> TRAIN_LABEL_PATH = readLabelsOneHot(Keras.kerasPath(LOCAL_PREFIX, TRAIN_LABELS).toString(), 100);
+//        List<float[][]> TRAIN_IMAGE_PATH = readImages(Keras.kerasPath(LOCAL_PREFIX,
+// TRAIN_IMAGES).toString(), 100);
+//        List<float[][]> TRAIN_LABEL_PATH = readLabelsOneHot(Keras.kerasPath(LOCAL_PREFIX,
+// TRAIN_LABELS).toString(), 100);
 //
-//        List<float[][]> TEST_IMAGE_PATH = readImages(Keras.kerasPath(LOCAL_PREFIX , TEST_IMAGES).toString(), 100);
-//        List<float[][]> TEST_LABEL_PATH = readLabelsOneHot(Keras.kerasPath(LOCAL_PREFIX, TEST_LABELS).toString(), 100);
+//        List<float[][]> TEST_IMAGE_PATH = readImages(Keras.kerasPath(LOCAL_PREFIX ,
+// TEST_IMAGES).toString(), 100);
+//        List<float[][]> TEST_LABEL_PATH = readLabelsOneHot(Keras.kerasPath(LOCAL_PREFIX,
+// TEST_LABELS).toString(), 100);
 //
-//        return new Dataset<>(TRAIN_IMAGE_PATH, TRAIN_LABEL_PATH, TEST_IMAGE_PATH, TEST_LABEL_PATH);
+//        return new Dataset<>(TRAIN_IMAGE_PATH, TRAIN_LABEL_PATH, TEST_IMAGE_PATH,
+// TEST_LABEL_PATH);
 //    }
 //
-//    private static List<float[][]> readImages(String imagesPath, int batchSize) throws IOException {
+//    private static List<float[][]> readImages(String imagesPath, int batchSize) throws IOException
+// {
 //        try (DataInputStream inputStream =
 //                     new DataInputStream(new GZIPInputStream(new FileInputStream(imagesPath)))) {
 //
@@ -68,12 +74,14 @@
 //            int cols = inputStream.readInt();
 //
 //            if (numImages % batchSize != 0) {
-//                throw new IllegalArgumentException("Batch Size must divide num elements" + numImages + ", " + batchSize);
+//                throw new IllegalArgumentException("Batch Size must divide num elements" +
+// numImages + ", " + batchSize);
 //            }
 //
 //            List<float[][]> batches = new ArrayList<>();
 //            for (int i = 0; i < numImages / batchSize; i++) {
-//                float[][] batch = readImageBuffer(inputStream, batchSize, rows * cols).toFloatMatrix();
+//                float[][] batch = readImageBuffer(inputStream, batchSize, rows *
+// cols).toFloatMatrix();
 //                batches.add(batch);
 //            }
 //
@@ -81,7 +89,8 @@
 //        }
 //    }
 //
-//    private static List<float[][]> readLabelsOneHot(String labelsPath, int batchSize) throws IOException {
+//    private static List<float[][]> readLabelsOneHot(String labelsPath, int batchSize) throws
+// IOException {
 //        try (DataInputStream inputStream =
 //                     new DataInputStream(new GZIPInputStream(new FileInputStream(labelsPath)))) {
 //
@@ -100,7 +109,8 @@
 //        }
 //    }
 //
-//    private static byte[][] readBatchedBytes(DataInputStream inputStream, int batches, int bytesPerBatch) throws IOException {
+//    private static byte[][] readBatchedBytes(DataInputStream inputStream, int batches, int
+// bytesPerBatch) throws IOException {
 //        byte[][] entries = new byte[batches][bytesPerBatch];
 //        for (int i = 0; i < batches; i++) {
 //            inputStream.readFully(entries[i]);
@@ -108,7 +118,8 @@
 //        return entries;
 //    }
 //
-//    private static INDArray readImageBuffer(DataInputStream inputStream, int numImages, int imageSize) throws IOException {
+//    private static INDArray readImageBuffer(DataInputStream inputStream, int numImages, int
+// imageSize) throws IOException {
 //        byte[][] entries = readBatchedBytes(inputStream, numImages, imageSize);
 //
 //        float[][] unsignedEntries = new float[numImages][imageSize];
@@ -121,7 +132,8 @@
 //        return Nd4j.create(unsignedEntries);
 //    }
 //
-//    private static INDArray readLabelBuffer(DataInputStream inputStream, int numLabels) throws IOException {
+//    private static INDArray readLabelBuffer(DataInputStream inputStream, int numLabels) throws
+// IOException {
 //        byte[][] entries = readBatchedBytes(inputStream, numLabels, 1);
 //
 //        float[][] labels = new float[numLabels][OUTPUT_CLASSES];
@@ -140,4 +152,4 @@
 //        if (fill) Arrays.fill(oneHot, 0);
 //        oneHot[label] = 1.0f;
 //    }
-//}
+// }

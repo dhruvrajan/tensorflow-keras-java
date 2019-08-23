@@ -1,21 +1,21 @@
-//package io.gitlab.keras.datasets;
+// package io.gitlab.keras.datasets;
 //
-//import io.gitlab.keras.data.TensorDataset;
-//import io.gitlab.keras.data.TensorSplit;
-//import io.gitlab.keras.utils.DataUtils;
-//import io.gitlab.keras.utils.Keras;
-//import org.tensorflow.Tensor;
-//import org.tensorflow.Tensors;
+// import io.gitlab.keras.data.TensorDataset;
+// import io.gitlab.keras.data.TensorSplit;
+// import io.gitlab.keras.utils.DataUtils;
+// import io.gitlab.keras.utils.Keras;
+// import org.tensorflow.Tensor;
+// import org.tensorflow.Tensors;
 //
-//import java.io.BufferedReader;
-//import java.io.FileReader;
-//import java.io.IOException;
-//import java.util.ArrayList;
-//import java.util.Arrays;
-//import java.util.Collections;
-//import java.util.List;
+// import java.io.BufferedReader;
+// import java.io.FileReader;
+// import java.io.IOException;
+// import java.util.ArrayList;
+// import java.util.Arrays;
+// import java.util.Collections;
+// import java.util.List;
 //
-//public class Iris {
+// public class Iris {
 //    private static final String IRIS_ORIGIN =
 //            "https://archive.ics.uci.edu/ml/machine-learning-databases/input/input.data";
 //    private static final int NUM_EXAMPLES = 151;
@@ -70,7 +70,8 @@
 //                    xvector[i] = Float.parseFloat(xstring[i]);
 //                }
 //
-//                float[] yvector = oneHot(COLOR.valueOf(values[1]).getValue(), COLOR.values().length);
+//                float[] yvector = oneHot(COLOR.valueOf(values[1]).getValue(),
+// COLOR.values().length);
 //
 //                XTrain[count] = xvector;
 //                yTrain[count] = yvector;
@@ -88,7 +89,8 @@
 //                    xvector[i] = Float.parseFloat(xstring[i]);
 //                }
 //
-//                float[] yvector = oneHot(COLOR.valueOf(values[1]).getValue(), COLOR.values().length);
+//                float[] yvector = oneHot(COLOR.valueOf(values[1]).getValue(),
+// COLOR.values().length);
 //
 //                XVal[count - trainSize] = xvector;
 //                yVal[count - trainSize] = yvector;
@@ -98,8 +100,10 @@
 //
 //
 //            return new TensorDataset<Float>(
-//                    new TensorSplit<Float>(Tensors.create(XTrain), Tensors.create(yTrain), Float.class),
-//                    new TensorSplit<Float>(Tensors.create(XVal), Tensors.create(yVal), Float.class)
+//                    new TensorSplit<Float>(Tensors.create(XTrain), Tensors.create(yTrain),
+// Float.class),
+//                    new TensorSplit<Float>(Tensors.create(XVal), Tensors.create(yVal),
+// Float.class)
 //            );
 //        }
 //    }
@@ -114,4 +118,4 @@
 //        oneHot[label] = 1.0f;
 //        return oneHot;
 //    }
-//}
+// }

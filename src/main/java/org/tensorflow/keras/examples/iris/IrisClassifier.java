@@ -1,20 +1,20 @@
-//package io.gitlab.keras.examples.iris;
+// package io.gitlab.keras.examples.iris;
 //
-//import io.gitlab.keras.data.TensorDataset;
-//import io.gitlab.keras.datasets.Iris;
-//import io.gitlab.keras.layers.Dense;
-//import io.gitlab.keras.layers.InputLayer;
-//import io.gitlab.keras.losses.SoftmaxCrossEntropyLoss;
-//import io.gitlab.keras.metrics.Accuracy;
-//import io.gitlab.keras.models.Sequential;
-//import io.gitlab.keras.optimizers.GradientDescentOptimizer;
-//import org.tensorflow.Graph;
-//import org.tensorflow.Shape;
-//import org.tensorflow.op.Ops;
+// import io.gitlab.keras.data.TensorDataset;
+// import io.gitlab.keras.datasets.Iris;
+// import io.gitlab.keras.layers.Dense;
+// import io.gitlab.keras.layers.InputLayer;
+// import io.gitlab.keras.losses.SoftmaxCrossEntropyLoss;
+// import io.gitlab.keras.metrics.Accuracy;
+// import io.gitlab.keras.models.Sequential;
+// import io.gitlab.keras.optimizers.GradientDescentOptimizer;
+// import org.tensorflow.Graph;
+// import org.tensorflow.Shape;
+// import org.tensorflow.op.Ops;
 //
-//import java.io.IOException;
+// import java.io.IOException;
 //
-//public class IrisClassifier {
+// public class IrisClassifier {
 //    final static int BATCH_SIZE = 5;
 //
 //    public static void main(String[] args) throws IOException {
@@ -28,8 +28,9 @@
 //                    new Dense(3, Shape.make(BATCH_SIZE, 4))
 //            );
 //
-//            model.compile(tf, new GradientDescentOptimizer((float) 0.06), new SoftmaxCrossEntropyLoss(), new Accuracy());
+//            model.compile(tf, new GradientDescentOptimizer((float) 0.06), new
+// SoftmaxCrossEntropyLoss(), new Accuracy());
 //            model.fit(graph, data.XTrain, data.YTrain, data.XTest, data.YTest, 100);
 //        }
 //    }
-//}
+// }

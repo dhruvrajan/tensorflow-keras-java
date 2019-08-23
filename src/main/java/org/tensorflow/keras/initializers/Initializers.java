@@ -1,14 +1,14 @@
 package org.tensorflow.keras.initializers;
 
 public enum Initializers {
-    zeros;
+  zeros;
 
-    public static Initializer<Float> select(Initializers initializer) {
-        switch (initializer) {
-            case zeros:
-                return new Zeros<Float>().dtype(Float.class);
-            default:
-                throw new IllegalArgumentException("invalid initializer type");
-        }
+  public static Initializer<Float> select(Initializers initializer) {
+    switch (initializer) {
+      case zeros:
+        return new Zeros<Float>().dtype(Float.class);
+      default:
+        throw new IllegalArgumentException("invalid initializer type");
     }
+  }
 }

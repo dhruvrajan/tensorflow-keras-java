@@ -1,13 +1,13 @@
-//package io.gitlab.keras.utils;
+// package io.gitlab.keras.utils;
 //
-//import org.nd4j.linalg.api.buffer.DataBuffer;
-//import org.nd4j.linalg.api.buffer.FloatBuffer;
-//import org.nd4j.linalg.api.ndarray.INDArray;
-//import org.nd4j.linalg.factory.Nd4j;
-//import org.nd4j.serde.binary.BinarySerde;
-//import org.tensorflow.Tensor;
-//import org.tensorflow.Tensors;
-//public class ConversionUtils {
+// import org.nd4j.linalg.api.buffer.DataBuffer;
+// import org.nd4j.linalg.api.buffer.FloatBuffer;
+// import org.nd4j.linalg.api.ndarray.INDArray;
+// import org.nd4j.linalg.factory.Nd4j;
+// import org.nd4j.serde.binary.BinarySerde;
+// import org.tensorflow.Tensor;
+// import org.tensorflow.Tensors;
+// public class ConversionUtils {
 //
 //    public static void main(String[] args) {
 //
@@ -33,4 +33,4 @@
 //        java.nio.FloatBuffer dbf = BinarySerde.toByteBuffer(ndArray).asFloatBuffer();
 //        return Tensor.create(ndArray.shape(), dbf);
 //    }
-//}
+// }
