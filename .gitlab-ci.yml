@@ -10,7 +10,7 @@ cache:
     - target/
 
 build:
-  stage: build
+  stage: create
   script:
     - mvn $MAVEN_CLI_OPTS compile
 
