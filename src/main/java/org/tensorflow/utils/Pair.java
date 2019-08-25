@@ -1,4 +1,4 @@
-package org.tensorflow.keras.utils;
+package org.tensorflow.utils;
 
 public class Pair<T, S> {
   private T first;

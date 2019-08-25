@@ -57,39 +57,78 @@ public class TensorShape {
     return this.dims[i];
   }
 
+  /**
+   * Test whether dimension i in this shape is known
+   * @param i Target dimension to test
+   * @return Whether dimension i is unknown (equal to -1)
+   */
   public boolean isKnown(int i) {
     return dims[i] != -1;
   }
 
+  /**
+   * Throw an exception if dimension i is unknown.
+   *
+   * @param i Target dimension to test
+   * @throws IllegalStateException if dimension i is unknown
+   */
   public void assertKnown(int i) {
     if (!isKnown(i)) {
       throw new IllegalStateException("Dimension " + i + " in shape needs to be known.");
     }
   }
 
-  public TensorShape replaceLast(long dim) {
-    return replace(this.dims.length - 1, dim);
-  }
-
-  public long size(int i) {
-    return this.dims[i];
-  }
-
-  public int numDimensions() {
-    return this.dims.length;
-  }
-
+  /**
+   * Replace dimension i with a new dimension size.
+   * @param i The target dimension to change.
+   * @param dim The new dimension size.
+   * @return The new changed TensorShape
+   */
   public TensorShape replace(int i, long dim) {
     dims[i] = dim;
     return this;
   }
 
-  public TensorShape concatenate(long dim) {
-    this.dims = concatenate(this.dims, dim);
+  /**
+   * Replace the last dimension with a new dimension size.
+   * @param dim New size for the last dimensions
+   * @return The new changed TensorShape
+   */
+  public TensorShape replaceLast(long dim) {
+    return replace(this.dims.length - 1, dim);
+  }
+
+  /**
+   * Replace the first dimension with a new dimension size.
+   * @param dim New size for first dimension
+   * @return The new changed TensorShape.
+   */
+  public TensorShape replaceFirst(long dim) {
+    return replace(0, dim);
+  }
+
+  /**
+   * Get the size of a target dimension.
+   * @param i Target dimension.
+   * @return The size of dimension i
+   */
+  public long size(int i) {
+    return this.dims[i];
+  }
+
+  public TensorShape concatenate(long... dims) {
+    this.dims = concatenate(this.dims, dims);
     return this;
   }
 
-  public static long[] dimsFromShape(Shape shape) {
+  @Override
+  public boolean equals(Object other) {
+    if (other == this) return true;
+    else if (!(other instanceof TensorShape)) return false;
+    return Arrays.equals(((TensorShape) other).dims, dims);
+  }
+
+  private static long[] dimsFromShape(Shape shape) {
     long[] dims = new long[shape.numDimensions()];
     for (int i = 0; i < shape.numDimensions(); i++) {
       dims[i] = shape.size(i);
@@ -97,18 +136,18 @@ public class TensorShape {
     return dims;
   }
 
-  public static long[] concatenate(long[] first, long last) {
-    long[] dims = new long[first.length + 1];
+  private static long[] concatenate(long[] first, long... last) {
+    long[] dims = new long[first.length + last.length];
     System.arraycopy(first, 0, dims, 0, first.length);
-    dims[dims.length - 1] = last;
+    System.arraycopy(last, 0, dims, first.length, last.length);
     return dims;
   }
 
-  public static long head(long... dims) {
+  private static long head(long... dims) {
     return dims[0];
   }
 
-  public static long[] tail(long... dims) {
+  private static long[] tail(long... dims) {
     return Arrays.copyOfRange(dims, 1, dims.length);
   }
 

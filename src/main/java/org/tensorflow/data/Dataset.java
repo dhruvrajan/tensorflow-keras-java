@@ -1,7 +1,7 @@
 package org.tensorflow.data;
 
 import org.tensorflow.Operand;
-import org.tensorflow.keras.utils.Pair;
+import org.tensorflow.utils.Pair;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -15,10 +15,11 @@ public abstract class Dataset<T> implements Iterable<Collection<Operand<T>>> {
    * @param transformation A function that takes one `Dataset` argument and returns a `Dataset`.
    * @return The `Dataset` returned by applying `transformation` to this dataset.
    */
-  public abstract Dataset<T> apply(Function<Dataset<T>, Dataset<T>> transformation);
+//  public abstract Dataset<T> apply(Function<Dataset<T>, Dataset<T>> transformation);
 
   /**
-   * Combines consecutive elements of this dataset into batches.
+   * Combines consecutive elements of this dataset into batches. Does not drop the last
+   * batch, even if it has fewer than batchSize elements.
    *
    * @param batchSize The number of consecutive elements of this dataset to combine in a single
    *     batch.

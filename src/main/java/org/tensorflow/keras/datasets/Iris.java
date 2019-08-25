@@ -1,7 +1,7 @@
 // package io.gitlab.keras.datasets;
 //
 // import io.gitlab.keras.data.TensorDataset;
-// import io.gitlab.keras.data.TensorSplit;
+// import io.gitlab.keras.data.TensorFrame;
 // import io.gitlab.keras.utils.DataUtils;
 // import io.gitlab.keras.utils.Keras;
 // import org.tensorflow.Tensor;
@@ -100,9 +100,9 @@
 //
 //
 //            return new TensorDataset<Float>(
-//                    new TensorSplit<Float>(Tensors.create(XTrain), Tensors.create(yTrain),
+//                    new TensorFrame<Float>(Tensors.create(XTrain), Tensors.create(yTrain),
 // Float.class),
-//                    new TensorSplit<Float>(Tensors.create(XVal), Tensors.create(yVal),
+//                    new TensorFrame<Float>(Tensors.create(XVal), Tensors.create(yVal),
 // Float.class)
 //            );
 //        }
