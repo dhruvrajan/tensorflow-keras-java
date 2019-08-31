@@ -1,26 +1,23 @@
 package org.tensorflow.data;
 
 import org.tensorflow.Operand;
-import org.tensorflow.utils.Pair;
+import org.tensorflow.Tensor;
+import org.tensorflow.nio.nd.NdArray;
 import org.tensorflow.op.Ops;
+import org.tensorflow.utils.Pair;
 
 import java.util.Collection;
 import java.util.Iterator;
 
-public abstract class TensorFrame<T> {
-    /**
-     * Splits a TensorFrame into a train frame and test frame, using `testSize` as the fraction
-     * to keep in the test frame.
-     * @return A pair (train, test) containing the new frames.
-     */
-    public abstract Pair<TensorFrame<T>, TensorFrame<T>> trainTestSplit(double testSize);
+public abstract class TensorFrame<T> implements Dataset<T> {
+    protected long batchSize = 1;
+    protected boolean dropRemainder = false;
 
-    /**
-     * Constructs an iterator over batches of size `batchSize`.
-     * @param tf
-     * @param batchSize
-     * @return
-     */
-    public abstract Iterator<Collection<Operand<T>>> batchIterator(Ops tf, int batchSize);
-    public abstract long size();
+    /* Override functions from Dataset<T> */
+    @Override
+    public Dataset<T> batch(long batchSize, boolean dropRemainder) {
+        this.batchSize = batchSize;
+        this.dropRemainder = dropRemainder;
+        return this;
+    }
 }

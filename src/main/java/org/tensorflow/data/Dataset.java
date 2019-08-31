@@ -1,13 +1,14 @@
 package org.tensorflow.data;
 
 import org.tensorflow.Operand;
+import org.tensorflow.op.Ops;
 import org.tensorflow.utils.Pair;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.function.Function;
 
-public abstract class Dataset<T> implements Iterable<Collection<Operand<T>>> {
+public abstract interface Dataset<T> {
 
   /**
    * Applies a transformation function to this dataset.
@@ -25,7 +26,7 @@ public abstract class Dataset<T> implements Iterable<Collection<Operand<T>>> {
    *     batch.
    * @return A `Dataset`
    */
-  public Dataset<T> batch(int batchSize) {
+  default public Dataset<T> batch(long batchSize) {
     return this.batch(batchSize, false);
   }
 
@@ -38,7 +39,7 @@ public abstract class Dataset<T> implements Iterable<Collection<Operand<T>>> {
    *     case that it has fewer than `batchSize` elements.
    * @return A `Dataset`
    */
-  public abstract Dataset<T> batch(int batchSize, boolean dropRemainder);
+  public abstract Dataset<T> batch(long batchSize, boolean dropRemainder);
 
   /**
    * Enumerates the elements of this dataset as pairs of tensors and integers
@@ -46,5 +47,8 @@ public abstract class Dataset<T> implements Iterable<Collection<Operand<T>>> {
    * @param start The start value for enumeration
    * @return A `Dataset`
    */
-  public abstract Iterator<Pair<Integer, Collection<T>>> enumerate(int start);
+//  public abstract Iterator<Pair<Integer, Collection<T>>> enumerate(int start);
+
+
+//  public Iterator<Operand<T>[]> iterator(Ops tf);
 }
