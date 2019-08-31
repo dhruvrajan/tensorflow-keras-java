@@ -116,6 +116,11 @@ public class TensorShape {
     return this.dims[i];
   }
 
+  /**
+   * Augment this TensorShape by appending more dimensions to it.
+   * @param dims The new dimensions to incorporate
+   * @return The new changed TensorShape
+   */
   public TensorShape concatenate(long... dims) {
     this.dims = concatenate(this.dims, dims);
     return this;

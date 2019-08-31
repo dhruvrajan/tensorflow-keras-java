@@ -1,7 +1,10 @@
 package org.tensorflow.data;
 
+import java.util.Iterator;
+
+import org.tensorflow.op.Ops;
 import org.tensorflow.op.core.Constant;
 
-public abstract class EagerLoader<T> {
-    public abstract Constant<T> getBachOps(long i);
+public interface EagerLoader<T> extends BatchLoader<T> {
+    Iterator<Constant<T>> getBatchOps(Ops tf);
 }

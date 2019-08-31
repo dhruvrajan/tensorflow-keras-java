@@ -1,19 +1,20 @@
 package org.tensorflow.data;
 
 import org.tensorflow.Operand;
-import org.tensorflow.Tensor;
 import org.tensorflow.Shape;
+import org.tensorflow.Tensor;
 import org.tensorflow.op.Ops;
-import org.tensorflow.op.core.Placeholder;
+import org.tensorflow.utils.Pair;
 
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.stream.Collectors;
 
-public class GraphModeTensorFrame<T> extends TensorFrame<T> {
+public class GraphModeTensorFrame<T> extends TensorFrame<T> implements GraphLoader<T> {
     private Class<T> dtype;
     private Tensor<T>[] tensors;
 
+    @SafeVarargs
     public GraphModeTensorFrame(Class<T> dtype, Tensor<T> firstTensor, Tensor<T>... tensors) {
         this.dtype = dtype;
 
@@ -50,26 +51,46 @@ public class GraphModeTensorFrame<T> extends TensorFrame<T> {
         return Arrays.stream(tensors)
                 .map(tensor -> {
                     Operand<T> variable = tf.variable(getShape(tensor.shape()), dtype);
-                    var begin = tf.constant(i * batchSize);
-                    var size = tf.constant(batchSize);
-                    return tf.slice(variable, begin, size);
+                    return tf.slice(variable,
+                            tf.constant(getBatchStartSelector((int) i * batchSize, tensor.numDimensions())),
+                            tf.constant(getBatchSizeSelector(batchSize, tensor.numDimensions())));
+
                 }).collect(Collectors.toList()).toArray(ops);
     }
 
-    public Iterator<Operand<T>[]> iterator(Ops tf) {
-        return new Iterator<Operand<T>[]>() {
-            int index = 0;
+    /** Build a long[length] filled with default_, with val at position pos */
+    private static long[] batchSelector(int length, int pos, long val, long default_) {
 
+        long[] arr = new long[length];
+        Arrays.fill(arr, default_);
+        arr[pos] = val;
+        return arr;
+    }
+
+    /** Size selector for tf.slice */
+    private static long[] getBatchSizeSelector(long batchSize, int dimensions) {
+        return batchSelector(dimensions, 0, batchSize, -1);
+    }
+
+    /** Start selector for tf.slice */
+    private static long[] getBatchStartSelector(long target, int dimensions) {
+        return batchSelector(dimensions, 0, target, 0);
+    }
+
+    @Override
+    public Iterator<Pair<Tensor<T>[], Operand<T>[]>> getBatchTensorsAndOps(Ops tf) {
+        return new Iterator<Pair<Tensor<T>[], Operand<T>[]>>() {
+            long batchIndex = 0;
             @Override
             public boolean hasNext() {
-                return index < size() / batchSize;
+                return batchIndex < numBatches();
             }
 
             @Override
-            public Operand<T>[] next() {
-                Operand<T>[] batch = getBatch(tf, index);
-                index++;
-                return batch;
+            public Pair<Tensor<T>[], Operand<T>[]> next() {
+                Operand<T>[] batchOps = getBatch(tf, batchIndex);
+                batchIndex++;
+                return new Pair<>(tensors, batchOps);
             }
         };
     }

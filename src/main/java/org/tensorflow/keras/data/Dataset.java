@@ -114,7 +114,7 @@ public class Dataset {
 //            List<Split<X, Y>> batches = new ArrayList<>();
 //
 //            for (int i = 0; i < numBatches; i++) {
-//                Split<X, Y> batch = getBatch(batchSize, i);
+//                Split<X, Y> batch = getBatchOps(batchSize, i);
 //                batches.add(batch);
 //            }
 //
@@ -128,7 +128,7 @@ public class Dataset {
 //        /**
 //         *  Retrieve a particular batch given a batch size
 //         */
-//        Split<X, Y> getBatch(int batchSize, int i) {
+//        Split<X, Y> getBatchOps(int batchSize, int i) {
 //            assert i < X.length / batchSize;
 //            return extractRange(batchSize * i, batchSize);
 //        }

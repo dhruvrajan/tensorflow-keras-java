@@ -1,6 +1,7 @@
-package org.tensorflow.keras.utils;
+package org.tensorflow.utils;
 
 import org.tensorflow.Operand;
+import org.tensorflow.Output;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
 
@@ -42,6 +43,13 @@ public class SessionRunner {
       this.runner.addTarget(target);
     }
 
+    return this;
+  }
+
+  public SessionRunner feed(Tensor[] tensors, Operand[] ops) {
+    for (Pair<Tensor, Operand> pairs : (Iterable<Pair<Tensor, Operand>>) () -> Pair.zip(tensors, ops)) {
+      this.runner.feed(pairs.second().asOutput(), pairs.first());
+    }
     return this;
   }
 

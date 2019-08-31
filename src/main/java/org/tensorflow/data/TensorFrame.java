@@ -9,8 +9,8 @@ import org.tensorflow.utils.Pair;
 import java.util.Collection;
 import java.util.Iterator;
 
-public abstract class TensorFrame<T> implements Dataset<T> {
-    protected long batchSize = 1;
+public abstract class TensorFrame<T> implements Dataset<T>, BatchLoader<T> {
+    protected long batchSize = 2;
     protected boolean dropRemainder = false;
 
     /* Override functions from Dataset<T> */
@@ -19,5 +19,15 @@ public abstract class TensorFrame<T> implements Dataset<T> {
         this.batchSize = batchSize;
         this.dropRemainder = dropRemainder;
         return this;
+    }
+
+    @Override
+    public long batchSize() {
+        return this.batchSize;
+    }
+
+    @Override
+    public long numBatches() {
+        return size() / batchSize;
     }
 }
