@@ -1,12 +1,12 @@
-//package org.tensorflow.keras.data;
+// package org.tensorflow.keras.data;
 //
-//import org.tensorflow.Operand;
-//import org.tensorflow.utils.Pair;
-//import org.tensorflow.op.Ops;
+// import org.tensorflow.Operand;
+// import org.tensorflow.utils.Pair;
+// import org.tensorflow.op.Ops;
 //
-//import java.util.Iterator;
+// import java.util.Iterator;
 //
-//public class KerasDataset<T> {
+// public class KerasDataset<T> {
 //  private KerasSplit<T> train;
 //  private KerasSplit<T> val;
 //  private KerasSplit<T> test;
@@ -62,7 +62,8 @@
 //  }
 //
 //  private KerasDataset<T> makeValSplit(double valSplit) {
-//    if (val != null) throw new IllegalStateException("Cannot override existing validation split.");
+//    if (val != null) throw new IllegalStateException("Cannot override existing validation
+// split.");
 //
 //    Pair<KerasSplit<T>, KerasSplit<T>> splitTrain = train.split(1 - valSplit);
 //    this.train = splitTrain.first();
@@ -84,4 +85,4 @@
 //    if (this.test == null) return 0;
 //    return this.val.size();
 //  }
-//}
+// }

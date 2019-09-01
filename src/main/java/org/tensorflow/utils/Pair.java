@@ -36,7 +36,7 @@ public class Pair<T, S> {
       @Override
       public Pair<T, S> next() {
         index++;
-        return Pair.of(first[index-1], second[index-1]);
+        return Pair.of(first[index - 1], second[index - 1]);
       }
     };
   }

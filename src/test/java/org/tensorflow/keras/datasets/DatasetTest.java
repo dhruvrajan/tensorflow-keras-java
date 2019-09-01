@@ -1,13 +1,13 @@
-//package io.gitlab.keras.datasets;
+// package io.gitlab.keras.datasets;
 //
-//import io.gitlab.keras.data.Dataset;
-//import org.junit.jupiter.api.AfterEach;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
+// import io.gitlab.keras.data.Dataset;
+// import org.junit.jupiter.api.AfterEach;
+// import org.junit.jupiter.api.BeforeEach;
+// import org.junit.jupiter.api.Test;
 //
-//import static org.junit.jupiter.api.Assertions.*;
+// import static org.junit.jupiter.api.Assertions.*;
 //
-//class DatasetTest {
+// class DatasetTest {
 //
 //    @BeforeEach
 //    void setUp() {
@@ -46,4 +46,4 @@
 //    @AfterEach
 //    void tearDown() {
 //    }
-//}
+// }

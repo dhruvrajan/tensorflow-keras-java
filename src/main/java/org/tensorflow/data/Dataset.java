@@ -1,13 +1,5 @@
 package org.tensorflow.data;
 
-import org.tensorflow.Operand;
-import org.tensorflow.op.Ops;
-import org.tensorflow.utils.Pair;
-
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.function.Function;
-
 public abstract interface Dataset<T> {
 
   /**
@@ -16,17 +8,17 @@ public abstract interface Dataset<T> {
    * @param transformation A function that takes one `Dataset` argument and returns a `Dataset`.
    * @return The `Dataset` returned by applying `transformation` to this dataset.
    */
-//  public abstract Dataset<T> apply(Function<Dataset<T>, Dataset<T>> transformation);
+  //  public abstract Dataset<T> apply(Function<Dataset<T>, Dataset<T>> transformation);
 
   /**
-   * Combines consecutive elements of this dataset into batches. Does not drop the last
-   * batch, even if it has fewer than batchSize elements.
+   * Combines consecutive elements of this dataset into batches. Does not drop the last batch, even
+   * if it has fewer than batchSize elements.
    *
    * @param batchSize The number of consecutive elements of this dataset to combine in a single
    *     batch.
    * @return A `Dataset`
    */
-  default public Dataset<T> batch(long batchSize) {
+  public default Dataset<T> batch(long batchSize) {
     return this.batch(batchSize, false);
   }
 
@@ -47,8 +39,7 @@ public abstract interface Dataset<T> {
    * @param start The start value for enumeration
    * @return A `Dataset`
    */
-//  public abstract Iterator<Pair<Integer, Collection<T>>> enumerate(int start);
+  //  public abstract Iterator<Pair<Integer, Collection<T>>> enumerate(int start);
 
-
-//  public Iterator<Operand<T>[]> iterator(Ops tf);
+  //  public Iterator<Operand<T>[]> iterator(Ops tf);
 }

@@ -59,6 +59,7 @@ public class TensorShape {
 
   /**
    * Test whether dimension i in this shape is known
+   *
    * @param i Target dimension to test
    * @return Whether dimension i is unknown (equal to -1)
    */
@@ -80,6 +81,7 @@ public class TensorShape {
 
   /**
    * Replace dimension i with a new dimension size.
+   *
    * @param i The target dimension to change.
    * @param dim The new dimension size.
    * @return The new changed TensorShape
@@ -91,6 +93,7 @@ public class TensorShape {
 
   /**
    * Replace the last dimension with a new dimension size.
+   *
    * @param dim New size for the last dimensions
    * @return The new changed TensorShape
    */
@@ -100,6 +103,7 @@ public class TensorShape {
 
   /**
    * Replace the first dimension with a new dimension size.
+   *
    * @param dim New size for first dimension
    * @return The new changed TensorShape.
    */
@@ -109,6 +113,7 @@ public class TensorShape {
 
   /**
    * Get the size of a target dimension.
+   *
    * @param i Target dimension.
    * @return The size of dimension i
    */
@@ -118,6 +123,7 @@ public class TensorShape {
 
   /**
    * Augment this TensorShape by appending more dimensions to it.
+   *
    * @param dims The new dimensions to incorporate
    * @return The new changed TensorShape
    */

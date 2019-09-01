@@ -1,9 +1,10 @@
 package org.tensorflow.keras.datasets;
 
 import org.tensorflow.Tensors;
+import org.tensorflow.data.GraphModeTensorFrame;
+import org.tensorflow.data.TensorFrame;
 import org.tensorflow.keras.data.Dataset;
-import org.tensorflow.keras.data.TensorDataset;
-import org.tensorflow.keras.data.TensorSplit;
+import org.tensorflow.utils.Pair;
 
 import java.io.DataInputStream;
 import java.io.FileInputStream;
@@ -29,15 +30,17 @@ public class MNISTLoader {
   private static String TRAIN_LABEL_PATH =
       "C:\\Users\\dhruv\\data\\mnist\\train-labels-idx1-ubyte.gz";
 
-  public static TensorDataset<Float> loadData() throws IOException {
+  public static Pair<TensorFrame<Float>, TensorFrame<Float>> loadData() throws IOException {
     float[][] trainImages = readImages(TRAIN_IMAGE_PATH);
     float[][] trainLabels = readLabelsOneHot(TRAIN_LABEL_PATH);
     float[][] testImages = readImages(TEST_IMAGE_PATH);
     float[][] testLabels = readLabelsOneHot(TEST_LABEL_PATH);
 
-    return new TensorDataset<>(
-        new TensorSplit<>(Tensors.create(trainImages), Tensors.create(trainLabels), Float.class),
-        new TensorSplit<>(Tensors.create(testImages), Tensors.create(testLabels), Float.class));
+    return new Pair<>(
+        new GraphModeTensorFrame<>(
+            Float.class, Tensors.create(trainImages), Tensors.create(trainLabels)),
+        new GraphModeTensorFrame<>(
+            Float.class, Tensors.create(testImages), Tensors.create(testLabels)));
   }
 
   public static Dataset loadDataset() throws IOException {

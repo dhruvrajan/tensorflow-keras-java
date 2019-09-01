@@ -1,8 +1,8 @@
 package org.tensorflow.keras.data;
 
 import org.tensorflow.Operand;
-import org.tensorflow.utils.Pair;
 import org.tensorflow.op.Ops;
+import org.tensorflow.utils.Pair;
 
 import java.util.Iterator;
 

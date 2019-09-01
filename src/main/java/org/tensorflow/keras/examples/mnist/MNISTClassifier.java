@@ -1,17 +1,17 @@
-//package org.tensorflow.keras.examples.mnist;
+// package org.tensorflow.keras.examples.mnist;
 //
-//import org.tensorflow.Shape;
-//import org.tensorflow.*;
-//import org.tensorflow.keras.data.Dataset;
-//import org.tensorflow.keras.datasets.MNISTLoader;
-//import org.tensorflow.op.Ops;
-//import org.tensorflow.op.core.*;
+// import org.tensorflow.Shape;
+// import org.tensorflow.*;
+// import org.tensorflow.keras.data.Dataset;
+// import org.tensorflow.keras.datasets.MNISTLoader;
+// import org.tensorflow.op.Ops;
+// import org.tensorflow.op.core.*;
 //
-//import java.io.IOException;
-//import java.util.Arrays;
-//import java.util.Collections;
+// import java.io.IOException;
+// import java.util.Arrays;
+// import java.util.Collections;
 //
-//public class MNISTClassifier implements Runnable {
+// public class MNISTClassifier implements Runnable {
 //  private static final int INPUT_SIZE = 28 * 28;
 //
 //  private static final float LEARNING_RATE = 0.2f;
@@ -126,4 +126,4 @@
 //  private static Operand<Integer> constArray(Ops tf, int... i) {
 //    return tf.constant(i);
 //  }
-//}
+// }

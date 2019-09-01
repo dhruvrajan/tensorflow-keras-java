@@ -1,22 +1,22 @@
-//package org.tensorflow.keras.models;
+// package org.tensorflow.keras.models;
 //
-//import org.tensorflow.*;
-//import org.tensorflow.keras.data.Dataset;
-//import org.tensorflow.keras.layers.InputLayer;
-//import org.tensorflow.keras.layers.Layer;
-//import org.tensorflow.keras.losses.Loss;
-//import org.tensorflow.keras.mixin.MetricFunction;
-//import org.tensorflow.keras.optimizers.Optimizer;
-//import org.tensorflow.op.Ops;
-//import org.tensorflow.op.core.Placeholder;
-//import org.tensorflow.op.core.Variable;
+// import org.tensorflow.*;
+// import org.tensorflow.keras.data.Dataset;
+// import org.tensorflow.keras.layers.InputLayer;
+// import org.tensorflow.keras.layers.Layer;
+// import org.tensorflow.keras.losses.Loss;
+// import org.tensorflow.keras.mixin.MetricFunction;
+// import org.tensorflow.keras.optimizers.Optimizer;
+// import org.tensorflow.op.Ops;
+// import org.tensorflow.op.core.Placeholder;
+// import org.tensorflow.op.core.Variable;
 //
-//import java.util.ArrayList;
-//import java.util.Arrays;
-//import java.util.List;
-//import java.util.stream.Collectors;
+// import java.util.ArrayList;
+// import java.util.Arrays;
+// import java.util.List;
+// import java.util.stream.Collectors;
 //
-//public class Sequential extends Model<Float> {
+// public class Sequential extends Model<Float> {
 //  private InputLayer firstLayer;
 //  private Placeholder<Float> labels;
 //  private Optimizer<Float> optimizer;
@@ -84,7 +84,8 @@
 //  }
 //
 //  /** Basically, need to collect targets for session.run. */
-//  //    public void fit(Ops tf, Graph graph, TensorDataset<Float> data, int epochs, int batchSize) {
+//  //    public void fit(Ops tf, Graph graph, TensorDataset<Float> data, int epochs, int batchSize)
+// {
 //  //        try (var session = new Session(graph)) {
 //  //
 //  //            // Initialize
@@ -270,4 +271,4 @@
 //    }
 //    return runner;
 //  }
-//}
+// }

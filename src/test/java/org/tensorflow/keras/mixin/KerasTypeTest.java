@@ -1,22 +1,18 @@
 package org.tensorflow.keras.mixin;
 
-
-import org.tensorflow.keras.layers.Dense;
 import org.junit.jupiter.api.Test;
+import org.tensorflow.keras.layers.Dense;
 
 class KerasTypeTest {
 
-    @Test
-    void build() {
-    }
+  @Test
+  void build() {}
 
-    @Test
-    void computeOutputShape() {
-    }
+  @Test
+  void computeOutputShape() {}
 
-    @Test
-    void call() {
-        var dense = Dense.create(4);
-
-    }
+  @Test
+  void call() {
+    var dense = Dense.create(4);
+  }
 }
