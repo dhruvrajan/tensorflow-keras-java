@@ -6,7 +6,7 @@ jobs:
     strategy:
       matrix:
         os: [macOS-latest, ubuntu-latest, windows-latest]
-        java: ['1.8', '11.0.4', '12.0.2']
+        java: ['11.0.4', '12.0.2']
     steps:
     - uses: actions/checkout@v1
       with:
