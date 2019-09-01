@@ -3,6 +3,17 @@
 .DS_Store
 *~
 
+# Eclipse
+/.classpath
+/.factorypath
+/.project
+/.settings/
+
+# IntelliJ IDEA
+/.idea/
+*.iml
+*.iws
+
 # sbt specific
 .cache
 .history
@@ -18,10 +29,6 @@ project/plugins/project/
 **/.bloop
 .metals/
 .vscode/
-
-# IntelliJ IDEA
-.idea
-*.iml
 
 # Scala-IDE specific
 .scala_dependencies
