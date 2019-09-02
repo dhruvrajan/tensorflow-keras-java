@@ -7,6 +7,8 @@ import org.tensorflow.op.core.Placeholder;
 import org.tensorflow.utils.Pair;
 import org.tensorflow.utils.SessionRunner;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.nio.FloatBuffer;
 import java.util.Arrays;
 import java.util.List;
@@ -52,7 +54,6 @@ class GraphModeTensorFrameTest {
                     Operand<Float>[] ops = batch.second();
                     List<Tensor<?>> outputs = runner.feed(tensors, placeholders).fetch(ops).run();
 
-                    System.out.println("Ran session");
                     try (Tensor<?> XBatch = outputs.get(0);
                          Tensor<?> yBatch = outputs.get(1); ) {
 
@@ -65,24 +66,15 @@ class GraphModeTensorFrameTest {
                         float[] xarray = XBuffer.array();
 
                         for (int i = 0; i < XBatch.shape()[0]; i++) {
-                            for (int b = 0; b < batchSize; b++) {
-                                for (int j = 0; j < XBatch.shape()[1]; j++) {
-                                    assertEquals()
-                                }
+                            for (int j = 0; j < XBatch.shape()[1]; j++) {
+                                float real = xarray[i * batchSize + j];
+                                assertEquals(batches * batchSize * XBatch.shape()[1] + i * batchSize + j + 1, real);
                             }
-
-                            i += batchSize;
                         }
-
-                        System.out.println("XBATCH: " + Arrays.toString(XBuffer.array()));
-                        System.out.println("YBATCH: " + Arrays.toString(yBuffer.array()));
-                    } finally {
-                        outputs.get(0).close();
-                        outputs.get(1).close();
                     }
-                }
 
-                batches ++;
+                    batches ++;
+                }
             }
         }
     }
