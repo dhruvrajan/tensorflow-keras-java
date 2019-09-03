@@ -116,6 +116,8 @@ public class Dense extends Layer<Float> implements KerasType<Float> {
     addInitializer(BIAS_INIT, this.biasInitializer);
     this.biasInitializer.build(tf, this.bias);
 
+//    this.activation.build(tf, computeOutputShape(inputShape));
+
     this.built = true;
   }
 

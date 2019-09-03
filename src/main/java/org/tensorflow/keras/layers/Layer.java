@@ -7,9 +7,7 @@ import org.tensorflow.keras.mixin.LayerFunction;
 import org.tensorflow.op.Ops;
 import org.tensorflow.op.core.Variable;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -23,15 +21,17 @@ import java.util.stream.Collectors;
 public abstract class Layer<T> implements LayerFunction<T> {
 
   private int INPUTS_LENGTH;
-  protected boolean built = false;
+  protected boolean built;
 
   private Map<String, Variable<T>> weights;
   private Map<String, Initializer<T>> initializers;
 
-  public Layer(int inputsLength) {
-    this.INPUTS_LENGTH = inputsLength;
-    weights = new HashMap<>();
-    initializers = new HashMap<>();
+  public Layer(int numInputs) {
+    this.INPUTS_LENGTH = numInputs;
+
+    this.built = false;
+    this.weights = new HashMap<>();
+    this.initializers = new HashMap<>();
   }
 
   /**
@@ -106,8 +106,8 @@ public abstract class Layer<T> implements LayerFunction<T> {
         .collect(Collectors.toList());
   }
 
-  public Collection<Variable<T>> trainableWeights() {
-    return this.weights.values();
+  public List<Variable<T>> trainableWeights() {
+    return new ArrayList<>(this.weights.values());
   }
 
   public boolean isBuilt() {

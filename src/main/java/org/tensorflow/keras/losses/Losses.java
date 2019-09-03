@@ -6,10 +6,10 @@ public enum Losses {
 
   public static Loss select(Losses lossType) {
     switch (lossType) {
-      case mean_squared_error:
-        return new MeanSquaredError();
-      case softmax_crossentropy:
-        return new SoftmaxCrossEntropyLoss();
+//      case mean_squared_error:
+//        return new MeanSquaredError();
+//      case softmax_crossentropy:
+//        return new SoftmaxCrossEntropyLoss();
       default:
         throw new IllegalArgumentException("Invalid loss type.");
     }

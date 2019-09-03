@@ -13,41 +13,25 @@ public abstract class Metric extends Layer<Float> implements MetricFunction {
     super(2);
   }
 
-  public static Metric select(String s) {
-    return select(Metrics.valueOf(s));
+  public static Metric create(Metrics metricType) {
+    return options().create(metricType);
   }
 
-  private static Metric select(Metrics metricType) {
-    return Metrics.select(metricType);
+  public static Options options() {
+    return new Options();
+  }
+
+  static class Options {
+    public Metric create(Metrics metricType) {
+      return Metrics.select(metricType);
+    }
   }
 
   @Override
   @SafeVarargs
   public final Operand<Float> call(Ops tf, Operand<Float>... ops) {
-    if (ops.length != 2) {
-      throw new IllegalArgumentException(
-          "Metric type "
-              + "'"
-              + this.getClass().getName()
-              + "'"
-              + " call() takes 2 Operand<Float> objects as input. "
-              + "Recevied "
-              + ops.length
-              + ".");
-    }
-
     return call(tf, ops[0], ops[1]);
   }
 
-  public abstract Operand<Float> call(Ops tf, Operand<Float> output, Placeholder<Float> label);
-
-  @Override
-  public Operand<Float> apply(Ops tf, Operand<Float> output, Operand<Float> label) {
-    return this.apply(tf, output, (Operand<Float>) label);
-  }
-
-  //    @Override
-  //    public List<Operand<Float>> metricOps() {
-  //        return Collections.singletonList(outputOp);
-  //    }
+  public abstract Operand<Float> call(Ops tf, Operand<Float> output, Operand<Float> label);
 }

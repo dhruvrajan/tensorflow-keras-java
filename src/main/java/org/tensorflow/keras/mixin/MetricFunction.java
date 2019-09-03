@@ -5,5 +5,5 @@ import org.tensorflow.op.Ops;
 
 @FunctionalInterface
 public interface MetricFunction {
-  Operand<Float> apply(Ops tf, Operand<Float> output, Operand<Float> label);
+  Operand<Float> apply(Ops tf, Operand<Float> yTrue, Operand<Float> yPred);
 }
