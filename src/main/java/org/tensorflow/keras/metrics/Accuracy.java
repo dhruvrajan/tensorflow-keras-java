@@ -9,7 +9,7 @@ public class Accuracy extends Metric {
   public void build(Ops tf) {}
 
   @Override
-  public Operand<Float> call(Ops tf, Operand<Float> output, Placeholder<Float> label) {
+  public Operand<Float> call(Ops tf, Operand<Float> output, Operand<Float> label) {
     Operand<Long> predicted = tf.argMax(output, tf.constant(1));
     Operand<Long> expected = tf.argMax(label, tf.constant(1));
 

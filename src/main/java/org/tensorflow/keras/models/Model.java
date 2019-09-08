@@ -95,9 +95,9 @@ public abstract class Model<T> extends Layer<T> {
       return setOptimizer(Optimizers.select(optimizerType));
     }
 
-    public CompilerOptions addMetric(String metricName) {
-      return addMetric(Metric.select(metricName));
-    }
+//    public CompilerOptions addMetric(String metricName) {
+//      return addMetric(Metrics.select(metricName));
+//    }
 
     public CompilerOptions addMetric(Metrics metric) {
       return addMetric(Metrics.select(metric));

@@ -14,14 +14,14 @@ public enum Metrics {
         return new Accuracy();
         //            case binary_accuracy:
         //                return new BinaryAccuracy();
-      case categorical_accuracy:
-        return new CategoricalAccuracy();
-      case sparse_categorical_accuracy:
-        return new SparseCategoricalAccuracy();
+//      case categorical_accuracy:
+//        return new CategoricalAccuracy();
+//      case sparse_categorical_accuracy:
+//        return new SparseCategoricalAccuracy();
         //            case top_k_categorical_accuracy:
         //                return new TopKCategoricalAccuracy();
-      case sparse_top_k_categorical_accuracy:
-        return new SparseTopKCategoricalAccuracy();
+//      case sparse_top_k_categorical_accuracy:
+//        return new SparseTopKCategoricalAccuracy();
       default:
         throw new IllegalArgumentException("Invalid metric type");
     }

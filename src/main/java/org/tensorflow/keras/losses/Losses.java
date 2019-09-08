@@ -8,8 +8,8 @@ public enum Losses {
     switch (lossType) {
 //      case mean_squared_error:
 //        return new MeanSquaredError();
-//      case softmax_crossentropy:
-//        return new SoftmaxCrossEntropyLoss();
+      case softmax_crossentropy:
+        return new SoftmaxCrossEntropyLoss();
       default:
         throw new IllegalArgumentException("Invalid loss type.");
     }

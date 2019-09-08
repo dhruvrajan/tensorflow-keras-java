@@ -28,6 +28,11 @@ public abstract class Metric extends Layer<Float> implements MetricFunction {
   }
 
   @Override
+  public Operand<Float> apply(Ops tf, Operand<Float> yTrue, Operand<Float> yPred) {
+    return this.call(tf, yTrue, yPred);
+  }
+
+  @Override
   @SafeVarargs
   public final Operand<Float> call(Ops tf, Operand<Float>... ops) {
     return call(tf, ops[0], ops[1]);
