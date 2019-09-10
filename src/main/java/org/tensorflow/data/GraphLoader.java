@@ -4,12 +4,29 @@ import org.tensorflow.Operand;
 import org.tensorflow.Tensor;
 import org.tensorflow.op.Ops;
 import org.tensorflow.op.core.Placeholder;
-import org.tensorflow.utils.Pair;
 
 import java.util.Iterator;
 
 public interface GraphLoader<T> extends BatchLoader<T> {
+  /**
+   * Get placeholder objects to feed dataset tensors into.
+   * @return An array of Placeholder<T> objects representing the dataset in a tensorfow graph.
+   */
   Placeholder<T>[] getPlaceholders();
 
-  Iterator<Pair<Tensor<T>[], Operand<T>[]>> getBatchTensorsAndOps(Ops tf);
+  /**
+   * Get the tensor objects associated with the tensor.
+   *
+   * @return An array of Tensor<T> objects matching this dataset's placeholders, with the dataset dataset information
+   *         to be loaded into the tensorflow graph.
+   */
+  Tensor<T>[] getTensors();
+
+  /**
+   * Iterate over the batch operands from this dataset.
+   *
+   * @param tf Ops object greated from the current tensorflow graph.
+   * @return an iterator over batch slices from this dataset.
+   */
+  Iterator<Operand<T>[]> getBatchOps(Ops tf);
 }

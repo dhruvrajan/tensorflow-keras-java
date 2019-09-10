@@ -5,7 +5,6 @@ import org.tensorflow.Shape;
 import org.tensorflow.Tensor;
 import org.tensorflow.op.Ops;
 import org.tensorflow.op.core.Placeholder;
-import org.tensorflow.utils.Pair;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -110,7 +109,8 @@ public class GraphModeTensorFrame<T> extends TensorFrame<T> implements GraphLoad
     return placeholders;
   }
 
-  public Iterator<Pair<Tensor<T>[], Operand<T>[]>> getBatchTensorsAndOps(Ops tf) {
+
+  public Iterator<Operand<T>[]> getBatchOps(Ops tf) {
     if (!built) throw new IllegalStateException("Must build tensorframe before getting batches");
 
     return new Iterator<>() {
@@ -122,10 +122,10 @@ public class GraphModeTensorFrame<T> extends TensorFrame<T> implements GraphLoad
       }
 
       @Override
-      public Pair<Tensor<T>[], Operand<T>[]> next() {
+      public Operand<T>[] next() {
         Operand<T>[] batchOps = getBatch(tf, batchIndex);
         batchIndex++;
-        return Pair.of(tensors, batchOps);
+        return batchOps;
       }
     };
   }
