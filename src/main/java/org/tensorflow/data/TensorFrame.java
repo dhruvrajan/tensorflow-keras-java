@@ -1,6 +1,6 @@
 package org.tensorflow.data;
 
-public abstract class TensorFrame<T> implements Dataset<T>, BatchLoader<T> {
+public abstract class TensorFrame<T> implements Dataset<T> {
   protected long batchSize = 1;
   protected boolean dropRemainder = false;
 
@@ -12,12 +12,12 @@ public abstract class TensorFrame<T> implements Dataset<T>, BatchLoader<T> {
     return this;
   }
 
-  @Override
+  public abstract long size();
+
   public long batchSize() {
     return this.batchSize;
   }
 
-  @Override
   public long numBatches() {
     return size() / batchSize;
   }
