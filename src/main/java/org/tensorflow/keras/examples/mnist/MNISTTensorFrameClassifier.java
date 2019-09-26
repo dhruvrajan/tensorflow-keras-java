@@ -81,11 +81,11 @@ public class MNISTTensorFrameClassifier implements Runnable {
 
         runner.run();
 
-        Placeholder<Float>[] trainPlaceholders = train.getPlaceholders();
-        Placeholder<Float>[] testPlaceholders = test.getPlaceholders();
+        Placeholder<Float>[] trainPlaceholders = train.getDataPlaceholders();
+        Placeholder<Float>[] testPlaceholders = test.getDataPlaceholders();
 
-        Tensor<Float>[] trainTensors = train.getTensors();
-        Tensor<Float>[] testTensors = test.getTensors();
+        Tensor<Float>[] trainTensors = train.getDataTensors();
+        Tensor<Float>[] testTensors = test.getDataTensors();
 
         try (Tensor<Float> trainXTensor = trainTensors[0];
              Tensor<Float> trainYTensor = trainTensors[1];

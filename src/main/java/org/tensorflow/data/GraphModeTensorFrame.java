@@ -6,14 +6,19 @@ import org.tensorflow.Tensor;
 import org.tensorflow.op.Ops;
 import org.tensorflow.op.core.Placeholder;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.stream.Collectors;
 
-public class GraphModeTensorFrame<T> extends TensorFrame<T> implements GraphLoader<T> {
+public class GraphModeTensorFrame<T> extends TensorFrame<T> {
   private Class<T> dtype;
-  private Tensor<T>[] tensors;
-  private Placeholder<T>[] placeholders;
+
+  private Tensor<T>[] dataTensors;
+  private Placeholder<T>[] dataPlaceholders;
+  private Operand<T>[] batchOperands;
+
+  private Placeholder<Integer> batchIndexPlaceholder;
   private boolean built = false;
 
   @SafeVarargs
@@ -22,21 +27,22 @@ public class GraphModeTensorFrame<T> extends TensorFrame<T> implements GraphLoad
 
     // Check first dimension matches
     long matchDim = firstTensor.shape()[0];
+
     for (Tensor<T> t : tensors) {
       if (t.shape()[0] != matchDim) {
         throw new IllegalArgumentException(
-            "All tensors in a tensor frame must have equal first dimension.");
+            "All dataTensors in a tensor frame must have equal first dimension.");
       }
     }
 
     // Record Tensor Objects
-    this.tensors = new Tensor[tensors.length + 1];
-    this.tensors[0] = firstTensor;
-    System.arraycopy(tensors, 0, this.tensors, 1, tensors.length);
+    this.dataTensors = (Tensor<T>[]) new Tensor[tensors.length + 1];
+    this.dataTensors[0] = firstTensor;
+    System.arraycopy(tensors, 0, this.dataTensors, 1, tensors.length);
   }
 
   public long size() {
-    return this.tensors[0].shape()[0];
+    return this.dataTensors[0].shape()[0];
   }
 
   /** Utility to construct a Shape from a long[] */
@@ -50,10 +56,28 @@ public class GraphModeTensorFrame<T> extends TensorFrame<T> implements GraphLoad
     return Shape.make(head, tail);
   }
 
-  private Operand<T>[] getBatch(Ops tf, long i) {
-    Operand<T>[] ops = new Operand[this.tensors.length];
+  private Operand<T>[] makeBatchOps(Ops tf) {
+    long[] startSelector = new long[this.dataTensors[0].numDimensions()];
+    long[] sizeSelector = new long[this.dataTensors[0].numDimensions()];
 
-    return Arrays.stream(placeholders)
+    Arrays.fill(startSelector, 0);
+    Arrays.fill(sizeSelector, -1);
+
+    sizeSelector[0] = batchSize;
+
+    Operand<Long> sizeSelectorOp = tf.constant(sizeSelector);
+    Operand<Long>
+
+    for (Placeholder<T> placeholder : this.dataPlaceholders) {
+
+    }
+  }
+
+  private Operand<T>[] getBatch(Ops tf, long i) {
+    Operand<T>[] ops = new Operand[this.dataTensors.length];
+
+
+    return Arrays.stream(dataPlaceholders)
         .map(
             placeholder -> {
               Shape shape = placeholder.asOutput().shape();
@@ -76,7 +100,7 @@ public class GraphModeTensorFrame<T> extends TensorFrame<T> implements GraphLoad
   }
 
   /** Size selector for tf.slice */
-  private static long[] getBatchSizeSelector(long batchSize, int dimensions) {
+  private static Operand<T> getBatchSizeSelector(long batchSize, int dimensions) {
     return batchSelector(dimensions, 0, batchSize, -1);
   }
 
@@ -86,12 +110,16 @@ public class GraphModeTensorFrame<T> extends TensorFrame<T> implements GraphLoad
   }
 
   public GraphModeTensorFrame<T> build(Ops tf) {
-    // Create Placeholders (will be filled by tensors before graph is run)
-    this.placeholders = new Placeholder[this.tensors.length];
-    for (int i = 0; i < this.placeholders.length; ++i) {
-      this.placeholders[i] =
-          tf.placeholder(this.dtype, Placeholder.shape(getShape(this.tensors[i].shape())));
+    // Create Placeholders (will be filled by dataTensors before graph is run)
+    this.dataPlaceholders = new Placeholder[this.dataTensors.length];
+    for (int i = 0; i < this.dataPlaceholders.length; ++i) {
+      this.dataPlaceholders[i] =
+          tf.placeholder(this.dtype, Placeholder.shape(getShape(this.dataTensors[i].shape())));
     }
+
+    // Placeholder representing batch index
+    this.batchIndexPlaceholder = tf.placeholder(Integer.class, Placeholder.shape(Shape.make(1)));
+
 
     this.built = true;
     return this;
@@ -101,32 +129,34 @@ public class GraphModeTensorFrame<T> extends TensorFrame<T> implements GraphLoad
     return built;
   }
 
-  public Tensor<T>[] getTensors() {
-    return tensors;
+  public Tensor<T>[] getDataTensors() {
+    return dataTensors;
   }
 
-  public Placeholder<T>[] getPlaceholders() {
-    return placeholders;
+  public Placeholder<T>[] getDataPlaceholders() {
+    return dataPlaceholders;
+  }
+
+  public Operand<T>[] getBatchOperands(Ops tf) {
+    return batchOperands;
   }
 
 
-  public Iterator<Operand<T>[]> getBatchOps(Ops tf) {
-    if (!built) throw new IllegalStateException("Must build tensorframe before getting batches");
-
-    return new Iterator<>() {
-      long batchIndex = 0;
-
-      @Override
-      public boolean hasNext() {
-        return batchIndex < numBatches();
-      }
-
-      @Override
-      public Operand<T>[] next() {
-        Operand<T>[] batchOps = getBatch(tf, batchIndex);
-        batchIndex++;
-        return batchOps;
-      }
-    };
-  }
+//  public Iterator<Operand<T>[]> getBatchOps(Ops tf) {
+//    if (!built) throw new IllegalStateException("Must build tensorframe before getting batches");
+//
+//    return new Iterator<>() {
+//      int batchIndex = 0;
+//
+//      @Override
+//      public boolean hasNext() {
+//        return batchIndex < numBatches();
+//      }
+//
+//      @Override
+//      public Operand<T>[] next() {
+//        return batchOperands[batchIndex];
+//      }
+//    };
+//  }
 }

@@ -12,7 +12,7 @@ public interface GraphLoader<T> extends BatchLoader<T> {
    * Get placeholder objects to feed dataset tensors into.
    * @return An array of Placeholder<T> objects representing the dataset in a tensorfow graph.
    */
-  Placeholder<T>[] getPlaceholders();
+  Placeholder<T>[] getDataPlaceholders();
 
   /**
    * Get the tensor objects associated with the tensor.
@@ -20,7 +20,7 @@ public interface GraphLoader<T> extends BatchLoader<T> {
    * @return An array of Tensor<T> objects matching this dataset's placeholders, with the dataset dataset information
    *         to be loaded into the tensorflow graph.
    */
-  Tensor<T>[] getTensors();
+  Tensor<T>[] getDataTensors();
 
   /**
    * Iterate over the batch operands from this dataset.

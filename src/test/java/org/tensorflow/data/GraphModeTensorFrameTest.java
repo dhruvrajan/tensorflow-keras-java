@@ -43,7 +43,7 @@
 //
 //            graphModeTensorFrame.build(tf);
 //            graphModeTensorFrame.batch(batchSize);
-//            Placeholder<Float>[] placeholders = graphModeTensorFrame.getPlaceholders();
+//            Placeholder<Float>[] placeholders = graphModeTensorFrame.getDataPlaceholders();
 //
 //            int batches = 0;
 //            for (Pair<Tensor<Float>[], Operand<Float>[]> batch : (Iterable<Pair<Tensor<Float>[], Operand<Float>[]>>) () -> graphModeTensorFrame.getBatchOps(tf)) {
