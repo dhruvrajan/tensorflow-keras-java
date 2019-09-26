@@ -24,9 +24,9 @@ import java.util.List;
 public class MNISTTensorFrameClassifier implements Runnable {
     private static final int INPUT_SIZE = 28 * 28;
 
-    private static final float LEARNING_RATE = 0.2f;
+    private static final float LEARNING_RATE = 0.15f;
     private static final int FEATURES = 10;
-    private static final int BATCH_SIZE = 600;
+    private static final int BATCH_SIZE = 100;
     private static final int EPOCHS = 10;
 
     public static void main(String[] args) {
@@ -37,7 +37,6 @@ public class MNISTTensorFrameClassifier implements Runnable {
 
     public void run() {
         try (Graph graph = new Graph()) {
-
             Ops tf = Ops.create(graph);
 
             // Load MNIST Dataset
@@ -69,101 +68,94 @@ public class MNISTTensorFrameClassifier implements Runnable {
 
                 inputLayer.build(tf);
                 denseLayer.build(tf, inputLayer.computeOutputShape());
+                optimizer.build(tf);
+
 
                 // Fit Model (TRAIN)
                 try (Session session = new Session(graph)) {
-                    Session.Runner runner = session.runner();
-                    Operand<Float> XOp = trainOps[0];
-                    Operand<Float> yOp = trainOps[1];
+                    {
+                        Session.Runner runner = session.runner();
+                        Operand<Float> XOp = trainOps[0];
+                        Operand<Float> yOp = trainOps[1];
 
-                    // Compute Output / Loss / Accuracy
-                    Operand<Float> yTrue = yOp;
-                    Operand<Float> yPred = denseLayer.apply(tf, XOp);
+                        // Compute Output / Loss / Accuracy
+                        Operand<Float> yTrue = yOp;
+                        Operand<Float> yPred = denseLayer.apply(tf, XOp);
 
-                    Operand<Float> batchLoss = loss.apply(tf, yTrue, yPred);
-                    Operand<Float> batchAccuracy = accuracy.apply(tf, yTrue, yPred);
+                        Operand<Float> batchLoss = loss.apply(tf, yTrue, yPred);
+                        Operand<Float> batchAccuracy = accuracy.apply(tf, yTrue, yPred);
+
+                        List<Operand<Float>> minimize = optimizer.minimize(tf, batchLoss, denseLayer.trainableWeights());
 
 
-                    // Run initializer ops
-                    for (Operand<Float> op : denseLayer.initializerOps()) {
-                        runner.addTarget(op);
+                        // Run initializer ops
+                        for (Operand<Float> op : denseLayer.initializerOps()) {
+                            runner.addTarget(op);
+                        }
+
+                        runner.run();
+
+                        for (int epoch = 0; epoch < EPOCHS; epoch++) {
+                            float trainEpochAccuracy = 0;
+                            float trainEpochLoss = 0;
+
+                            // Load Batches
+                            for (int i = 0; i < train.numBatches(); i++) {
+                                runner = session.runner();
+                                train.feedSessionRunner(runner, i);
+
+                                for (Operand<Float> op : minimize) {
+                                    runner.addTarget(op);
+                                }
+
+                                runner.fetch(batchLoss);
+                                runner.fetch(batchAccuracy);
+
+                                List<Tensor<?>> values = runner.run();
+                                try (Tensor<?> lossTensor = values.get(0);
+                                     Tensor<?> accuracyTensor = values.get(1)) {
+                                    trainEpochAccuracy += accuracyTensor.floatValue() / train.numBatches();
+                                    trainEpochLoss += lossTensor.floatValue() / train.numBatches();
+                                }
+                            }
+
+                            System.out.println("Epoch " + epoch + " train accuracy: " + trainEpochAccuracy + "  loss: " + trainEpochLoss);
+                        }
                     }
 
-                    runner.run();
+                    // Fit Model (TEST)
+                    {
+                        Session.Runner runner = session.runner();
+                        Operand<Float> XOp = testOps[0];
+                        Operand<Float> yOp = testOps[1];
 
-                    for (int epoch = 0; epoch < EPOCHS; epoch++) {
+                        // Compute Output / Loss / Accuracy
+                        Operand<Float> yTrue = yOp;
+                        Operand<Float> yPred = denseLayer.apply(tf, XOp);
+
+                        Operand<Float> batchLoss = loss.apply(tf, yTrue, yPred);
+                        Operand<Float> batchAccuracy = accuracy.apply(tf, yTrue, yPred);
+
                         float trainEpochAccuracy = 0;
                         float trainEpochLoss = 0;
 
                         // Load Batches
-                        for (int i = 0; i < train.numBatches(); i++) {
+                        for (int i = 0; i < test.numBatches(); i++) {
                             runner = session.runner();
-                            train.feedSessionRunner(runner, i);
-
-                            for (Operand<Float> op : optimizer.minimize(tf, batchLoss, denseLayer.trainableWeights())) {
-                                runner.addTarget(op);
-                            }
-
+                            test.feedSessionRunner(runner, i);
                             runner.fetch(batchLoss);
                             runner.fetch(batchAccuracy);
 
                             List<Tensor<?>> values = runner.run();
                             try (Tensor<?> lossTensor = values.get(0);
                                  Tensor<?> accuracyTensor = values.get(1)) {
-                                trainEpochAccuracy += accuracyTensor.floatValue() / train.numBatches();
-                                trainEpochLoss += lossTensor.floatValue() / train.numBatches();
+                                trainEpochAccuracy += accuracyTensor.floatValue() / test.numBatches();
+                                trainEpochLoss += lossTensor.floatValue() / test.numBatches();
                             }
                         }
 
-                        System.out.println("Epoch " + epoch + " train accuracy: " + trainEpochAccuracy + "  loss: " + trainEpochLoss);
+                        System.out.println("Test accuracy: " + trainEpochAccuracy + "  loss: " + trainEpochLoss);
                     }
-                }
-
-                // Fit Model (TEST)
-                try (Session session = new Session(graph)) {
-                    Session.Runner runner = session.runner();
-                    Operand<Float> XOp = testOps[0];
-                    Operand<Float> yOp = testOps[1];
-
-                    // Compute Output / Loss / Accuracy
-                    Operand<Float> yTrue = yOp;
-                    Operand<Float> yPred = denseLayer.apply(tf, XOp);
-
-                    Operand<Float> batchLoss = loss.apply(tf, yTrue, yPred);
-                    Operand<Float> batchAccuracy = accuracy.apply(tf, yTrue, yPred);
-
-
-                    // Run initializer ops
-                    for (Operand<Float> op : denseLayer.initializerOps()) {
-                        runner.addTarget(op);
-                    }
-
-                    runner.run();
-
-                    float trainEpochAccuracy = 0;
-                    float trainEpochLoss = 0;
-
-                    // Load Batches
-                    for (int i = 0; i < test.numBatches(); i++) {
-                        runner = session.runner();
-                        test.feedSessionRunner(runner, i);
-
-                        for (Operand<Float> op : optimizer.minimize(tf, batchLoss, denseLayer.trainableWeights())) {
-                            runner.addTarget(op);
-                        }
-
-                        runner.fetch(batchLoss);
-                        runner.fetch(batchAccuracy);
-
-                        List<Tensor<?>> values = runner.run();
-                        try (Tensor<?> lossTensor = values.get(0);
-                             Tensor<?> accuracyTensor = values.get(1)) {
-                            trainEpochAccuracy += accuracyTensor.floatValue() / test.numBatches();
-                            trainEpochLoss += lossTensor.floatValue() / test.numBatches();
-                        }
-                    }
-
-                    System.out.println("Test accuracy: " + trainEpochAccuracy + "  loss: " + trainEpochLoss);
                 }
             }
         }

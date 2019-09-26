@@ -19,6 +19,8 @@ public abstract class Optimizer<T> {
     return tf.gradients(loss, weights);
   }
 
+  public abstract  void build(Ops tf);
+
   public abstract List<Operand<Float>> applyGradients(
       Ops tf, List<Variable<Float>> weights, Gradients gradients);
 
