@@ -9,7 +9,7 @@ import org.tensorflow.utils.SessionRunner;
 
 import java.util.Iterator;
 
-public interface GraphLoader<T> {
+public interface GraphLoader<T> extends Dataset<T> {
   /**
    * Get placeholder objects to feed dataset tensors into.
    * @return An array of Placeholder<T> objects representing the dataset in a tensorfow graph.

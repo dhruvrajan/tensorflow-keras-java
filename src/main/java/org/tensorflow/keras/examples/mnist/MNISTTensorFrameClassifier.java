@@ -5,7 +5,6 @@ import org.tensorflow.Operand;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
 import org.tensorflow.data.GraphModeTensorFrame;
-import org.tensorflow.data.TensorFrame;
 import org.tensorflow.keras.activations.Activations;
 import org.tensorflow.keras.datasets.MNISTLoader;
 import org.tensorflow.keras.layers.Dense;
@@ -17,148 +16,156 @@ import org.tensorflow.keras.metrics.Metrics;
 import org.tensorflow.keras.optimizers.GradientDescentOptimizer;
 import org.tensorflow.keras.optimizers.Optimizer;
 import org.tensorflow.op.Ops;
-import org.tensorflow.op.core.Placeholder;
 import org.tensorflow.utils.Pair;
 
 import java.io.IOException;
+import java.util.List;
 
 public class MNISTTensorFrameClassifier implements Runnable {
-  private static final int INPUT_SIZE = 28 * 28;
+    private static final int INPUT_SIZE = 28 * 28;
 
-  private static final float LEARNING_RATE = 0.2f;
-  private static final int FEATURES = 10;
-  private static final int BATCH_SIZE = 600;
-  private static final int EPOCHS = 10;
+    private static final float LEARNING_RATE = 0.2f;
+    private static final int FEATURES = 10;
+    private static final int BATCH_SIZE = 600;
+    private static final int EPOCHS = 10;
 
-  public static void main(String[] args) {
-    MNISTTensorFrameClassifier mnist = new MNISTTensorFrameClassifier();
-    mnist.run();
+    public static void main(String[] args) {
+        MNISTTensorFrameClassifier mnist = new MNISTTensorFrameClassifier();
+        mnist.run();
 
-  }
-
-  public void run() {
-    try (Graph graph = new Graph()) {
-
-      Ops tf = Ops.create(graph);
-
-      // Load MNIST Dataset
-      Pair<TensorFrame<Float>, TensorFrame<Float>> data;
-      try {
-        data = MNISTLoader.loadData();
-      } catch (IOException e) {
-        throw new IllegalArgumentException("Could not load MNIST dataset.");
-      }
-
-      GraphModeTensorFrame<Float> train = (GraphModeTensorFrame<Float>) data.first();
-      GraphModeTensorFrame<Float> test = (GraphModeTensorFrame<Float>) data.second();
-
-      InputLayer inputLayer = InputLayer.create(INPUT_SIZE);
-      Dense denseLayer = Dense.options().setActivation(Activations.softmax).create(FEATURES);
-
-      Loss loss = Losses.select(Losses.softmax_crossentropy);
-      Metric accuracy = Metrics.select(Metrics.accuracy);
-      Optimizer<Float> optimizer = new GradientDescentOptimizer(LEARNING_RATE);
-
-      // Compile Model
-      train.batch(BATCH_SIZE);
-      train.build(tf);
-
-      test.batch(BATCH_SIZE);
-      test.build(tf);
-
-      inputLayer.build(tf);
-      denseLayer.build(tf, inputLayer.computeOutputShape());
-
-
-      // Fit Model
-      try (Session session = new Session(graph)) {
-        Session.Runner runner = session.runner();
-
-        // Run initializer ops
-        for (Operand<Float> op : denseLayer.initializerOps()) {
-          runner.addTarget(op);
-        }
-
-        runner.run();
-
-        Placeholder<Float>[] trainPlaceholders = train.getDataPlaceholders();
-        Placeholder<Float>[] testPlaceholders = test.getDataPlaceholders();
-
-        Tensor<Float>[] trainTensors = train.getDataTensors();
-        Tensor<Float>[] testTensors = test.getDataTensors();
-
-        try (Tensor<Float> trainXTensor = trainTensors[0];
-             Tensor<Float> trainYTensor = trainTensors[1];
-             Tensor<Float> testXTensor = testTensors[0];
-             Tensor<Float> testYTensor = testTensors[1]) {
-
-          // Run Training Loop
-          for (int epoch = 0; epoch < EPOCHS; epoch++) {
-            double trainEpochAccuracy = 0;
-
-            int count = 0;
-            for (Operand<Float>[] operands :
-                (Iterable<Operand<Float>[]>) () -> train.getBatchOps(tf)) {
-
-              runner = session.runner();
-
-              Operand<Float> XOp = operands[0];
-              Operand<Float> yOp = operands[1];
-
-              runner.feed(trainPlaceholders[0].asOutput(), trainXTensor);
-              runner.feed(trainPlaceholders[1].asOutput(), trainYTensor);
-
-              // Compute Output / Loss / Accuracy
-              Operand<Float> yTrue = yOp;
-              Operand<Float> yPred = denseLayer.apply(tf, XOp);
-
-              Operand<Float> batchLoss = loss.apply(tf, yTrue, yPred);
-              Operand<Float> batchAccuracy = accuracy.apply(tf, yTrue, yPred);
-
-              for (Operand<Float> op :
-                  optimizer.minimize(tf, batchLoss, denseLayer.trainableWeights())) {
-                runner.addTarget(op);
-              }
-
-              try (Tensor<?> value = runner.fetch(batchAccuracy).run().get(0)) {
-                trainEpochAccuracy += value.floatValue() / train.numBatches();
-                //              System.out.println("Train Batch Accuracy is " + value.floatValue());
-              }
-
-              count += 1;
-              System.out.println("Count = " + count);
-            }
-
-            System.out.println(">>> Train Epoch Accuracy is" + trainEpochAccuracy);
-          }
-
-
-          // Get Test Accuracy
-          double testEpochAccuracy = 0;
-          for (Operand<Float>[] operands : (Iterable<Operand<Float>[]>) () -> test.getBatchOps(tf)) {
-            runner = session.runner();
-
-            Operand<Float> XOp = operands[0];
-            Operand<Float> yOp = operands[1];
-
-
-            runner.feed(testPlaceholders[0].asOutput(), testXTensor);
-            runner.feed(testPlaceholders[1].asOutput(), testYTensor);
-
-            // Compute Output / Loss / Accurcy
-            Operand<Float> yTrue = yOp;
-            Operand<Float> yPred = denseLayer.apply(tf, XOp);
-
-            Operand<Float> batchAccuracy = accuracy.apply(tf, yPred, yTrue);
-
-            try (Tensor<?> value = runner.fetch(batchAccuracy).run().get(0)) {
-              testEpochAccuracy += value.floatValue() / test.numBatches();
-            }
-          }
-
-          System.out.println(">>> Test Epoch Accurcy is " + testEpochAccuracy);
-        }
-      }
     }
-  }
+
+    public void run() {
+        try (Graph graph = new Graph()) {
+
+            Ops tf = Ops.create(graph);
+
+            // Load MNIST Dataset
+            Pair<GraphModeTensorFrame<Float>, GraphModeTensorFrame<Float>> data;
+            try {
+                data = MNISTLoader.loadData();
+            } catch (IOException e) {
+                throw new IllegalArgumentException("Could not load MNIST dataset.");
+            }
+
+            try (GraphModeTensorFrame<Float> train = data.first();
+                 GraphModeTensorFrame<Float> test = data.second()) {
+
+                InputLayer inputLayer = InputLayer.create(INPUT_SIZE);
+                Dense denseLayer = Dense.options().setActivation(Activations.softmax).create(FEATURES);
+
+                Loss loss = Losses.select(Losses.softmax_crossentropy);
+                Metric accuracy = Metrics.select(Metrics.accuracy);
+                Optimizer<Float> optimizer = new GradientDescentOptimizer(LEARNING_RATE);
+
+                // Compile Model
+                train.batch(BATCH_SIZE);
+                train.build(tf);
+                Operand<Float>[] trainOps = train.getBatchOperands();
+
+                test.batch(BATCH_SIZE);
+                test.build(tf);
+                Operand<Float>[] testOps = test.getBatchOperands();
+
+                inputLayer.build(tf);
+                denseLayer.build(tf, inputLayer.computeOutputShape());
+
+                // Fit Model (TRAIN)
+                try (Session session = new Session(graph)) {
+                    Session.Runner runner = session.runner();
+                    Operand<Float> XOp = trainOps[0];
+                    Operand<Float> yOp = trainOps[1];
+
+                    // Compute Output / Loss / Accuracy
+                    Operand<Float> yTrue = yOp;
+                    Operand<Float> yPred = denseLayer.apply(tf, XOp);
+
+                    Operand<Float> batchLoss = loss.apply(tf, yTrue, yPred);
+                    Operand<Float> batchAccuracy = accuracy.apply(tf, yTrue, yPred);
+
+
+                    // Run initializer ops
+                    for (Operand<Float> op : denseLayer.initializerOps()) {
+                        runner.addTarget(op);
+                    }
+
+                    runner.run();
+
+                    for (int epoch = 0; epoch < EPOCHS; epoch++) {
+                        float trainEpochAccuracy = 0;
+                        float trainEpochLoss = 0;
+
+                        // Load Batches
+                        for (int i = 0; i < train.numBatches(); i++) {
+                            runner = session.runner();
+                            train.feedSessionRunner(runner, i);
+
+                            for (Operand<Float> op : optimizer.minimize(tf, batchLoss, denseLayer.trainableWeights())) {
+                                runner.addTarget(op);
+                            }
+
+                            runner.fetch(batchLoss);
+                            runner.fetch(batchAccuracy);
+
+                            List<Tensor<?>> values = runner.run();
+                            try (Tensor<?> lossTensor = values.get(0);
+                                 Tensor<?> accuracyTensor = values.get(1)) {
+                                trainEpochAccuracy += accuracyTensor.floatValue() / train.numBatches();
+                                trainEpochLoss += lossTensor.floatValue() / train.numBatches();
+                            }
+                        }
+
+                        System.out.println("Epoch " + epoch + " train accuracy: " + trainEpochAccuracy + "  loss: " + trainEpochLoss);
+                    }
+                }
+
+                // Fit Model (TEST)
+                try (Session session = new Session(graph)) {
+                    Session.Runner runner = session.runner();
+                    Operand<Float> XOp = testOps[0];
+                    Operand<Float> yOp = testOps[1];
+
+                    // Compute Output / Loss / Accuracy
+                    Operand<Float> yTrue = yOp;
+                    Operand<Float> yPred = denseLayer.apply(tf, XOp);
+
+                    Operand<Float> batchLoss = loss.apply(tf, yTrue, yPred);
+                    Operand<Float> batchAccuracy = accuracy.apply(tf, yTrue, yPred);
+
+
+                    // Run initializer ops
+                    for (Operand<Float> op : denseLayer.initializerOps()) {
+                        runner.addTarget(op);
+                    }
+
+                    runner.run();
+
+                    float trainEpochAccuracy = 0;
+                    float trainEpochLoss = 0;
+
+                    // Load Batches
+                    for (int i = 0; i < test.numBatches(); i++) {
+                        runner = session.runner();
+                        test.feedSessionRunner(runner, i);
+
+                        for (Operand<Float> op : optimizer.minimize(tf, batchLoss, denseLayer.trainableWeights())) {
+                            runner.addTarget(op);
+                        }
+
+                        runner.fetch(batchLoss);
+                        runner.fetch(batchAccuracy);
+
+                        List<Tensor<?>> values = runner.run();
+                        try (Tensor<?> lossTensor = values.get(0);
+                             Tensor<?> accuracyTensor = values.get(1)) {
+                            trainEpochAccuracy += accuracyTensor.floatValue() / test.numBatches();
+                            trainEpochLoss += lossTensor.floatValue() / test.numBatches();
+                        }
+                    }
+
+                    System.out.println("Test accuracy: " + trainEpochAccuracy + "  loss: " + trainEpochLoss);
+                }
+            }
+        }
+    }
 }

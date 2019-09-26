@@ -7,7 +7,7 @@ import org.tensorflow.op.core.Slice;
 
 import java.util.Arrays;
 
-public class GraphModeTensorFrame<T> extends TensorFrame<T> implements GraphLoader<T> {
+public class GraphModeTensorFrame<T> extends TensorFrame<T> implements GraphLoader<T>, AutoCloseable {
     private Class<T> dtype;
 
     private Tensor<T>[] dataTensors;
@@ -126,5 +126,12 @@ public class GraphModeTensorFrame<T> extends TensorFrame<T> implements GraphLoad
         System.arraycopy(dims, 1, tail, 0, dims.length - 1);
 
         return Shape.make(head, tail);
+    }
+
+    @Override
+    public void close() {
+        for (Tensor<T> tensor : this.dataTensors) {
+            tensor.close();
+        }
     }
 }
