@@ -15,8 +15,6 @@ import org.tensorflow.keras.optimizers.Optimizers;
 import org.tensorflow.op.Ops;
 import org.tensorflow.utils.Pair;
 
-import java.beans.FeatureDescriptor;
-
 public class MNISTKeras {
     private static final int INPUT_SIZE = 28 * 28;
     private static final int HIDDEN = 200;
