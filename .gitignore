@@ -31,3 +31,5 @@ project/plugins/project/
 .ensime_cache/
 .ensime
 venv
+.classpath
+.project
