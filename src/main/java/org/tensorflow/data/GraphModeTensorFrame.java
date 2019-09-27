@@ -47,7 +47,7 @@ public class GraphModeTensorFrame<T> extends TensorFrame<T> implements GraphLoad
         return this.dataTensors[0].shape()[0];
     }
 
-    public GraphModeTensorFrame<T> build(Ops tf) {
+    public void build(Ops tf) {
         // Create Placeholders (will be filled by dataTensors before graph is run)
         this.dataPlaceholders = new Placeholder[this.length()];
         for (int i = 0; i < this.length(); ++i) {
@@ -72,7 +72,6 @@ public class GraphModeTensorFrame<T> extends TensorFrame<T> implements GraphLoad
         }
 
         this.built = true;
-        return this;
     }
 
     @Override

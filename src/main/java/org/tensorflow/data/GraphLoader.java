@@ -24,6 +24,9 @@ public interface GraphLoader<T> extends Dataset<T> {
    */
   Tensor<T>[] getDataTensors();
 
+  Operand<T>[] getBatchOperands();
+
+
   /**
    * Feed inputs to session runner.
    * @param runner

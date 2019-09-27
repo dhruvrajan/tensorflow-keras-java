@@ -1,5 +1,9 @@
 package org.tensorflow.data;
 
+import org.tensorflow.Operand;
+import org.tensorflow.Session;
+import org.tensorflow.op.Ops;
+
 public abstract class TensorFrame<T> implements Dataset<T> {
   protected long batchSize = 1;
   protected boolean dropRemainder = false;
@@ -12,6 +16,10 @@ public abstract class TensorFrame<T> implements Dataset<T> {
     return this;
   }
 
+  public abstract void build(Ops tf);
+
+  public abstract Operand<T>[] getBatchOperands();
+
   public abstract long size();
 
   public long batchSize() {
@@ -21,4 +29,6 @@ public abstract class TensorFrame<T> implements Dataset<T> {
   public long numBatches() {
     return size() / batchSize;
   }
+  public abstract  Session.Runner  feedSessionRunner(Session.Runner runner, long batch);
+
 }

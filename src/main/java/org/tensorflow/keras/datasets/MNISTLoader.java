@@ -1,12 +1,8 @@
 package org.tensorflow.keras.datasets;
 
-import org.tensorflow.Graph;
 import org.tensorflow.Tensors;
-
-import org.tensorflow.data.GraphLoader;
 import org.tensorflow.data.GraphModeTensorFrame;
 import org.tensorflow.data.TensorFrame;
-import org.tensorflow.keras.data.Dataset;
 import org.tensorflow.utils.Pair;
 
 import java.io.DataInputStream;
@@ -33,7 +29,7 @@ public class MNISTLoader {
   private static String TRAIN_LABEL_PATH =
       "C:\\Users\\dhruv\\data\\mnist\\train-labels-idx1-ubyte.gz";
 
-  public static Pair<GraphModeTensorFrame<Float>, GraphModeTensorFrame<Float>> loadData() throws IOException {
+  public static Pair<TensorFrame<Float>, TensorFrame<Float>> loadData() throws IOException {
     float[][] trainImages = readImages(TRAIN_IMAGE_PATH);
     float[][] trainLabels = readLabelsOneHot(TRAIN_LABEL_PATH);
     float[][] testImages = readImages(TEST_IMAGE_PATH);
@@ -44,16 +40,6 @@ public class MNISTLoader {
             Float.class, Tensors.create(trainImages), Tensors.create(trainLabels)),
         new GraphModeTensorFrame<>(
             Float.class, Tensors.create(testImages), Tensors.create(testLabels)));
-  }
-
-  public static Dataset loadDataset() throws IOException {
-
-    float[][] trainImages = readImages(TRAIN_IMAGE_PATH);
-    float[][] trainLabels = readLabelsOneHot(TRAIN_LABEL_PATH);
-    float[][] testImages = readImages(TEST_IMAGE_PATH);
-    float[][] testLabels = readLabelsOneHot(TEST_LABEL_PATH);
-
-    return new Dataset(trainImages, trainLabels, testImages, testLabels);
   }
 
   private static float[][] readImages(String imagesPath) throws IOException {

@@ -9,7 +9,7 @@ public enum Optimizers {
   public static Optimizer<Float> select(Optimizers optimizerType) {
     switch (optimizerType) {
       case sgd:
-        return new GradientDescentOptimizer(0.01f);
+        return new GradientDescentOptimizer(0.2f);
       default:
         throw new IllegalArgumentException("Invalid Optimizer Type.");
     }

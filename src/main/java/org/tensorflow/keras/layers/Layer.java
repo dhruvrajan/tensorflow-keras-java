@@ -64,7 +64,7 @@ public abstract class Layer<T> implements LayerFunction<T> {
   public final Operand<T> apply(Ops tf, Operand<T>... inputs) {
     if (!this.built) {
       throw new IllegalStateException(
-          "Layer.call() cannot be called before the layer is built (Layer.create())");
+          "Layer.call() cannot be called before the layer is built (Layer.build())");
     }
 
     if (inputs.length != INPUTS_LENGTH) {

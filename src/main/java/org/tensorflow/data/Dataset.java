@@ -1,6 +1,6 @@
 package org.tensorflow.data;
 
-public interface Dataset<T>  {
+public interface Dataset<T> extends AutoCloseable {
   /**
    * Combines consecutive elements of this dataset into batches. Does not drop the last batch, even
    * if it has fewer than batchSize elements.
@@ -23,4 +23,7 @@ public interface Dataset<T>  {
    * @return A `Dataset`
    */
   Dataset<T> batch(long batchSize, boolean dropRemainder);
+
+  @Override
+  void close();
 }
