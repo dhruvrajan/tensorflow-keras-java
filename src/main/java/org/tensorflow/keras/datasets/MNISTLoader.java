@@ -1,116 +1,132 @@
-package org.tensorflow.keras.datasets;
+  package org.tensorflow.keras.datasets;
 
-import org.tensorflow.Tensors;
-import org.tensorflow.data.GraphLoader;
-import org.tensorflow.data.GraphModeTensorFrame;
-import org.tensorflow.data.TensorFrame;
-import org.tensorflow.utils.Pair;
+  import org.tensorflow.Tensors;
+  import org.tensorflow.data.GraphLoader;
+  import org.tensorflow.data.GraphModeTensorFrame;
+  import org.tensorflow.keras.examples.mnist.MNISTKeras;
+  import org.tensorflow.keras.utils.DataUtils;
+  import org.tensorflow.keras.utils.Keras;
+  import org.tensorflow.utils.Pair;
 
-import java.io.DataInputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.zip.GZIPInputStream;
+  import java.io.DataInputStream;
+  import java.io.FileInputStream;
+  import java.io.IOException;
+  import java.util.Arrays;
+  import java.util.zip.GZIPInputStream;
 
-/**
- * Code based on example found at: -
- * https://github.com/karllessard/models/tree/master/samples/languages/java/mnist/src/main/java/org/tensorflow/model/sample/mnist
- */
-public class MNISTLoader {
-  private static final int IMAGE_MAGIC = 2051;
-  private static final int LABELS_MAGIC = 2049;
-  private static final int OUTPUT_CLASSES = 10;
+  /**
+   * Code based on example found at: -
+   * https://github.com/karllessard/models/tree/master/samples/languages/java/mnist/src/main/java/org/tensorflow/model/sample/mnist
+   */
+  public class MNISTLoader {
+      private static final int IMAGE_MAGIC = 2051;
+      private static final int LABELS_MAGIC = 2049;
+      private static final int OUTPUT_CLASSES = 10;
 
-  private static String TEST_IMAGE_PATH =
-      "C:\\Users\\dhruv\\data\\mnist\\t10k-images-idx3-ubyte.gz";
-  private static String TRAIN_IMAGE_PATH =
-      "C:\\Users\\dhruv\\data\\mnist\\train-images-idx3-ubyte.gz";
-  private static String TEST_LABEL_PATH =
-      "C:\\Users\\dhruv\\data\\mnist\\t10k-labels-idx1-ubyte.gz";
-  private static String TRAIN_LABEL_PATH =
-      "C:\\Users\\dhruv\\data\\mnist\\train-labels-idx1-ubyte.gz";
+      private static final String TRAIN_IMAGES = "train-images-idx3-ubyte.gz";
+      private static final String TRAIN_LABELS = "train-labels-idx1-ubyte.gz";
+      private static final String TEST_IMAGES = "t10k-images-idx3-ubyte.gz";
+      private static final String TEST_LABELS = "t10k-labels-idx1-ubyte.gz";
 
-  public static Pair<GraphLoader<Float>, GraphLoader<Float>> graphDataLoader() throws IOException {
-    float[][] trainImages = readImages(TRAIN_IMAGE_PATH);
-    float[][] trainLabels = readLabelsOneHot(TRAIN_LABEL_PATH);
-    float[][] testImages = readImages(TEST_IMAGE_PATH);
-    float[][] testLabels = readLabelsOneHot(TEST_LABEL_PATH);
+      private static final String ORIGIN_BASE = "http://yann.lecun.com/exdb/mnist/";
 
-    return new Pair<>(
-        new GraphModeTensorFrame<>(
-            Float.class, Tensors.create(trainImages), Tensors.create(trainLabels)),
-        new GraphModeTensorFrame<>(
-            Float.class, Tensors.create(testImages), Tensors.create(testLabels)));
-  }
+      private static final String LOCAL_PREFIX = "datasets/mnist/";
 
-  private static float[][] readImages(String imagesPath) throws IOException {
-    try (DataInputStream inputStream =
-        new DataInputStream(new GZIPInputStream(new FileInputStream(imagesPath)))) {
-
-      if (inputStream.readInt() != IMAGE_MAGIC) {
-        throw new IllegalArgumentException("Invalid Image Data File");
+      public static void download() throws IOException {
+          DataUtils.getFile(LOCAL_PREFIX + TRAIN_IMAGES, ORIGIN_BASE + TRAIN_IMAGES,
+                  "440fcabf73cc546fa21475e81ea370265605f56be210a4024d2ca8f203523609", "sha256");
+          DataUtils.getFile(LOCAL_PREFIX + TRAIN_LABELS, ORIGIN_BASE + TRAIN_LABELS,
+                  "fcdfeedb53b53c99384b2cd314206a08fdf6aa97070e19921427a179ea123d19", "sha256");
+          DataUtils.getFile(LOCAL_PREFIX + TEST_IMAGES, ORIGIN_BASE + TEST_IMAGES,
+                  "beb4b4806386107117295b2e3e08b4c16a6dfb4f001bfeb97bf25425ba1e08e4", "sha256");
+          DataUtils.getFile(LOCAL_PREFIX + TEST_LABELS, ORIGIN_BASE + TEST_LABELS,
+                  "986c5b8cbc6074861436f5581f7798be35c7c0025262d33b4df4c9ef668ec773", "sha256");
       }
 
-      int numImages = inputStream.readInt();
-      int rows = inputStream.readInt();
-      int cols = inputStream.readInt();
+      public static Pair<GraphLoader<Float>, GraphLoader<Float>> graphDataLoader() throws IOException {
+          // Download MNIST files if they don't exist.
+          MNISTLoader.download();
 
-      return readImageBuffer(inputStream, numImages, rows * cols);
-    }
-  }
+          float[][] trainImages = readImages(Keras.kerasPath(LOCAL_PREFIX, TRAIN_IMAGES).toString());
+          float[][] trainLabels = readLabelsOneHot(Keras.kerasPath(LOCAL_PREFIX, TRAIN_LABELS).toString());
+          float[][] testImages = readImages(Keras.kerasPath(LOCAL_PREFIX, TEST_IMAGES).toString());
+          float[][] testLabels = readLabelsOneHot(Keras.kerasPath(LOCAL_PREFIX + TEST_LABELS).toString());
 
-  private static float[][] readLabelsOneHot(String labelsPath) throws IOException {
-    try (DataInputStream inputStream =
-        new DataInputStream(new GZIPInputStream(new FileInputStream(labelsPath)))) {
-      if (inputStream.readInt() != LABELS_MAGIC) {
-        throw new IllegalArgumentException("Invalid Label Data File");
+          return new Pair<>(
+                  new GraphModeTensorFrame<>(
+                          Float.class, Tensors.create(trainImages), Tensors.create(trainLabels)),
+                  new GraphModeTensorFrame<>(
+                          Float.class, Tensors.create(testImages), Tensors.create(testLabels)));
       }
 
-      int numLabels = inputStream.readInt();
-      return readLabelBuffer(inputStream, numLabels);
-    }
-  }
+      private static float[][] readImages(String imagesPath) throws IOException {
+          try (DataInputStream inputStream =
+                       new DataInputStream(new GZIPInputStream(new FileInputStream(imagesPath)))) {
 
-  private static byte[][] readBatchedBytes(
-      DataInputStream inputStream, int batches, int bytesPerBatch) throws IOException {
-    byte[][] entries = new byte[batches][bytesPerBatch];
-    for (int i = 0; i < batches; i++) {
-      inputStream.readFully(entries[i]);
-    }
-    return entries;
-  }
+              if (inputStream.readInt() != IMAGE_MAGIC) {
+                  throw new IllegalArgumentException("Invalid Image Data File");
+              }
 
-  private static float[][] readImageBuffer(
-      DataInputStream inputStream, int numImages, int imageSize) throws IOException {
-    byte[][] entries = readBatchedBytes(inputStream, numImages, imageSize);
-    float[][] unsignedEntries = new float[numImages][imageSize];
-    for (int i = 0; i < unsignedEntries.length; i++) {
-      for (int j = 0; j < unsignedEntries[0].length; j++) {
-        unsignedEntries[i][j] = (float) (entries[i][j] & 0xFF) / 255.0f;
+              int numImages = inputStream.readInt();
+              int rows = inputStream.readInt();
+              int cols = inputStream.readInt();
+
+              return readImageBuffer(inputStream, numImages, rows * cols);
+          }
       }
-    }
 
-    return unsignedEntries;
+      private static float[][] readLabelsOneHot(String labelsPath) throws IOException {
+          try (DataInputStream inputStream =
+                       new DataInputStream(new GZIPInputStream(new FileInputStream(labelsPath)))) {
+              if (inputStream.readInt() != LABELS_MAGIC) {
+                  throw new IllegalArgumentException("Invalid Label Data File");
+              }
+
+              int numLabels = inputStream.readInt();
+              return readLabelBuffer(inputStream, numLabels);
+          }
+      }
+
+      private static byte[][] readBatchedBytes(
+              DataInputStream inputStream, int batches, int bytesPerBatch) throws IOException {
+          byte[][] entries = new byte[batches][bytesPerBatch];
+          for (int i = 0; i < batches; i++) {
+              inputStream.readFully(entries[i]);
+          }
+          return entries;
+      }
+
+      private static float[][] readImageBuffer(
+              DataInputStream inputStream, int numImages, int imageSize) throws IOException {
+          byte[][] entries = readBatchedBytes(inputStream, numImages, imageSize);
+          float[][] unsignedEntries = new float[numImages][imageSize];
+          for (int i = 0; i < unsignedEntries.length; i++) {
+              for (int j = 0; j < unsignedEntries[0].length; j++) {
+                  unsignedEntries[i][j] = (float) (entries[i][j] & 0xFF) / 255.0f;
+              }
+          }
+
+          return unsignedEntries;
+      }
+
+      private static float[][] readLabelBuffer(DataInputStream inputStream, int numLabels)
+              throws IOException {
+          byte[][] entries = readBatchedBytes(inputStream, numLabels, 1);
+
+          float[][] labels = new float[numLabels][OUTPUT_CLASSES];
+          for (int i = 0; i < entries.length; i++) {
+              labelToOneHotVector(entries[i][0] & 0xFF, labels[i], false);
+          }
+
+          return labels;
+      }
+
+      private static void labelToOneHotVector(int label, float[] oneHot, boolean fill) {
+          if (label >= oneHot.length) {
+              throw new IllegalArgumentException("Invalid Index for One-Hot Vector");
+          }
+
+          if (fill) Arrays.fill(oneHot, 0);
+          oneHot[label] = 1.0f;
+      }
   }
-
-  private static float[][] readLabelBuffer(DataInputStream inputStream, int numLabels)
-      throws IOException {
-    byte[][] entries = readBatchedBytes(inputStream, numLabels, 1);
-
-    float[][] labels = new float[numLabels][OUTPUT_CLASSES];
-    for (int i = 0; i < entries.length; i++) {
-      labelToOneHotVector(entries[i][0] & 0xFF, labels[i], false);
-    }
-
-    return labels;
-  }
-
-  private static void labelToOneHotVector(int label, float[] oneHot, boolean fill) {
-    if (label >= oneHot.length) {
-      throw new IllegalArgumentException("Invalid Index for One-Hot Vector");
-    }
-
-    if (fill) Arrays.fill(oneHot, 0);
-    oneHot[label] = 1.0f;
-  }
-}
