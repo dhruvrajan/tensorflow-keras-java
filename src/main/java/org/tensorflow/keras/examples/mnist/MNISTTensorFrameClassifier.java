@@ -4,7 +4,7 @@ import org.tensorflow.Graph;
 import org.tensorflow.Operand;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
-import org.tensorflow.data.GraphModeTensorFrame;
+import org.tensorflow.data.GraphLoader;
 import org.tensorflow.data.TensorFrame;
 import org.tensorflow.keras.activations.Activations;
 import org.tensorflow.keras.datasets.MNISTLoader;
@@ -42,15 +42,15 @@ public class MNISTTensorFrameClassifier implements Runnable {
             Ops tf = Ops.create(graph);
 
             // Load MNIST Dataset
-            Pair<TensorFrame<Float>, TensorFrame<Float>> data;
+            Pair<GraphLoader<Float>, GraphLoader<Float>> data;
             try {
-                data = MNISTLoader.loadData();
+                data = MNISTLoader.graphDataLoader();
             } catch (IOException e) {
                 throw new IllegalArgumentException("Could not load MNIST dataset.");
             }
 
-            try (TensorFrame<Float> train = data.first();
-                 TensorFrame<Float> test = data.second()) {
+            try (GraphLoader<Float> train = data.first();
+                 GraphLoader<Float> test = data.second()) {
 
                 InputLayer inputLayer = InputLayer.create(INPUT_SIZE);
                 Dense denseLayer = Dense.options().setActivation(Activations.softmax).create(FEATURES);

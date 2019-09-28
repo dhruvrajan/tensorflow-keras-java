@@ -31,3 +31,4 @@ project/plugins/project/
 .ensime_cache/
 .ensime
 venv
+bin/

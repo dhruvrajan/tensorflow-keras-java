@@ -1,10 +1,10 @@
 package org.tensorflow.keras.examples.mnist;
 
 import org.tensorflow.Graph;
+import org.tensorflow.data.GraphLoader;
 import org.tensorflow.data.TensorFrame;
 import org.tensorflow.keras.activations.Activations;
 import org.tensorflow.keras.datasets.MNISTLoader;
-import org.tensorflow.keras.initializers.Initializers;
 import org.tensorflow.keras.layers.Dense;
 import org.tensorflow.keras.layers.InputLayer;
 import org.tensorflow.keras.losses.Losses;
@@ -14,8 +14,6 @@ import org.tensorflow.keras.models.Sequential;
 import org.tensorflow.keras.optimizers.Optimizers;
 import org.tensorflow.op.Ops;
 import org.tensorflow.utils.Pair;
-
-import java.beans.FeatureDescriptor;
 
 public class MNISTKeras {
     private static final int INPUT_SIZE = 28 * 28;
@@ -29,9 +27,9 @@ public class MNISTKeras {
             Ops tf = Ops.create(graph);
 
             // Load MNIST Train / Test Data
-            Pair<TensorFrame<Float>, TensorFrame<Float>> data = MNISTLoader.loadData();
-            try (TensorFrame<Float> train = data.first();
-                 TensorFrame<Float> test = data.second()) {
+            Pair<GraphLoader<Float>, GraphLoader<Float>> data = MNISTLoader.graphDataLoader();
+            try (GraphLoader<Float> train = data.first();
+                 GraphLoader<Float> test = data.second()) {
 
                 Model model = new Sequential(
                         InputLayer.create(INPUT_SIZE),

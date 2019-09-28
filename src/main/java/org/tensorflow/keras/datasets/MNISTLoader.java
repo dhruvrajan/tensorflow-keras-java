@@ -1,6 +1,7 @@
 package org.tensorflow.keras.datasets;
 
 import org.tensorflow.Tensors;
+import org.tensorflow.data.GraphLoader;
 import org.tensorflow.data.GraphModeTensorFrame;
 import org.tensorflow.data.TensorFrame;
 import org.tensorflow.utils.Pair;
@@ -29,7 +30,7 @@ public class MNISTLoader {
   private static String TRAIN_LABEL_PATH =
       "C:\\Users\\dhruv\\data\\mnist\\train-labels-idx1-ubyte.gz";
 
-  public static Pair<TensorFrame<Float>, TensorFrame<Float>> loadData() throws IOException {
+  public static Pair<GraphLoader<Float>, GraphLoader<Float>> graphDataLoader() throws IOException {
     float[][] trainImages = readImages(TRAIN_IMAGE_PATH);
     float[][] trainLabels = readLabelsOneHot(TRAIN_LABEL_PATH);
     float[][] testImages = readImages(TEST_IMAGE_PATH);

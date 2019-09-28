@@ -1,6 +1,7 @@
 package org.tensorflow.keras.models;
 
 import org.tensorflow.*;
+import org.tensorflow.data.GraphLoader;
 import org.tensorflow.data.TensorFrame;
 import org.tensorflow.keras.layers.InputLayer;
 import org.tensorflow.keras.layers.Layer;
@@ -81,7 +82,7 @@ public class Sequential extends Model<Float> {
     }
 
     @Override
-    public void fit(Ops tf, TensorFrame<Float> train, TensorFrame<Float> test, int epochs, int batchSize) {
+    public void fit(Ops tf, GraphLoader<Float> train, GraphLoader<Float> test, int epochs, int batchSize) {
         try (Session session = new Session(tf.scope().graph())) {
             runTrainingLoop(tf, session, train, epochs, batchSize, true);
             runPredictionLoop(tf, session, test, batchSize);
@@ -93,11 +94,11 @@ public class Sequential extends Model<Float> {
         throw new UnsupportedOperationException("Unimplemented");
     }
 
-    private void runPredictionLoop(Ops tf, Session session, TensorFrame<Float> data, int batchSize) {
+    private void runPredictionLoop(Ops tf, Session session, GraphLoader<Float> data, int batchSize) {
         runTrainingLoop(tf, session, data, 1, batchSize, false);
     }
 
-    private void runTrainingLoop(Ops tf, Session session, TensorFrame<Float> data, int epochs, int batchSize, boolean training) {
+    private void runTrainingLoop(Ops tf, Session session, GraphLoader<Float> data, int epochs, int batchSize, boolean training) {
         data.batch(batchSize);
         data.build(tf);
         Operand<Float>[] dataOps = data.getBatchOperands();

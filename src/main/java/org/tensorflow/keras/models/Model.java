@@ -3,6 +3,7 @@ package org.tensorflow.keras.models;
 import org.tensorflow.Graph;
 import org.tensorflow.Shape;
 import org.tensorflow.Tensor;
+import org.tensorflow.data.GraphLoader;
 import org.tensorflow.data.TensorFrame;
 import org.tensorflow.keras.layers.Layer;
 import org.tensorflow.keras.losses.Loss;
@@ -30,7 +31,7 @@ public abstract class Model<T> extends Layer<T> {
         compile(tf, compilerBuilder.optimizer, compilerBuilder.loss, compilerBuilder.metrics);
     }
 
-    public abstract void fit(Ops tf, TensorFrame<Float> train, TensorFrame<Float> test, int epochs, int batchSize);
+    public abstract void fit(Ops tf, GraphLoader<Float> train, GraphLoader<Float> test, int epochs, int batchSize);
 
     public abstract void fit(Graph graph, List<float[][]> data, List<float[][]> labels, int
             epochs, int batchSize,

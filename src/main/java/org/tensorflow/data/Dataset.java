@@ -24,6 +24,10 @@ public interface Dataset<T> extends AutoCloseable {
    */
   Dataset<T> batch(long batchSize, boolean dropRemainder);
 
+  long batchSize();
+
+  long numBatches();
+
   @Override
   void close();
 }
