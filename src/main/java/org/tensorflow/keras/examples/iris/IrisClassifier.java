@@ -11,12 +11,8 @@ import org.tensorflow.keras.metrics.Metrics;
 import org.tensorflow.keras.models.Model;
 import org.tensorflow.keras.models.Sequential;
 import org.tensorflow.keras.optimizers.GradientDescentOptimizer;
-import org.tensorflow.keras.optimizers.Optimizer;
-import org.tensorflow.keras.optimizers.Optimizers;
 import org.tensorflow.op.Ops;
 import org.tensorflow.utils.Pair;
-
-import java.awt.*;
 
 public class IrisClassifier {
     private static final int INPUT_SIZE = 4;

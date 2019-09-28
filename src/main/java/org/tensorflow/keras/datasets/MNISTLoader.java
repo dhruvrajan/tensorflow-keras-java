@@ -3,7 +3,6 @@
   import org.tensorflow.Tensors;
   import org.tensorflow.data.GraphLoader;
   import org.tensorflow.data.GraphModeTensorFrame;
-  import org.tensorflow.keras.examples.mnist.MNISTKeras;
   import org.tensorflow.keras.utils.DataUtils;
   import org.tensorflow.keras.utils.Keras;
   import org.tensorflow.utils.Pair;
@@ -15,8 +14,10 @@
   import java.util.zip.GZIPInputStream;
 
   /**
-   * Code based on example found at: -
+   * Code based on example found at:
    * https://github.com/karllessard/models/tree/master/samples/languages/java/mnist/src/main/java/org/tensorflow/model/sample/mnist
+   *
+   * Utility for downloading and using MNIST data with a local keras installation.
    */
   public class MNISTLoader {
       private static final int IMAGE_MAGIC = 2051;
@@ -32,6 +33,10 @@
 
       private static final String LOCAL_PREFIX = "datasets/mnist/";
 
+      /**
+       * Download MNIST dataset files to the local .keras/ directory.
+       * @throws IOException when the download fails
+       */
       public static void download() throws IOException {
           DataUtils.getFile(LOCAL_PREFIX + TRAIN_IMAGES, ORIGIN_BASE + TRAIN_IMAGES,
                   "440fcabf73cc546fa21475e81ea370265605f56be210a4024d2ca8f203523609", "sha256");
@@ -47,11 +52,13 @@
           // Download MNIST files if they don't exist.
           MNISTLoader.download();
 
+          // Read data files into arrays
           float[][] trainImages = readImages(Keras.kerasPath(LOCAL_PREFIX, TRAIN_IMAGES).toString());
           float[][] trainLabels = readLabelsOneHot(Keras.kerasPath(LOCAL_PREFIX, TRAIN_LABELS).toString());
           float[][] testImages = readImages(Keras.kerasPath(LOCAL_PREFIX, TEST_IMAGES).toString());
           float[][] testLabels = readLabelsOneHot(Keras.kerasPath(LOCAL_PREFIX + TEST_LABELS).toString());
 
+          // Return a pair of graph loaders; train and test sets
           return new Pair<>(
                   new GraphModeTensorFrame<>(
                           Float.class, Tensors.create(trainImages), Tensors.create(trainLabels)),
@@ -59,6 +66,12 @@
                           Float.class, Tensors.create(testImages), Tensors.create(testLabels)));
       }
 
+      /**
+       * Reads MNIST images into an array, given the image datafile path.
+       * @param imagesPath MNIST image datafile path
+       * @return an array of shape (# examples, # pixels) containing the image data
+       * @throws IOException when the file reading fails.
+       */
       private static float[][] readImages(String imagesPath) throws IOException {
           try (DataInputStream inputStream =
                        new DataInputStream(new GZIPInputStream(new FileInputStream(imagesPath)))) {
@@ -75,6 +88,12 @@
           }
       }
 
+      /**
+       * Reads MNIST label files into an array, given a label datafile path.
+       * @param labelsPath MNIST label datafile path
+       * @return an array of shape (# examples, # classes) containing the label data
+       * @throws IOException when the file reading fails.
+       */
       private static float[][] readLabelsOneHot(String labelsPath) throws IOException {
           try (DataInputStream inputStream =
                        new DataInputStream(new GZIPInputStream(new FileInputStream(labelsPath)))) {
