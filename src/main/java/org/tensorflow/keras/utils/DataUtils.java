@@ -53,6 +53,7 @@ public class DataUtils {
                     return;
                 } else {
                     System.out.println(fname + " exists but is corrupted. Re-downloading...");
+                    return;
                 }
             }
         }

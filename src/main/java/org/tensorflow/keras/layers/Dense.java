@@ -36,8 +36,8 @@ public class Dense extends Layer<Float> implements KerasType<Float> {
     this.units = units;
 
     this.activation = Activations.select(options.activation);
-    this.kernelInitializer = Initializers.select(options.kernelInitializer);
-    this.biasInitializer = Initializers.select(options.biasInitializer);
+    this.kernelInitializer = options.kernelInitializer;
+    this.biasInitializer = options.biasInitializer;
   }
 
   private Dense(
@@ -69,8 +69,8 @@ public class Dense extends Layer<Float> implements KerasType<Float> {
   public static class Options {
     // Default parameters
     private Activations activation = Activations.linear;
-    private Initializers kernelInitializer = Initializers.zeros;
-    private Initializers biasInitializer = Initializers.zeros;
+    private Initializer<Float> kernelInitializer = Initializers.select(Initializers.zeros);
+    private Initializer<Float> biasInitializer = Initializers.select(Initializers.zeros);
 
     public Options() {}
 
@@ -80,11 +80,19 @@ public class Dense extends Layer<Float> implements KerasType<Float> {
     }
 
     public Options setKernelInitializer(Initializers kernelInitializer) {
+      return setKernelInitializer(Initializers.select(kernelInitializer));
+    }
+
+    public Options setKernelInitializer(Initializer kernelInitializer) {
       this.kernelInitializer = kernelInitializer;
       return this;
     }
 
     public Options setBiasInitializer(Initializers biasInitializer) {
+      return setBiasInitializer(Initializers.select(biasInitializer));
+    }
+
+    public Options setBiasInitializer(Initializer biasInitializer) {
       this.biasInitializer = biasInitializer;
       return this;
     }
@@ -93,8 +101,8 @@ public class Dense extends Layer<Float> implements KerasType<Float> {
       return new Dense(
           units,
           Activations.select(activation),
-          Initializers.select(kernelInitializer),
-          Initializers.select(biasInitializer));
+          kernelInitializer,
+          biasInitializer);
     }
   }
 

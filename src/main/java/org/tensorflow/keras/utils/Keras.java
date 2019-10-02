@@ -40,7 +40,7 @@ public class Keras {
   // Keras backend utilties
   //
 
-  public static <T> Operand<Integer> constArray(Ops tf, int... i) {
+  public static Operand<Integer> constArray(Ops tf, int... i) {
     return tf.constant(i);
   }
 

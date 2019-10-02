@@ -39,6 +39,15 @@ public class TensorShape {
     return this.dims.length;
   }
 
+  public int numElements() {
+    int prod = 1;
+    for (int i = 0; i < this.numDimensions(); i++) {
+      prod *= this.dims[i];
+    }
+
+    return prod;
+  }
+
   public TensorShape replace(int i, long dim) {
     dims[i] = dim;
     return this;

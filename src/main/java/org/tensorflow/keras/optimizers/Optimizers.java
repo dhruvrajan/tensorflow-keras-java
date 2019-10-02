@@ -10,6 +10,8 @@ public enum Optimizers {
     switch (optimizerType) {
       case sgd:
         return new GradientDescentOptimizer(0.2f);
+//      case adam:
+//        return new AdamOptimizer(0.2f);
       default:
         throw new IllegalArgumentException("Invalid Optimizer Type.");
     }
