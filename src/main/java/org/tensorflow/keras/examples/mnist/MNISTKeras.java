@@ -27,6 +27,7 @@ public class MNISTKeras {
                  GraphLoader<Float> test = data.second()) {
                 Model model = new Sequential(
                         InputLayer.create(28 * 28),
+                        Dense.create(128, Activations.softmax),
                         Dense.options()
                                 .setActivation(Activations.relu)
                                 .setKernelInitializer(Initializers.randomNormal)

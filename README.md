@@ -21,12 +21,13 @@ import tensorflow as tf
 (X_train, y_train), (X_val, y_val) = tf.keras.datasets.load_mnist()
 
 model = tf.keras.models.Sequential([
-    tf.keras.layers.Dense(10, activation="softmax"),
+  tf.keras.layers.Flatten(input_shape=(28, 28)),
+  tf.keras.layers.Dense(128, activation='relu', kernel_initializer="random_normal", bias_initializer="zeros"),
+  tf.keras.layers.Dense(10, activation='softmax', kernel_initializer="random_normal", bias_initializer="zeros")
 ])
 
-model.compile(optimizer="sgd", loss="softmax_crossentropy", metrics=["accuracy"])
-tf.keras.
-model.fit(X_train, y_train, val_data=(X_test, y_test), epochs=100, batch_size=100)
+model.compile(optimizer='sgd', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+model.fit(X_train, y_train, val_data=(X_val, y_val), epochs=100, batch_size=100)
 
 ```
  
@@ -34,32 +35,43 @@ Java:
 ```java
 public class MNISTKeras {
 
-    public static void main(String[] args) throws Exception {
-        try (Graph graph = new Graph()) {
-            Ops tf = Ops.create(graph);
-
-            // Load MNIST Train / Test Data
-            Pair<TensorFrame<Float>, TensorFrame<Float>> data = MNISTLoader.loadData();
-            try (TensorFrame<Float> train = data.first();
-                 TensorFrame<Float> test = data.second()) {
-
-                Model model = new Sequential(
-                        InputLayer.create(INPUT_SIZE),
-                        Dense.options()
-                                .setActivation(Activations.softmax)
-                                .create(FEATURES)
-                );
-
-                model.compile(tf, model.compilerOptions()
-                        .setOptimizer(Optimizers.sgd)
-                        .setLoss(Losses.softmax_crossentropy)
-                        .addMetric(Metrics.accuracy)
-                        .create(graph));
-
-                model.fit(tf, train, test, EPOCHS, BATCH_SIZE);
+     public static void main(String[] args) throws Exception {
+            try (Graph graph = new Graph()) {
+                Ops tf = Ops.create(graph);
+    
+                // Load MNIST Train / Test Data
+                Pair<GraphLoader<Float>, GraphLoader<Float>> data = MNISTLoader.graphDataLoader();
+                try (GraphLoader<Float> train = data.first();
+                     GraphLoader<Float> test = data.second()) {
+                    Model model = new Sequential(
+                            InputLayer.create(28 * 28),
+                            Dense.options()
+                                    .setActivation(Activations.relu)
+                                    .setKernelInitializer(Initializers.randomNormal)
+                                    .setBiasInitializer(Initializers.zeros)
+                                    .create(128),
+                            Dense.options()
+                                    .setActivation(Activations.softmax)
+                                    .setKernelInitializer(Initializers.randomNormal)
+                                    .setBiasInitializer(Initializers.zeros)
+                                    .create(10)
+                    );
+    
+                    // Compile Model
+                    model.compile(tf, model.compilerOptions()
+                            .setOptimizer(new GradientDescentOptimizer(0.2f))
+                            .setLoss(Losses.softmax_crossentropy)
+                            .addMetric(Metrics.accuracy)
+                            .create(graph));
+    
+                    // Fit and Evaluate Model
+                    model.fit(tf, model.fitOptions()
+                            .setEpochs(10)
+                            .setBatchSize(100)
+                            .create(train, test));
+                }
             }
         }
-    }
 }
 ```
 
