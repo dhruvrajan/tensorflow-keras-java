@@ -126,31 +126,35 @@ public abstract class Model<T> extends Layer<T> {
     }
 
     public static class FitOptions {
-        TensorFrame<Float> train;
-        TensorFrame<Float> test;
+        GraphLoader<Float> train;
+        GraphLoader<Float> test;
         int epochs = 10;
         int batchSize = 1;
 
-        public void setTrain(TensorFrame<Float> train) {
+        public FitOptions setTrain(TensorFrame<Float> train) {
             this.train = train;
+            return this;
         }
 
-        public void setTest(TensorFrame<Float> test) {
+        public FitOptions setTest(TensorFrame<Float> test) {
             this.test = test;
+            return this;
         }
 
-        public void setEpochs(int epochs) {
+        public FitOptions setEpochs(int epochs) {
             this.epochs = epochs;
+            return this;
         }
 
-        public void setBatchSize(int batchSize) {
+        public FitOptions setBatchSize(int batchSize) {
             this.batchSize = batchSize;
+            return this;
         }
 
         public FitOptions() {
         }
 
-        public FitOptions create(TensorFrame<Float> train, TensorFrame<Float> test) {
+        public FitOptions create(GraphLoader<Float> train, GraphLoader<Float> test) {
           this.train = train;
           this.test = test;
           return this;

@@ -44,10 +44,10 @@ public class Keras {
     return tf.constant(i);
   }
 
-  public static Operand<Long> shapeOperand(Ops tf, Shape shape) {
-    long[] shapeArray = new long[shape.numDimensions()];
+  public static Operand<Integer> shapeOperand(Ops tf, Shape shape) {
+    int[] shapeArray = new int[shape.numDimensions()];
     for (int i = 0; i < shapeArray.length; i++) {
-      shapeArray[i] = shape.size(i);
+      shapeArray[i] = (int) shape.size(i);
     }
 
     return tf.constant(shapeArray);
