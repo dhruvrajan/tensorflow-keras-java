@@ -32,16 +32,12 @@ model.fit(X_train, y_train, val_data=(X_val, y_val), epochs=10, batch_size=100)
  
 Java:
 ```java
-package org.tensorflow.keras.examples.mnist;
-
 import org.tensorflow.Graph;
 import org.tensorflow.data.GraphLoader;
 import org.tensorflow.keras.activations.Activations;
 import org.tensorflow.keras.datasets.MNIST;
-import org.tensorflow.keras.initializers.Initializer;
 import org.tensorflow.keras.initializers.Initializers;
 import org.tensorflow.keras.layers.Dense;
-import org.tensorflow.keras.layers.Input;
 import org.tensorflow.keras.layers.Layers;
 import org.tensorflow.keras.losses.Losses;
 import org.tensorflow.keras.metrics.Metrics;
