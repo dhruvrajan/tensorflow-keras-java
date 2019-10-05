@@ -38,9 +38,11 @@ import org.tensorflow.Graph;
 import org.tensorflow.data.GraphLoader;
 import org.tensorflow.keras.activations.Activations;
 import org.tensorflow.keras.datasets.MNIST;
+import org.tensorflow.keras.initializers.Initializer;
 import org.tensorflow.keras.initializers.Initializers;
 import org.tensorflow.keras.layers.Dense;
 import org.tensorflow.keras.layers.Input;
+import org.tensorflow.keras.layers.Layers;
 import org.tensorflow.keras.losses.Losses;
 import org.tensorflow.keras.metrics.Metrics;
 import org.tensorflow.keras.models.Model;
@@ -56,18 +58,23 @@ public class MNISTKeras {
 
     static {
         // Define Neural Network Model
+
+        // Note: Layers can be constructed either from individual
+        //       Option.Builder classes, or from the static helper
+        //       methods defined in `Layers` which wrap the explicit builders
+        //       to decrease verbosity.
         model = new Sequential(
-                new Input(28 * 28),
+                Layers.input(28 * 28),
+
+                // Construct using Dense.Options.Builder
                 new Dense(128, Dense.Options.builder()
                         .setActivation(Activations.relu)
                         .setKernelInitializer(Initializers.randomNormal)
                         .setBiasInitializer(Initializers.zeros)
                         .build()),
-                new Dense(10, Dense.Options.builder()
-                        .setActivation(Activations.softmax)
-                        .setKernelInitializer(Initializers.randomNormal)
-                        .setBiasInitializer(Initializers.zeros)
-                        .build())
+
+                // Construct using static helper Layers.dense(...)
+                Layers.dense(10, Activations.softmax, Initializers.randomNormal, Initializers.zeros)
         );
 
         // Model Compile Configuration
