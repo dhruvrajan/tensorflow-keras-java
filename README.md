@@ -63,7 +63,6 @@ public class MNISTKeras {
             // Define Neural Network Model
             Model model = new Sequential(
                     InputLayer.create(28 * 28),
-                    Dense.create(128, Activations.softmax),
                     Dense.options()
                             .setActivation(Activations.relu)
                             .setKernelInitializer(Initializers.randomNormal)
@@ -91,7 +90,6 @@ public class MNISTKeras {
         }
     }
 }
-
 ```
 
 Overview
