@@ -27,7 +27,7 @@ model = tf.keras.models.Sequential([
 ])
 
 model.compile(optimizer='sgd', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-model.fit(X_train, y_train, val_data=(X_val, y_val), epochs=100, batch_size=100)
+model.fit(X_train, y_train, val_data=(X_val, y_val), epochs=10, batch_size=100)
 
 ```
  
