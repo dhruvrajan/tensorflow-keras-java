@@ -27,51 +27,87 @@ model = tf.keras.models.Sequential([
 ])
 
 model.compile(optimizer='sgd', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-model.fit(X_train, y_train, val_data=(X_val, y_val), epochs=100, batch_size=100)
+model.fit(X_train, y_train, val_data=(X_val, y_val), epochs=10, batch_size=100)
 
 ```
  
 Java:
 ```java
-public class MNISTKeras {
+package org.tensorflow.keras.examples.mnist;
 
-     public static void main(String[] args) throws Exception {
-            try (Graph graph = new Graph()) {
-                Ops tf = Ops.create(graph);
-    
-                // Load MNIST Train / Test Data
-                Pair<GraphLoader<Float>, GraphLoader<Float>> data = MNISTLoader.graphDataLoader();
-                try (GraphLoader<Float> train = data.first();
-                     GraphLoader<Float> test = data.second()) {
-                    Model model = new Sequential(
-                            InputLayer.create(28 * 28),
-                            Dense.options()
-                                    .setActivation(Activations.relu)
-                                    .setKernelInitializer(Initializers.randomNormal)
-                                    .setBiasInitializer(Initializers.zeros)
-                                    .create(128),
-                            Dense.options()
-                                    .setActivation(Activations.softmax)
-                                    .setKernelInitializer(Initializers.randomNormal)
-                                    .setBiasInitializer(Initializers.zeros)
-                                    .create(10)
-                    );
-    
-                    // Compile Model
-                    model.compile(tf, model.compilerOptions()
-                            .setOptimizer(new GradientDescentOptimizer(0.2f))
-                            .setLoss(Losses.softmax_crossentropy)
-                            .addMetric(Metrics.accuracy)
-                            .create(graph));
-    
-                    // Fit and Evaluate Model
-                    model.fit(tf, model.fitOptions()
-                            .setEpochs(10)
-                            .setBatchSize(100)
-                            .create(train, test));
-                }
-            }
+import org.tensorflow.Graph;
+import org.tensorflow.data.GraphLoader;
+import org.tensorflow.keras.activations.Activations;
+import org.tensorflow.keras.datasets.MNISTLoader;
+import org.tensorflow.keras.initializers.Initializers;
+import org.tensorflow.keras.layers.Dense;
+import org.tensorflow.keras.layers.Input;
+import org.tensorflow.keras.losses.Losses;
+import org.tensorflow.keras.metrics.Metrics;
+import org.tensorflow.keras.models.Model;
+import org.tensorflow.keras.models.Sequential;
+import org.tensorflow.keras.optimizers.Optimizers;
+import org.tensorflow.op.Ops;
+import org.tensorflow.utils.Pair;
+
+public class MNISTKeras {
+    private static Model<Float> model;
+    private static Model.CompileOptions compileOptions;
+    private static Model.FitOptions fitOptions;
+
+    static {
+        // Define Neural Network Model
+        model = new Sequential(
+                new Input(28 * 28),
+                new Dense(128,
+                        Dense.Options.builder()
+                                .setActivation(Activations.relu)
+                                .setKernelInitializer(Initializers.randomNormal)
+                                .setBiasInitializer(Initializers.zeros)
+                                .build()),
+                new Dense(10,
+                        Dense.Options.builder()
+                                .setActivation(Activations.softmax)
+                                .setKernelInitializer(Initializers.randomNormal)
+                                .setBiasInitializer(Initializers.zeros)
+                                .build())
+        );
+
+        // Model Compile Configuration
+        compileOptions = Model.CompileOptions.builder()
+                .setOptimizer(Optimizers.sgd)
+                .setLoss(Losses.softmax_crossentropy)
+                .addMetric(Metrics.accuracy)
+                .build();
+
+        // Model Training Loop Configuratoin
+        fitOptions = Model.FitOptions.builder()
+                .setEpochs(10)
+                .setBatchSize(100)
+                .build();
+    }
+
+    public static Model getModel() {
+        return model;
+    }
+
+    public static void main(String[] args) throws Exception {
+        Pair<GraphLoader<Float>, GraphLoader<Float>> loaders = MNISTLoader.graphLoaders();
+        try (Graph graph = new Graph();
+             // GraphLoader objects contain AutoCloseable `Tensor` objects.
+             GraphLoader<Float> train = loaders.first();
+             GraphLoader<Float> test = loaders.second()) {
+
+            // Create Tensorflow Ops Accessor
+            Ops tf = Ops.create(graph);
+
+            // Compile Model
+            model.compile(tf, compileOptions);
+
+            // Fit Model
+            model.fit(tf, train, test, fitOptions);
         }
+    }
 }
 ```
 
