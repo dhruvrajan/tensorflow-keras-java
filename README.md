@@ -59,18 +59,16 @@ public class MNISTKeras {
         // Define Neural Network Model
         model = new Sequential(
                 new Input(28 * 28),
-                new Dense(128,
-                        Dense.Options.builder()
-                                .setActivation(Activations.relu)
-                                .setKernelInitializer(Initializers.randomNormal)
-                                .setBiasInitializer(Initializers.zeros)
-                                .build()),
-                new Dense(10,
-                        Dense.Options.builder()
-                                .setActivation(Activations.softmax)
-                                .setKernelInitializer(Initializers.randomNormal)
-                                .setBiasInitializer(Initializers.zeros)
-                                .build())
+                new Dense(128, Dense.Options.builder()
+                        .setActivation(Activations.relu)
+                        .setKernelInitializer(Initializers.randomNormal)
+                        .setBiasInitializer(Initializers.zeros)
+                        .build()),
+                new Dense(10, Dense.Options.builder()
+                        .setActivation(Activations.softmax)
+                        .setKernelInitializer(Initializers.randomNormal)
+                        .setBiasInitializer(Initializers.zeros)
+                        .build())
         );
 
         // Model Compile Configuration
