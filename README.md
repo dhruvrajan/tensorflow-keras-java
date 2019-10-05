@@ -33,15 +33,33 @@ model.fit(X_train, y_train, val_data=(X_val, y_val), epochs=10, batch_size=100)
  
 Java:
 ```java
+package org.tensorflow.keras.examples.mnist;
+
+import org.tensorflow.Graph;
+import org.tensorflow.data.GraphLoader;
+import org.tensorflow.keras.activations.Activations;
+import org.tensorflow.keras.datasets.MNISTLoader;
+import org.tensorflow.keras.initializers.Initializers;
+import org.tensorflow.keras.layers.Dense;
+import org.tensorflow.keras.layers.InputLayer;
+import org.tensorflow.keras.losses.Losses;
+import org.tensorflow.keras.metrics.Metrics;
+import org.tensorflow.keras.models.Model;
+import org.tensorflow.keras.models.Sequential;
+import org.tensorflow.keras.optimizers.GradientDescentOptimizer;
+import org.tensorflow.op.Ops;
+import org.tensorflow.utils.Pair;
+
 public class MNISTKeras {
 
-Pair<GraphLoader<Float>, GraphLoader<Float>> data = MNISTLoader.graphDataLoader();
+    public static void main(String[] args) throws Exception {
+        Pair<GraphLoader<Float>, GraphLoader<Float>> data = MNISTLoader.graphDataLoader();
         try (Graph graph = new Graph();
              GraphLoader<Float> train = data.first();
              GraphLoader<Float> test = data.second()) {
-            
+
             Ops tf = Ops.create(graph);
-            
+
             // Define Neural Network Model
             Model model = new Sequential(
                     InputLayer.create(28 * 28),
@@ -73,6 +91,7 @@ Pair<GraphLoader<Float>, GraphLoader<Float>> data = MNISTLoader.graphDataLoader(
         }
     }
 }
+
 ```
 
 Overview
