@@ -51,7 +51,7 @@ public class MNISTKeras {
     }
 
 
-    public static void main(String[] args) throws Exception {
+    public static Model<Float> train() throws Exception {
         try (Graph graph = new Graph()) {
             // Create Tensorflow Ops Accessor
             Ops tf = Ops.create(graph);
@@ -67,6 +67,12 @@ public class MNISTKeras {
                 model.fit(tf, train, test, fitOptions);
             }
         }
+
+        return model;
+    }
+
+    public static void main(String[] args) throws Exception {
+        train();
     }
 }
 
