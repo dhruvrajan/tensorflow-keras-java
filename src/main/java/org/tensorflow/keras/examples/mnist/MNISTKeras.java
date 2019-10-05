@@ -3,7 +3,7 @@ package org.tensorflow.keras.examples.mnist;
 import org.tensorflow.Graph;
 import org.tensorflow.data.GraphLoader;
 import org.tensorflow.keras.activations.Activations;
-import org.tensorflow.keras.datasets.MNISTLoader;
+import org.tensorflow.keras.datasets.MNIST;
 import org.tensorflow.keras.initializers.Initializers;
 import org.tensorflow.keras.layers.Dense;
 import org.tensorflow.keras.layers.Input;
@@ -50,25 +50,22 @@ public class MNISTKeras {
                 .build();
     }
 
-    public static Model getModel() {
-        return model;
-    }
 
     public static void main(String[] args) throws Exception {
-        Pair<GraphLoader<Float>, GraphLoader<Float>> loaders = MNISTLoader.graphLoaders();
-        try (Graph graph = new Graph();
-             // GraphLoader objects contain AutoCloseable `Tensor` objects.
-             GraphLoader<Float> train = loaders.first();
-             GraphLoader<Float> test = loaders.second()) {
-
+        try (Graph graph = new Graph()) {
             // Create Tensorflow Ops Accessor
             Ops tf = Ops.create(graph);
 
             // Compile Model
             model.compile(tf, compileOptions);
 
-            // Fit Model
-            model.fit(tf, train, test, fitOptions);
+            Pair<GraphLoader<Float>, GraphLoader<Float>> loaders = MNIST.graphLoaders();
+            // GraphLoader objects contain AutoCloseable `Tensor` objects.
+            try (GraphLoader<Float> train = loaders.first();
+                 GraphLoader<Float> test = loaders.second()) {
+                // Fit model
+                model.fit(tf, train, test, fitOptions);
+            }
         }
     }
 }

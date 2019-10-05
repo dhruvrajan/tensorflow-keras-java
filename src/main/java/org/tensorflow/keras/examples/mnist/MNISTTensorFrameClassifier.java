@@ -6,7 +6,7 @@ import org.tensorflow.Session;
 import org.tensorflow.Tensor;
 import org.tensorflow.data.GraphLoader;
 import org.tensorflow.keras.activations.Activations;
-import org.tensorflow.keras.datasets.MNISTLoader;
+import org.tensorflow.keras.datasets.MNIST;
 import org.tensorflow.keras.layers.Dense;
 import org.tensorflow.keras.layers.Input;
 import org.tensorflow.keras.losses.Loss;
@@ -43,7 +43,7 @@ public class MNISTTensorFrameClassifier implements Runnable {
             // Load MNIST Dataset
             Pair<GraphLoader<Float>, GraphLoader<Float>> data;
             try {
-                data = MNISTLoader.graphLoaders();
+                data = MNIST.graphLoaders();
             } catch (IOException e) {
                 throw new IllegalArgumentException("Could not load MNIST dataset.");
             }

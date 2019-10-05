@@ -18,8 +18,6 @@ Python:
 ```python
 import tensorflow as tf
 
-(X_train, y_train), (X_val, y_val) = tf.keras.datasets.load_mnist()
-
 model = tf.keras.models.Sequential([
   tf.keras.layers.Flatten(input_shape=(28, 28)),
   tf.keras.layers.Dense(128, activation='relu', kernel_initializer="random_normal", bias_initializer="zeros"),
@@ -27,8 +25,9 @@ model = tf.keras.models.Sequential([
 ])
 
 model.compile(optimizer='sgd', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-model.fit(X_train, y_train, val_data=(X_val, y_val), epochs=10, batch_size=100)
 
+(X_train, y_train), (X_val, y_val) = tf.keras.datasets.load_mnist()
+model.fit(X_train, y_train, val_data=(X_val, y_val), epochs=10, batch_size=100)
 ```
  
 Java:
@@ -38,7 +37,7 @@ package org.tensorflow.keras.examples.mnist;
 import org.tensorflow.Graph;
 import org.tensorflow.data.GraphLoader;
 import org.tensorflow.keras.activations.Activations;
-import org.tensorflow.keras.datasets.MNISTLoader;
+import org.tensorflow.keras.datasets.MNIST;
 import org.tensorflow.keras.initializers.Initializers;
 import org.tensorflow.keras.layers.Dense;
 import org.tensorflow.keras.layers.Input;
@@ -85,25 +84,22 @@ public class MNISTKeras {
                 .build();
     }
 
-    public static Model getModel() {
-        return model;
-    }
 
     public static void main(String[] args) throws Exception {
-        Pair<GraphLoader<Float>, GraphLoader<Float>> loaders = MNISTLoader.graphLoaders();
-        try (Graph graph = new Graph();
-             // GraphLoader objects contain AutoCloseable `Tensor` objects.
-             GraphLoader<Float> train = loaders.first();
-             GraphLoader<Float> test = loaders.second()) {
-
+        try (Graph graph = new Graph()) {
             // Create Tensorflow Ops Accessor
             Ops tf = Ops.create(graph);
 
             // Compile Model
             model.compile(tf, compileOptions);
 
-            // Fit Model
-            model.fit(tf, train, test, fitOptions);
+            Pair<GraphLoader<Float>, GraphLoader<Float>> loaders = MNIST.graphLoaders();
+            // GraphLoader objects contain AutoCloseable `Tensor` objects.
+            try (GraphLoader<Float> train = loaders.first();
+                 GraphLoader<Float> test = loaders.second()) {
+                // Fit model
+                model.fit(tf, train, test, fitOptions);
+            }
         }
     }
 }
