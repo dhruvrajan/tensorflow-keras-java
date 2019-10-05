@@ -35,7 +35,7 @@ public class Dense extends Layer<Float> implements KerasType<Float> {
         super(DENSE_INPUT_LENGTH);
         this.units = units;
 
-        this.activation = Activations.select(options.activation);
+        this.activation = options.activation;
         this.kernelInitializer = options.kernelInitializer;
         this.biasInitializer = options.biasInitializer;
     }
@@ -52,58 +52,57 @@ public class Dense extends Layer<Float> implements KerasType<Float> {
         this.kernelInitializer = kernelInitializer;
         this.biasInitializer = biasInitializer;
     }
-
-    // Dense Builders
-    public static Dense create(int units) {
-        return options().create(units);
-    }
-
-    public static Dense create(int units, Activations activation) {
-        return options().setActivation(activation).create(units);
-    }
-
     public static Options options() {
         return new Dense.Options();
     }
 
     public static class Options {
         // Default parameters
-        private Activations activation = Activations.linear;
+        private Activation<Float> activation = Activations.select(Activations.linear);
         private Initializer<Float> kernelInitializer = Initializers.select(Initializers.zeros);
         private Initializer<Float> biasInitializer = Initializers.select(Initializers.zeros);
 
-        public Options() {
+        public static Builder builder() {
+            return new Builder();
         }
 
-        public Options setActivation(Activations activation) {
-            this.activation = activation;
-            return this;
-        }
+        public static class Builder {
+            private Options options;
 
-        public Options setKernelInitializer(Initializers kernelInitializer) {
-            return setKernelInitializer(Initializers.select(kernelInitializer));
-        }
+            public Builder() {
+              this.options = new Options();
+            }
 
-        public Options setKernelInitializer(Initializer kernelInitializer) {
-            this.kernelInitializer = kernelInitializer;
-            return this;
-        }
+            public Builder setActivation(Activations activation) {
+              return setActivation(Activations.select(activation));
+            }
 
-        public Options setBiasInitializer(Initializers biasInitializer) {
-            return setBiasInitializer(Initializers.select(biasInitializer));
-        }
+            public Builder setActivation(Activation<Float> activation) {
+                this.options.activation = activation;
+                return this;
+            }
 
-        public Options setBiasInitializer(Initializer biasInitializer) {
-            this.biasInitializer = biasInitializer;
-            return this;
-        }
+            public Builder setKernelInitializer(Initializers kernelInitializer) {
+                return setKernelInitializer(Initializers.select(kernelInitializer));
+            }
 
-        public Dense create(int units) {
-            return new Dense(
-                    units,
-                    Activations.select(activation),
-                    kernelInitializer,
-                    biasInitializer);
+            public Builder setKernelInitializer(Initializer kernelInitializer) {
+                this.options.kernelInitializer = kernelInitializer;
+                return this;
+            }
+
+            public Builder setBiasInitializer(Initializers biasInitializer) {
+                return setBiasInitializer(Initializers.select(biasInitializer));
+            }
+
+            public Builder setBiasInitializer(Initializer biasInitializer) {
+                this.options.biasInitializer = biasInitializer;
+                return this;
+            }
+
+            public Options build() {
+                return this.options;
+            }
         }
     }
 

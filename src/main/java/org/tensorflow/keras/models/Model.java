@@ -2,7 +2,6 @@ package org.tensorflow.keras.models;
 
 import org.tensorflow.Graph;
 import org.tensorflow.Shape;
-import org.tensorflow.Tensor;
 import org.tensorflow.data.GraphLoader;
 import org.tensorflow.data.TensorFrame;
 import org.tensorflow.keras.layers.Layer;
@@ -27,18 +26,14 @@ public abstract class Model<T> extends Layer<T> {
     public abstract void compile(Ops tf, Optimizer optimizer, Loss loss, List<MetricFunction> metric)
             throws Exception;
 
-    public void compile(Ops tf, CompilerOptions compilerBuilder) throws Exception {
+    public void compile(Ops tf, CompileOptions compilerBuilder) throws Exception {
         compile(tf, compilerBuilder.optimizer, compilerBuilder.loss, compilerBuilder.metrics);
     }
 
-    public abstract void fit(Ops tf, GraphLoader<Float> train, GraphLoader<Float> test, int epochs, int batchSize);
+    public abstract void fit(Ops tf, GraphLoader<T> train, GraphLoader<T> test, int epochs, int batchSize);
 
-    public abstract void fit(Graph graph, List<float[][]> data, List<float[][]> labels, int
-            epochs, int batchSize,
-                             List<float[][]> validationData, List<float[][]> validationLabels);
-
-    public void fit(Ops tf, FitOptions fitOptions) {
-        fit(tf, fitOptions.train, fitOptions.test, fitOptions.epochs, fitOptions.batchSize);
+    public void fit(Ops tf, GraphLoader<T> train, GraphLoader<T> test, FitOptions fitOptions) {
+        fit(tf, train, test, fitOptions.epochs, fitOptions.batchSize);
     }
 
     @Override
@@ -47,62 +42,70 @@ public abstract class Model<T> extends Layer<T> {
     }
 
     public FitOptions fitOptions() {
-      return new FitOptions();
+        return new FitOptions();
     }
 
-    public CompilerOptions compilerOptions() {
-      return new CompilerOptions();
+    public CompileOptions compileOptions() {
+        return new CompileOptions();
     }
 
 
-    public static class CompilerOptions {
-        private Graph graph;
+    public static class CompileOptions {
         private List<MetricFunction> metrics;
         private Optimizer optimizer;
 
         private Loss loss;
 
-        public CompilerOptions() {
+        public static Builder builder() {
+            return new Builder();
         }
 
-        public CompilerOptions create(Graph graph) {
-            this.graph = graph;
-            return this;
-        }
+        public static class Builder {
+            private CompileOptions options;
 
-        public CompilerOptions setLoss(Losses lossType) {
-            return setLoss(Losses.select(lossType));
-        }
-
-        public CompilerOptions setLoss(Loss loss) {
-            this.loss = loss;
-            return this;
-        }
-
-        public CompilerOptions setOptimizer(String optimizerName) {
-            return setOptimizer(Optimizer.select(optimizerName));
-        }
-
-        public CompilerOptions setOptimizer(Optimizer optimizer) {
-            this.optimizer = optimizer;
-            return this;
-        }
-
-        public CompilerOptions setOptimizer(Optimizers optimizerType) {
-            return setOptimizer(Optimizers.select(optimizerType));
-        }
-
-        public CompilerOptions addMetric(Metrics metric) {
-            return addMetric(Metrics.select(metric));
-        }
-
-        public CompilerOptions addMetric(MetricFunction metric) {
-            if (this.metrics == null) {
-                this.metrics = new ArrayList<>();
+            public Builder() {
+                this.options = new CompileOptions();
             }
-            this.metrics.add(metric);
-            return this;
+
+            public Builder setLoss(Losses lossType) {
+                return setLoss(Losses.select(lossType));
+            }
+
+            public Builder setLoss(Loss loss) {
+                options.loss = loss;
+                return this;
+            }
+
+            public Builder setOptimizer(String optimizerName) {
+                return setOptimizer(Optimizer.select(optimizerName));
+            }
+
+            public Builder setOptimizer(Optimizer optimizer) {
+                options.optimizer = optimizer;
+                return this;
+            }
+
+            public Builder setOptimizer(Optimizers optimizerType) {
+                return setOptimizer(Optimizers.select(optimizerType));
+            }
+
+            public Builder addMetric(Metrics metric) {
+                return addMetric(Metrics.select(metric));
+            }
+
+            public Builder addMetric(MetricFunction metric) {
+                if (options.metrics == null) {
+                    options.metrics = new ArrayList<>();
+                }
+                options.metrics.add(metric);
+                return this;
+            }
+
+            public CompileOptions build() {
+                return options;
+            }
         }
+
 
         public List<MetricFunction> getMetrics() {
             return this.metrics;
@@ -115,50 +118,37 @@ public abstract class Model<T> extends Layer<T> {
         public Loss getLoss() {
             return this.loss;
         }
-
-        public Graph getGraph() {
-            return graph;
-        }
-
-        public void setGraph(Graph graph) {
-            this.graph = graph;
-        }
     }
 
     public static class FitOptions {
-        GraphLoader<Float> train;
-        GraphLoader<Float> test;
         int epochs = 10;
         int batchSize = 1;
 
-        public FitOptions setTrain(TensorFrame<Float> train) {
-            this.train = train;
-            return this;
+        public static Builder builder() {
+            return new Builder();
         }
 
-        public FitOptions setTest(TensorFrame<Float> test) {
-            this.test = test;
-            return this;
-        }
+        public static class Builder {
+            private FitOptions options;
 
-        public FitOptions setEpochs(int epochs) {
-            this.epochs = epochs;
-            return this;
-        }
+            public Builder() {
+                this.options = new FitOptions();
+            }
 
-        public FitOptions setBatchSize(int batchSize) {
-            this.batchSize = batchSize;
-            return this;
-        }
+            public Builder setEpochs(int epochs) {
+                options.epochs = epochs;
+                return this;
+            }
 
-        public FitOptions() {
-        }
+            public Builder setBatchSize(int batchSize) {
+                options.batchSize = batchSize;
+                return this;
+            }
 
-        public FitOptions create(GraphLoader<Float> train, GraphLoader<Float> test) {
-          this.train = train;
-          this.test = test;
-          return this;
-        }
+            public FitOptions build() {
+                return options;
+            }
 
+        }
     }
 }

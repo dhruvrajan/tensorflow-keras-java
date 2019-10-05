@@ -2,8 +2,7 @@ package org.tensorflow.keras.models;
 
 import org.tensorflow.*;
 import org.tensorflow.data.GraphLoader;
-import org.tensorflow.data.TensorFrame;
-import org.tensorflow.keras.layers.InputLayer;
+import org.tensorflow.keras.layers.Input;
 import org.tensorflow.keras.layers.Layer;
 import org.tensorflow.keras.losses.Loss;
 import org.tensorflow.keras.mixin.MetricFunction;
@@ -16,7 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Sequential extends Model<Float> {
-    private InputLayer firstLayer;
+    private Input firstLayer;
     private Optimizer<Float> optimizer;
     private List<Layer<Float>> layers;
 
@@ -28,7 +27,7 @@ public class Sequential extends Model<Float> {
     private List<Operand<Float>> initializerOps;
 
     @SafeVarargs
-    public Sequential(InputLayer firstLayer, Layer<Float>... layers) {
+    public Sequential(Input firstLayer, Layer<Float>... layers) {
         this.firstLayer = firstLayer;
         this.layers = Arrays.asList(layers);
     }
@@ -88,12 +87,6 @@ public class Sequential extends Model<Float> {
             runPredictionLoop(tf, session, test, batchSize);
         }
     }
-
-    @Override
-    public void fit(Graph graph, List<float[][]> data, List<float[][]> labels, int epochs, int batchSize, List<float[][]> validationData, List<float[][]> validationLabels) {
-        throw new UnsupportedOperationException("Unimplemented");
-    }
-
     private void runPredictionLoop(Ops tf, Session session, GraphLoader<Float> data, int batchSize) {
         runTrainingLoop(tf, session, data, 1, batchSize, false);
     }

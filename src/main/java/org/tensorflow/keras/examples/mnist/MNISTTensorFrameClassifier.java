@@ -5,11 +5,10 @@ import org.tensorflow.Operand;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
 import org.tensorflow.data.GraphLoader;
-import org.tensorflow.data.TensorFrame;
 import org.tensorflow.keras.activations.Activations;
 import org.tensorflow.keras.datasets.MNISTLoader;
 import org.tensorflow.keras.layers.Dense;
-import org.tensorflow.keras.layers.InputLayer;
+import org.tensorflow.keras.layers.Input;
 import org.tensorflow.keras.losses.Loss;
 import org.tensorflow.keras.losses.Losses;
 import org.tensorflow.keras.metrics.Metric;
@@ -44,7 +43,7 @@ public class MNISTTensorFrameClassifier implements Runnable {
             // Load MNIST Dataset
             Pair<GraphLoader<Float>, GraphLoader<Float>> data;
             try {
-                data = MNISTLoader.graphDataLoader();
+                data = MNISTLoader.graphLoaders();
             } catch (IOException e) {
                 throw new IllegalArgumentException("Could not load MNIST dataset.");
             }
@@ -52,8 +51,8 @@ public class MNISTTensorFrameClassifier implements Runnable {
             try (GraphLoader<Float> train = data.first();
                  GraphLoader<Float> test = data.second()) {
 
-                InputLayer inputLayer = InputLayer.create(INPUT_SIZE);
-                Dense denseLayer = Dense.options().setActivation(Activations.softmax).create(FEATURES);
+                Input inputLayer = new Input(INPUT_SIZE);
+                Dense denseLayer = new Dense(FEATURES, Dense.Options.builder().setActivation(Activations.softmax).build());
 
                 Loss loss = Losses.select(Losses.softmax_crossentropy);
                 Metric accuracy = Metrics.select(Metrics.accuracy);
