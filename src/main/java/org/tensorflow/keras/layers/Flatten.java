@@ -6,24 +6,17 @@ import org.tensorflow.keras.mixin.KerasType;
 import org.tensorflow.keras.utils.Keras;
 import org.tensorflow.keras.utils.TensorShape;
 import org.tensorflow.op.Ops;
+import org.tensorflow.op.core.Constant;
+import org.tensorflow.op.core.Reshape;
 
 public class Flatten extends Layer<Float> implements KerasType<Float> {
     private static int FLATTEN_INPUT_LENGTH = 1;
-    private int units;
-
-
-    public Flatten(int units, Flatten.Options options) {
+    private Constant<Integer> axis;
+    private Constant<Integer> units;
+    private int unitsInt;
+    public Flatten(int units) {
         super(FLATTEN_INPUT_LENGTH);
-        this.units = units;
-    }
-
-    private Flatten() {
-        super(FLATTEN_INPUT_LENGTH);
-        this.units = units;
-    }
-
-    public static Flatten create() {
-        return new Flatten();
+        this.unitsInt = units;
     }
 
     public static Options options() {
@@ -36,6 +29,8 @@ public class Flatten extends Layer<Float> implements KerasType<Float> {
     }
 
     public void build(Ops tf, Shape inputShape) {
+        axis = tf.constant(0);
+        units = tf.constant(new int[] {-1, unitsInt});
         this.built = true;
     }
 
@@ -50,6 +45,6 @@ public class Flatten extends Layer<Float> implements KerasType<Float> {
     }
 
     private Operand<Float> call(Ops tf, Operand<Float> input) {
-        return tf.reshape(input, tf.reduceProd(Keras.shapeOperand(tf, input.asOutput().shape()), tf.constant(0)));
+        return tf.reshape(input, this.units);
     }
 }

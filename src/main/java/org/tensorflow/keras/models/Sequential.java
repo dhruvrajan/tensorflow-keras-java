@@ -32,6 +32,10 @@ public class Sequential extends Model<Float> {
         this.layers = Arrays.asList(layers);
     }
 
+    public static Sequential of(Input firstLayer, Layer<Float>... layers) {
+        return new Sequential(firstLayer, layers);
+    }
+
     public Sequential addLayer(Layer<Float> layer) {
         layers.add(layer);
         return this;

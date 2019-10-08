@@ -2,21 +2,19 @@ package org.tensorflow.keras.layers;
 
 import org.tensorflow.Operand;
 import org.tensorflow.Shape;
+import org.tensorflow.keras.utils.Keras;
 import org.tensorflow.op.Ops;
 import org.tensorflow.op.core.Placeholder;
 
 public class Input extends Layer<Float> {
   public Placeholder<Float> input;
-  private int length;
+  private long[] dims;
 
-  public Input(int length) {
+  public Input(long... otherDims) {
     super(0);
-    this.length = length;
+    this.dims = otherDims;
   }
 
-  public static Input create(int length) {
-    return new Input(length);
-  }
 
   @Override
   public void build(Ops tf, Shape inputShape) {
@@ -35,7 +33,7 @@ public class Input extends Layer<Float> {
   }
 
   public void build(Ops tf) {
-    this.input = tf.placeholder(Float.class, Placeholder.shape(Shape.make(-1, length)));
+    this.input = tf.placeholder(Float.class, Placeholder.shape(Keras.shapeFromDims(Keras.concatenate(-1, this.dims))));
     this.built = true;
   }
 

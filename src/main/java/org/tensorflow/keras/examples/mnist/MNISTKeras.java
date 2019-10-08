@@ -27,17 +27,18 @@ public class MNISTKeras {
         //       Option.Builder classes, or from the static helper
         //       methods defined in `Layers` which wrap the explicit builders
         //       to decrease verbosity.
-        model = new Sequential(
-                Layers.input(28 * 28),
+        model = Sequential.of(
+                Layers.input(28, 28),
+                Layers.flatten(28 * 28),
 
-                // Construct using Dense.Options.Builder
+                // Using Layer Options Builder
                 new Dense(128, Dense.Options.builder()
                         .setActivation(Activations.relu)
                         .setKernelInitializer(Initializers.randomNormal)
                         .setBiasInitializer(Initializers.zeros)
                         .build()),
 
-                // Construct using static helper Layers.dense(...)
+                // Using static helper Layers.dense(...)
                 Layers.dense(10, Activations.softmax, Initializers.randomNormal, Initializers.zeros)
         );
 
@@ -48,7 +49,7 @@ public class MNISTKeras {
                 .addMetric(Metrics.accuracy)
                 .build();
 
-        // Model Training Loop Configuratoin
+        // Model Training Loop Configuration
         fitOptions = Model.FitOptions.builder()
                 .setEpochs(10)
                 .setBatchSize(100)
@@ -64,7 +65,7 @@ public class MNISTKeras {
             // Compile Model
             model.compile(tf, compileOptions);
 
-            Pair<GraphLoader<Float>, GraphLoader<Float>> loaders = MNIST.graphLoaders();
+            Pair<GraphLoader<Float>, GraphLoader<Float>> loaders = MNIST.graphLoaders2D();
             // GraphLoader objects contain AutoCloseable `Tensor` objects.
             try (GraphLoader<Float> train = loaders.first();
                  GraphLoader<Float> test = loaders.second()) {
@@ -80,4 +81,3 @@ public class MNISTKeras {
         train();
     }
 }
-

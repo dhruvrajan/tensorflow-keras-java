@@ -30,8 +30,10 @@ model.compile(optimizer='sgd', loss='sparse_categorical_crossentropy', metrics=[
 model.fit(X_train, y_train, val_data=(X_val, y_val), epochs=10, batch_size=100)
 ```
  
-Java:
+Java (org.tensorflow.keras.examples.mnist.MNISTKeras.java):
 ```java
+package org.tensorflow.keras.examples.mnist;
+
 import org.tensorflow.Graph;
 import org.tensorflow.data.GraphLoader;
 import org.tensorflow.keras.activations.Activations;
@@ -54,22 +56,23 @@ public class MNISTKeras {
 
     static {
         // Define Neural Network Model
-
+        
         // Note: Layers can be constructed either from individual
         //       Option.Builder classes, or from the static helper
         //       methods defined in `Layers` which wrap the explicit builders
         //       to decrease verbosity.
-        model = new Sequential(
-                Layers.input(28 * 28),
+        model = Sequential.of(
+                Layers.input(28, 28),
+                Layers.flatten(28 * 28),
 
-                // Construct using Dense.Options.Builder
+                // Using Layer Options Builder
                 new Dense(128, Dense.Options.builder()
                         .setActivation(Activations.relu)
                         .setKernelInitializer(Initializers.randomNormal)
                         .setBiasInitializer(Initializers.zeros)
                         .build()),
-
-                // Construct using static helper Layers.dense(...)
+                
+                // Using static helper Layers.dense(...)
                 Layers.dense(10, Activations.softmax, Initializers.randomNormal, Initializers.zeros)
         );
 
@@ -80,7 +83,7 @@ public class MNISTKeras {
                 .addMetric(Metrics.accuracy)
                 .build();
 
-        // Model Training Loop Configuratoin
+        // Model Training Loop Configuration
         fitOptions = Model.FitOptions.builder()
                 .setEpochs(10)
                 .setBatchSize(100)
@@ -96,7 +99,7 @@ public class MNISTKeras {
             // Compile Model
             model.compile(tf, compileOptions);
 
-            Pair<GraphLoader<Float>, GraphLoader<Float>> loaders = MNIST.graphLoaders();
+            Pair<GraphLoader<Float>, GraphLoader<Float>> loaders = MNIST.graphLoaders2D();
             // GraphLoader objects contain AutoCloseable `Tensor` objects.
             try (GraphLoader<Float> train = loaders.first();
                  GraphLoader<Float> test = loaders.second()) {

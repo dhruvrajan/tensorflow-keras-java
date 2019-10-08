@@ -1,5 +1,6 @@
 package org.tensorflow.keras.utils;
 
+import java.lang.Math;
 import org.tensorflow.Shape;
 
 import static org.tensorflow.keras.utils.Keras.*;
@@ -42,9 +43,8 @@ public class TensorShape {
   public int numElements() {
     int prod = 1;
     for (int i = 0; i < this.numDimensions(); i++) {
-      prod *= this.dims[i];
+      prod *= Math.abs(this.dims[i]);
     }
-
     return prod;
   }
 
@@ -55,6 +55,11 @@ public class TensorShape {
 
   public TensorShape concatenate(long dim) {
     this.dims = Keras.concatenate(this.dims, dim);
+    return this;
+  }
+
+  public TensorShape addToFront(long dim) {
+    this.dims = Keras.concatenate(dim, dims);
     return this;
   }
 

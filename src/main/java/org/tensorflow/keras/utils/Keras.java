@@ -68,11 +68,22 @@ public class Keras {
     return dims;
   }
 
+  public static long[] concatenate(long first, long... remaining) {
+    long[] dims = new long[remaining.length + 1];
+    System.arraycopy(remaining, 0, dims, 1, remaining.length);
+    dims[0] = first;
+    return dims;
+  }
+
   public static long[] dimsFromShape(Shape shape) {
     long[] dims = new long[shape.numDimensions()];
     for (int i = 0; i < shape.numDimensions(); i++) {
       dims[i] = shape.size(i);
     }
     return dims;
+  }
+
+  public static Shape shapeFromDims(long... dims) {
+    return Shape.make(head(dims), tail(dims));
   }
 }

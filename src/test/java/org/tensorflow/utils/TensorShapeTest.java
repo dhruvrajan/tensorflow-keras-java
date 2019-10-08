@@ -2,6 +2,7 @@ package org.tensorflow.utils;
 
 import org.junit.jupiter.api.Test;
 import org.tensorflow.*;
+import org.tensorflow.keras.utils.Keras;
 import org.tensorflow.op.Ops;
 import org.tensorflow.op.core.Batch;
 import org.tensorflow.op.core.ConcatenateDataset;
@@ -19,15 +20,21 @@ class TensorShapeTest {
 
     @Test
     void testBatch() {
-        Tensor<Integer> t1 = Tensors.create(
-                new int[]{2, 4, 6, 8}
-        );
 
 
         try (Graph graph = new Graph()) {
-            // env is an ExecutionEnvironment, such as a Graph instance.
-            try (Tensor c1 = Tensor.create(3.0f)) {
+            Ops tf = Ops.create(graph);
 
+            // env is an ExecutionEnvironment, such as a Graph instance.
+            try (Session session = new Session(graph);
+                 Tensor<Integer> t1 = Tensors.create(new int[][] {{2, 4}, {6, 8}})) {
+                Placeholder<Integer> p1 = tf.placeholder(Integer.class, Placeholder.shape(Keras.shapeFromDims(t1.shape())));
+                Operand<Integer> op = tf.reshape(p1, tf.constant(new int[] {-1}));
+                List<Tensor<?>> tensors =
+                        session.runner().feed(p1.asOutput(), t1).fetch(op).run();
+
+                Shape shape = Keras.shapeFromDims(tensors.get(0).shape());
+                System.out.println("done");
             }
         }
 
