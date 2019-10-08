@@ -12,13 +12,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DataUtils {
+    public enum Checksum {
+        md5, sha256
+    }
 
-    public static String hashFile(String fpath, String algorithm) throws IOException {
+    public static String hashFile(String fpath, Checksum algorithm) throws IOException {
         MessageDigest instance = null;
 
         try {
-            algorithm = canonicalDigestAlgorithmNames.get(algorithm);
-            instance = MessageDigest.getInstance(algorithm);
+            String alg = (algorithm == Checksum.sha256) ? "SHA-256" : "MD5";
+            instance = MessageDigest.getInstance(alg);
         } catch (Exception e) {
             throw new IllegalArgumentException(
                     "Hash algorithm " + algorithm + " not found. Must be 'sha256' or 'md5'");
@@ -38,7 +41,7 @@ public class DataUtils {
      * @param fileHash The expected hash string of the file after loadData.
      * @throws IOException
      */
-    public static void getFile(String fname, String origin, String fileHash, String algorithm)
+    public static void getFile(String fname, String origin, String fileHash, Checksum algorithm)
             throws IOException {
 
         File localFile = Keras.kerasPath(fname).toFile();
@@ -106,15 +109,4 @@ public class DataUtils {
 
         return buffer.toString();
     }
-
-    static Map<String, String> canonicalDigestAlgorithmNames =
-            Collections.unmodifiableMap(
-                    new HashMap<String, String>() {
-                        {
-                            put("MD5", "MD5");
-                            put("md5", "MD5");
-                            put("SHA-256", "SHA-256");
-                            put("sha256", "SHA-256");
-                        }
-                    });
 }

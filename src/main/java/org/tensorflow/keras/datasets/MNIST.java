@@ -40,13 +40,13 @@ public class MNIST {
      */
     public static void download() throws IOException {
         DataUtils.getFile(LOCAL_PREFIX + TRAIN_IMAGES, ORIGIN_BASE + TRAIN_IMAGES,
-                "440fcabf73cc546fa21475e81ea370265605f56be210a4024d2ca8f203523609", "sha256");
+                "440fcabf73cc546fa21475e81ea370265605f56be210a4024d2ca8f203523609", DataUtils.Checksum.sha256);
         DataUtils.getFile(LOCAL_PREFIX + TRAIN_LABELS, ORIGIN_BASE + TRAIN_LABELS,
-                "fcdfeedb53b53c99384b2cd314206a08fdf6aa97070e19921427a179ea123d19", "sha256");
+                "fcdfeedb53b53c99384b2cd314206a08fdf6aa97070e19921427a179ea123d19", DataUtils.Checksum.sha256);
         DataUtils.getFile(LOCAL_PREFIX + TEST_IMAGES, ORIGIN_BASE + TEST_IMAGES,
-                "beb4b4806386107117295b2e3e08b4c16a6dfb4f001bfeb97bf25425ba1e08e4", "sha256");
+                "beb4b4806386107117295b2e3e08b4c16a6dfb4f001bfeb97bf25425ba1e08e4", DataUtils.Checksum.sha256);
         DataUtils.getFile(LOCAL_PREFIX + TEST_LABELS, ORIGIN_BASE + TEST_LABELS,
-                "986c5b8cbc6074861436f5581f7798be35c7c0025262d33b4df4c9ef668ec773", "sha256");
+                "986c5b8cbc6074861436f5581f7798be35c7c0025262d33b4df4c9ef668ec773", DataUtils.Checksum.sha256);
     }
 
     public static Pair<GraphLoader<Float>, GraphLoader<Float>> graphLoaders() throws IOException {
@@ -92,7 +92,7 @@ public class MNIST {
      * @return an array of shape (# examples, # pixels) containing the image data
      * @throws IOException when the file reading fails.
      */
-    private static float[][] readImages(String imagesPath) throws IOException {
+    static float[][] readImages(String imagesPath) throws IOException {
         try (DataInputStream inputStream =
                      new DataInputStream(new GZIPInputStream(new FileInputStream(imagesPath)))) {
 
@@ -108,7 +108,7 @@ public class MNIST {
         }
     }
 
-    private static float[][][] readImages2D(String imagesPath) throws IOException {
+    static float[][][] readImages2D(String imagesPath) throws IOException {
         try (DataInputStream inputStream =
                      new DataInputStream(new GZIPInputStream(new FileInputStream(imagesPath)))) {
 
@@ -132,7 +132,7 @@ public class MNIST {
      * @return an array of shape (# examples, # classes) containing the label data
      * @throws IOException when the file reading fails.
      */
-    private static float[][] readLabelsOneHot(String labelsPath) throws IOException {
+    static float[][] readLabelsOneHot(String labelsPath) throws IOException {
         try (DataInputStream inputStream =
                      new DataInputStream(new GZIPInputStream(new FileInputStream(labelsPath)))) {
             if (inputStream.readInt() != LABELS_MAGIC) {
