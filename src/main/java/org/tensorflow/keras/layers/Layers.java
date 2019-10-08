@@ -40,4 +40,6 @@ public class Layers {
     public static Flatten flatten(int units) {
         return new Flatten(units);
     }
+
+    // Builders for Conv2D Layer
 }

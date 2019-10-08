@@ -31,6 +31,8 @@ public class FashionMNISTKeras {
                 Layers.input(28, 28),
                 Layers.flatten(28 * 28),
 
+                Layers.dense(256, Activations.relu, Initializers.randomNormal, Initializers.zeros),
+
                 // Using Layer Options Builder
                 new Dense(128, Dense.Options.builder()
                         .setActivation(Activations.relu)
@@ -45,7 +47,7 @@ public class FashionMNISTKeras {
         // Model Compile Configuration
         compileOptions = Model.CompileOptions.builder()
                 .setOptimizer(Optimizers.sgd)
-                .setLoss(Losses.softmax_crossentropy)
+                .setLoss(Losses.sparseCategoricalCrossentropy)
                 .addMetric(Metrics.accuracy)
                 .build();
 
@@ -65,6 +67,7 @@ public class FashionMNISTKeras {
             // Compile Model
             model.compile(tf, compileOptions);
 
+            // Accessors for MNIST Data
             Pair<GraphLoader<Float>, GraphLoader<Float>> loaders = FashionMNIST.graphLoaders2D();
             // GraphLoader objects contain AutoCloseable `Tensor` objects.
             try (GraphLoader<Float> train = loaders.first();

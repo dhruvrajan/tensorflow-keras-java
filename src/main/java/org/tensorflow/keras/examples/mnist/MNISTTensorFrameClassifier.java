@@ -54,7 +54,7 @@ public class MNISTTensorFrameClassifier implements Runnable {
                 Input inputLayer = new Input(INPUT_SIZE);
                 Dense denseLayer = new Dense(FEATURES, Dense.Options.builder().setActivation(Activations.softmax).build());
 
-                Loss loss = Losses.select(Losses.softmax_crossentropy);
+                Loss loss = Losses.select(Losses.sparseCategoricalCrossentropy);
                 Metric accuracy = Metrics.select(Metrics.accuracy);
                 Optimizer<Float> optimizer = new GradientDescentOptimizer(LEARNING_RATE);
 

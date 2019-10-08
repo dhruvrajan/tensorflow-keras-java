@@ -45,7 +45,7 @@ public class MNISTKeras {
         // Model Compile Configuration
         compileOptions = Model.CompileOptions.builder()
                 .setOptimizer(Optimizers.sgd)
-                .setLoss(Losses.softmax_crossentropy)
+                .setLoss(Losses.sparseCategoricalCrossentropy)
                 .addMetric(Metrics.accuracy)
                 .build();
 
