@@ -2,6 +2,7 @@ package org.tensorflow.keras.layers;
 
 import org.tensorflow.keras.activations.Activation;
 import org.tensorflow.keras.activations.Activations;
+import org.tensorflow.keras.initializers.Initializer;
 import org.tensorflow.keras.initializers.Initializers;
 import org.tensorflow.keras.utils.Keras;
 
@@ -36,9 +37,17 @@ public class Layers {
                 .build());
     }
 
+    public static  Dense dense(int units, Activation<Float> activation, Initializer<Float> kernelInitializer, Initializer<Float> biasInitializer) {
+        return new Dense(units, Dense.Options.builder()
+                .setActivation(activation)
+                .setKernelInitializer(kernelInitializer)
+                .setBiasInitializer(biasInitializer)
+                .build());
+    }
+
     // Builders for Flatten Layer
-    public static Flatten flatten(int units) {
-        return new Flatten(units);
+    public static Flatten flatten() {
+        return new Flatten();
     }
 
     // Builders for Conv2D Layer

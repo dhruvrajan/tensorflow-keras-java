@@ -121,8 +121,11 @@ public abstract class Model<T> extends Layer<T> {
     }
 
     public static class FitOptions {
-        int epochs = 10;
-        int batchSize = 1;
+        public static int DEFAULT_EPOCHS = 1;
+        public static int DEFAULT_BATCH_SIZE = 32;
+
+        private int epochs = DEFAULT_EPOCHS;
+        private int batchSize = DEFAULT_BATCH_SIZE;
 
         public static Builder builder() {
             return new Builder();

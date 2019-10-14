@@ -56,56 +56,6 @@ public class Dense extends Layer<Float> implements KerasType<Float> {
         return new Dense.Options();
     }
 
-    public static class Options {
-        // Default parameters
-        private Activation<Float> activation = Activations.select(Activations.linear);
-        private Initializer<Float> kernelInitializer = Initializers.select(Initializers.zeros);
-        private Initializer<Float> biasInitializer = Initializers.select(Initializers.zeros);
-
-        public static Builder builder() {
-            return new Builder();
-        }
-
-        public static class Builder {
-            private Options options;
-
-            public Builder() {
-              this.options = new Options();
-            }
-
-            public Builder setActivation(Activations activation) {
-              return setActivation(Activations.select(activation));
-            }
-
-            public Builder setActivation(Activation<Float> activation) {
-                this.options.activation = activation;
-                return this;
-            }
-
-            public Builder setKernelInitializer(Initializers kernelInitializer) {
-                return setKernelInitializer(Initializers.select(kernelInitializer));
-            }
-
-            public Builder setKernelInitializer(Initializer kernelInitializer) {
-                this.options.kernelInitializer = kernelInitializer;
-                return this;
-            }
-
-            public Builder setBiasInitializer(Initializers biasInitializer) {
-                return setBiasInitializer(Initializers.select(biasInitializer));
-            }
-
-            public Builder setBiasInitializer(Initializer biasInitializer) {
-                this.options.biasInitializer = biasInitializer;
-                return this;
-            }
-
-            public Options build() {
-                return this.options;
-            }
-        }
-    }
-
     public void build(Ops tf, Shape inputShape) {
         TensorShape tensorShape = new TensorShape(inputShape);
         tensorShape.assertKnown(tensorShape.numDimensions() - 1);
@@ -143,4 +93,59 @@ public class Dense extends Layer<Float> implements KerasType<Float> {
         Operand<Float> signal = tf.add(tf.matMul(input, this.kernel), this.bias);
         return this.activation.apply(tf, signal);
     }
+
+    public static class Options {
+        public static Activations DEFAULT_ACTIVATION = Activations.linear;
+        public static Initializers DEFAULT_KERNEL_INITIALIZER = Initializers.randomNormal;
+        public static Initializers DEFAULT_BIAS_INITIALIZER = Initializers.zeros;
+
+        // Default parameters
+        private Activation<Float> activation = Activations.select(DEFAULT_ACTIVATION);
+        private Initializer<Float> kernelInitializer = Initializers.select(DEFAULT_KERNEL_INITIALIZER);
+        private Initializer<Float> biasInitializer = Initializers.select(DEFAULT_BIAS_INITIALIZER);
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static class Builder {
+            private Options options;
+
+            public Builder() {
+                this.options = new Options();
+            }
+
+            public Builder setActivation(Activations activation) {
+                return setActivation(Activations.select(activation));
+            }
+
+            public Builder setActivation(Activation<Float> activation) {
+                this.options.activation = activation;
+                return this;
+            }
+
+            public Builder setKernelInitializer(Initializers kernelInitializer) {
+                return setKernelInitializer(Initializers.select(kernelInitializer));
+            }
+
+            public Builder setKernelInitializer(Initializer kernelInitializer) {
+                this.options.kernelInitializer = kernelInitializer;
+                return this;
+            }
+
+            public Builder setBiasInitializer(Initializers biasInitializer) {
+                return setBiasInitializer(Initializers.select(biasInitializer));
+            }
+
+            public Builder setBiasInitializer(Initializer biasInitializer) {
+                this.options.biasInitializer = biasInitializer;
+                return this;
+            }
+
+            public Options build() {
+                return this.options;
+            }
+        }
+    }
+
 }

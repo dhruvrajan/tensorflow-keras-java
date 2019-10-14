@@ -29,7 +29,7 @@ public class FashionMNISTKeras {
         //       to decrease verbosity.
         model = Sequential.of(
                 Layers.input(28, 28),
-                Layers.flatten(28 * 28),
+                Layers.flatten(),
 
                 Layers.dense(256, Activations.relu, Initializers.randomNormal, Initializers.zeros),
 
@@ -59,7 +59,7 @@ public class FashionMNISTKeras {
     }
 
 
-    public static Model<Float> train() throws Exception {
+    public static Model<Float> train(Model<Float> model) throws Exception {
         try (Graph graph = new Graph()) {
             // Create Tensorflow Ops Accessor
             Ops tf = Ops.create(graph);
@@ -81,6 +81,6 @@ public class FashionMNISTKeras {
     }
 
     public static void main(String[] args) throws Exception {
-        train();
+        train(model);
     }
 }

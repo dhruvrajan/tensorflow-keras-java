@@ -13,7 +13,7 @@ Example
 Below is a comparison of the Java and Python implementations of a model trained for the MNIST dataset.
  
  
-Python:
+*Python:*
 
 ```python
 import tensorflow as tf
@@ -30,7 +30,7 @@ model.compile(optimizer='sgd', loss='sparse_categorical_crossentropy', metrics=[
 model.fit(X_train, y_train, val_data=(X_val, y_val), epochs=10, batch_size=100)
 ```
  
-Java (org.tensorflow.keras.examples.mnist.MNISTKeras.java):
+*Java* (org.tensorflow.keras.examples.mnist.MNISTKeras.java):
 ```java
 package org.tensorflow.keras.examples.mnist;
 
@@ -116,6 +116,58 @@ public class MNISTKeras {
     }
 }
 ```
+
+*Scala* (See https://github.com/dhruvrajan/tensorflow-keras-scala)
+```scala
+package org.tensorflow.keras.scala.examples
+
+import org.tensorflow.Graph
+import org.tensorflow.data.GraphLoader
+import org.tensorflow.keras.activations.Activations.{relu, softmax}
+import org.tensorflow.keras.datasets.FashionMNIST
+import org.tensorflow.keras.losses.Losses.sparseCategoricalCrossentropy
+import org.tensorflow.keras.metrics.Metrics.accuracy
+import org.tensorflow.keras.models.Sequential
+import org.tensorflow.keras.optimizers.Optimizers.sgd
+import org.tensorflow.keras.scala.{Layers, Model}
+import org.tensorflow.op.Ops
+import org.tensorflow.utils.Pair
+
+import scala.util.Using
+
+object FashionMNISTKeras {
+  val model: Model[java.lang.Float] = Sequential.of(
+    Layers.input(28, 28),
+    Layers.flatten(28 * 28),
+    Layers.dense(128, activation = relu),
+    Layers.dense(10, activation = softmax)
+  )
+
+  def train(model: Model[java.lang.Float]): Model[java.lang.Float] = {
+    Using.resource(new Graph()) { graph => {
+      val tf: Ops = Ops.create(graph)
+      // Compile Model
+      model.compile(tf, optimizer = sgd, loss = sparseCategoricalCrossentropy, metrics = List(accuracy))
+
+      val data: Pair[GraphLoader[java.lang.Float], GraphLoader[java.lang.Float]] = FashionMNIST.graphLoaders2D()
+      // GraphLoader objects contain AutoCloseable `Tensors`.
+      Using.resources(data.first(), data.second()) { (train, test) => {
+        // Fit Model
+        model.fit(tf, train, test, epochs = 10, batchSize = 100)
+      }
+      }
+    }
+    }
+    // Output Model
+    model
+  }
+
+  def main(args: Array[String]): Unit = {
+    train(model)
+  }
+}
+```
+
 
 Overview
 ==

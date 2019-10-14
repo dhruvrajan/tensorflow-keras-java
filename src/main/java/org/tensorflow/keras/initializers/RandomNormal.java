@@ -31,11 +31,6 @@ public class RandomNormal<T extends Number > extends Initializer<T> {
                 tf.constant(this.p2, dtype)
         ));
 
-//        this.initializerOp = tf.assign(in, tf.randomNormal(
-//                Keras.shapeOperand(tf, in.asOutput().shape()),
-//                dtype
-//        ));
-
         this.built = true;
         return this.initializerOp;
     }

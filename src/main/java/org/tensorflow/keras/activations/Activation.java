@@ -13,7 +13,6 @@ public class Activation<T extends Number> extends Layer<T> {
 
   private ActivationFunction<T> activation;
 
-
   /**
    * Creates an Activation function.
    * @param activation An activation function.
@@ -22,21 +21,6 @@ public class Activation<T extends Number> extends Layer<T> {
     super(1);
     this.activation = activation;
     this.built = true;
-  }
-
-  public Activation<T> create(Activations activation) {
-    return options().create(activation);
-  }
-
-  public static Options options() {
-    return new Options();
-  }
-
-  public static class Options {
-    public Options() {}
-    public <T extends Number> Activation<T> create(Activations activation) {
-      return Activations.select(activation);
-    }
   }
 
   @Override

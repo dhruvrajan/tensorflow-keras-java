@@ -29,7 +29,7 @@ public class MNISTKeras {
         //       to decrease verbosity.
         model = Sequential.of(
                 Layers.input(28, 28),
-                Layers.flatten(28 * 28),
+//                Layers.flatten(28 * 28),
 
                 // Using Layer Options Builder
                 new Dense(128, Dense.Options.builder()
