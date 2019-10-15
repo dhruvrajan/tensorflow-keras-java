@@ -6,15 +6,10 @@ import org.tensorflow.op.core.Assign;
 
 public abstract class Initializer<T> {
   protected Assign<T> initializerOp;
-  protected Class<T> dtype;
+
   protected boolean built = false;
 
-  public Initializer<T> dtype(Class<T> dtype) {
-    this.dtype = dtype;
-    return this;
-  }
-
-  public abstract Operand<T> build(Ops tf, Operand<T> in);
+  public abstract Operand<T> build(Ops tf, Operand<T> in, Class<T> dtype);
 
   public Assign<T> getInitializerOp() {
     return initializerOp;

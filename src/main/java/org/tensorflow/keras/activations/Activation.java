@@ -24,7 +24,7 @@ public class Activation<T extends Number> extends Layer<T> {
   }
 
   @Override
-  public void build(Ops tf, Shape in) {
+  public void build(Ops tf, Shape in, Class<T> dtypeA) {
     // Activations don't need state to be built and added to a graph. Does nothing.
   }
 

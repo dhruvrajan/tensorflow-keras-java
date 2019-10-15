@@ -6,7 +6,7 @@
 
  public class Ones<T> extends Initializer<T> {
   @Override
-  public Operand<T> build(Ops tf, Operand<T> in) {
+  public Operand<T> build(Ops tf, Operand<T> in, Class<T> dtype) {
     this.initializerOp = tf.assign(in, tf.fill(Keras.shapeOperand(tf, in.asOutput().shape()), tf.constant(1.0f, dtype)));
     this.built = true;
     return this.initializerOp;

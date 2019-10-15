@@ -6,8 +6,8 @@ import org.tensorflow.keras.utils.Keras;
 import org.tensorflow.op.Ops;
 import org.tensorflow.op.core.Placeholder;
 
-public class Input extends Layer<Float> {
-  public Placeholder<Float> input;
+public class Input<T extends Number> extends Layer<T> {
+  private Placeholder<T> input;
   private long[] dims;
 
   public Input(long... otherDims) {
@@ -15,30 +15,43 @@ public class Input extends Layer<Float> {
     this.dims = otherDims;
   }
 
+  @Override
+  public void build(Ops tf, Shape inputShape, Class<T> dtype) {
+    throw new UnsupportedOperationException(
+        "Cannot build an input layer with an input shape; it doesn't take any inputs. Use Input.build(Ops tf, Class<T> dtype)");
+  }
 
   @Override
-  public void build(Ops tf, Shape inputShape) {
+  public void doBuild(Ops tf, Shape inputShape, Class<T> dtype) {
     throw new UnsupportedOperationException(
-        "Cannot call create(Ops, Shape) on input layer with an input shape. Use create(Ops).");
+            "Cannot build an input layer with an input shape; it doesn't take any inputs. Use Input.build(Ops tf, Class<T> dtype)");
   }
 
   @Override
   public Shape computeOutputShape(Shape inputShape) {
     throw new UnsupportedOperationException(
-        "Cannot call create(Ops, Shape) on input layer with an input shape. Use create(Ops).");
+        "Cannot call computeOutputShape on");
   }
 
   public Shape computeOutputShape() {
     return input.asOutput().shape();
   }
 
-  public void build(Ops tf) {
-    this.input = tf.placeholder(Float.class, Placeholder.shape(Keras.shapeFromDims(Keras.concatenate(-1, this.dims))));
+  public void build(Ops tf, Class<T> dtype) {
+    this.input = tf.placeholder(dtype, Placeholder.shape(Keras.shapeFromDims(Keras.concatenate(-1, this.dims))));
+    this.built = true;
+  }
+  public void doBuild(Ops tf, Class<T> dtype) {
+    this.dtype = dtype;
+    this.input = tf.placeholder(dtype, Placeholder.shape(Keras.shapeFromDims(Keras.concatenate(-1, this.dims))));
     this.built = true;
   }
 
+
+
+
   @SafeVarargs
-  public final Operand<Float> call(Ops tf, Operand<Float>... inputs) {
+  public final Operand<T> call(Ops tf, Operand<T>... inputs) {
     return input;
   }
 }

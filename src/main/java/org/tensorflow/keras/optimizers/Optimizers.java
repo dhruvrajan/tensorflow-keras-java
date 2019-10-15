@@ -1,17 +1,12 @@
 package org.tensorflow.keras.optimizers;
 
 public enum Optimizers {
-  sgd,
-  adam,
-  adagrad,
-  adadelta;
+  sgd;
 
-  public static Optimizer<Float> select(Optimizers optimizerType) {
+  public static Optimizer select(Optimizers optimizerType) {
     switch (optimizerType) {
       case sgd:
         return new GradientDescentOptimizer(0.2f);
-//      case adam:
-//        return new AdamOptimizer(0.2f);
       default:
         throw new IllegalArgumentException("Invalid Optimizer Type.");
     }

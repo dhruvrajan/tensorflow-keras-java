@@ -6,6 +6,7 @@ import org.tensorflow.keras.activations.Activations;
 import org.tensorflow.keras.datasets.FashionMNIST;
 import org.tensorflow.keras.initializers.Initializers;
 import org.tensorflow.keras.layers.Dense;
+import org.tensorflow.keras.layers.Flatten;
 import org.tensorflow.keras.layers.Layers;
 import org.tensorflow.keras.losses.Losses;
 import org.tensorflow.keras.metrics.Metrics;
@@ -16,7 +17,7 @@ import org.tensorflow.op.Ops;
 import org.tensorflow.utils.Pair;
 
 public class FashionMNISTKeras {
-    private static Model<Float> model;
+    private static Model model;
     private static Model.CompileOptions compileOptions;
     private static Model.FitOptions fitOptions;
 
@@ -27,7 +28,7 @@ public class FashionMNISTKeras {
         //       Option.Builder classes, or from the static helper
         //       methods defined in `Layers` which wrap the explicit builders
         //       to decrease verbosity.
-        model = Sequential.of(
+        model = Sequential.of(Float.class,
                 Layers.input(28, 28),
                 Layers.flatten(),
 

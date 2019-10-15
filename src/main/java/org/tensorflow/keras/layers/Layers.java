@@ -50,5 +50,29 @@ public class Layers {
         return new Flatten();
     }
 
-    // Builders for Conv2D Layer
+
+    public static class Options<T> {
+        Class dtype = Float.class;
+
+        public Builder<T> builder() {
+            return new Builder<>();
+        }
+
+        public static class Builder<T> {
+            Options<T> options;
+
+            public Builder() {
+                this.options = new Options<>();
+            }
+
+            public Builder<T> dtype(Class<T> dtype) {
+                this.options.dtype = dtype;
+                return this;
+            }
+
+            public Options<T> build() {
+                return this.options;
+            }
+        }
+    }
 }

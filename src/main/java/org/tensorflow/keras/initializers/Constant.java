@@ -12,8 +12,8 @@ public class Constant<T> extends Initializer<T> {
         this.val = val;
     }
 
-
-    public Operand<T> build(Ops tf, Operand<T> in) {
+    @Override
+    public Operand<T> build(Ops tf, Operand<T> in, Class<T> dtype) {
         this.initializerOp = tf.assign(in, tf.fill(Keras.shapeOperand(tf, in.asOutput().shape()), tf.constant(0.1f, dtype)));
         this.built = true;
         return this.initializerOp;

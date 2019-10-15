@@ -7,6 +7,7 @@ import org.tensorflow.data.TensorFrame;
 import org.tensorflow.keras.layers.Layer;
 import org.tensorflow.keras.losses.Loss;
 import org.tensorflow.keras.losses.Losses;
+import org.tensorflow.keras.metrics.Metric;
 import org.tensorflow.keras.metrics.Metrics;
 import org.tensorflow.keras.mixin.MetricFunction;
 import org.tensorflow.keras.optimizers.Optimizer;
@@ -16,17 +17,19 @@ import org.tensorflow.op.Ops;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class Model<T> extends Layer<T> {
+public abstract class Model<T extends Number> extends Layer<T> {
+    Class<T> dtype;
 
-    public Model() {
+    public Model(Class<T> dtype) {
         // TODO:  For now, models take in only 1 input
         super(1);
+        this.dtype = dtype;
     }
 
-    public abstract void compile(Ops tf, Optimizer optimizer, Loss loss, List<MetricFunction> metric)
+    public abstract void compile(Ops tf, Optimizer<T> optimizer, Loss<T> loss, List<Metric<T>> metric)
             throws Exception;
 
-    public void compile(Ops tf, CompileOptions compilerBuilder) throws Exception {
+    public void compile(Ops tf, CompileOptions<T> compilerBuilder) throws Exception {
         compile(tf, compilerBuilder.optimizer, compilerBuilder.loss, compilerBuilder.metrics);
     }
 
@@ -37,7 +40,7 @@ public abstract class Model<T> extends Layer<T> {
     }
 
     @Override
-    public final void build(Ops tf, Shape inputShape) {
+    public final void build(Ops tf, Shape inputShape, Class<T> dtype) {
         throw new UnsupportedOperationException("Cannot create a Sequential model with inputShape");
     }
 
@@ -50,18 +53,18 @@ public abstract class Model<T> extends Layer<T> {
     }
 
 
-    public static class CompileOptions {
-        private List<MetricFunction> metrics;
-        private Optimizer optimizer;
+    public static class CompileOptions<T extends Number> {
+        private List<Metric<T>> metrics;
+        private Optimizer<T> optimizer;
 
-        private Loss loss;
+        private Loss<T> loss;
 
         public static Builder builder() {
             return new Builder();
         }
 
-        public static class Builder {
-            private CompileOptions options;
+        public static class Builder<T extends Number> {
+            private CompileOptions<T> options;
 
             public Builder() {
                 this.options = new CompileOptions();
@@ -71,13 +74,9 @@ public abstract class Model<T> extends Layer<T> {
                 return setLoss(Losses.select(lossType));
             }
 
-            public Builder setLoss(Loss loss) {
+            public Builder setLoss(Loss<T>loss) {
                 options.loss = loss;
                 return this;
-            }
-
-            public Builder setOptimizer(String optimizerName) {
-                return setOptimizer(Optimizer.select(optimizerName));
             }
 
             public Builder setOptimizer(Optimizer optimizer) {
@@ -93,7 +92,7 @@ public abstract class Model<T> extends Layer<T> {
                 return addMetric(Metrics.select(metric));
             }
 
-            public Builder addMetric(MetricFunction metric) {
+            public Builder addMetric(Metric<T> metric) {
                 if (options.metrics == null) {
                     options.metrics = new ArrayList<>();
                 }
@@ -107,7 +106,7 @@ public abstract class Model<T> extends Layer<T> {
         }
 
 
-        public List<MetricFunction> getMetrics() {
+        public List<Metric<T>> getMetrics() {
             return this.metrics;
         }
 
@@ -115,7 +114,7 @@ public abstract class Model<T> extends Layer<T> {
             return this.optimizer;
         }
 
-        public Loss getLoss() {
+        public Loss<T> getLoss() {
             return this.loss;
         }
     }

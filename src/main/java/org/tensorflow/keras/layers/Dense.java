@@ -6,12 +6,11 @@ import org.tensorflow.keras.activations.Activation;
 import org.tensorflow.keras.activations.Activations;
 import org.tensorflow.keras.initializers.Initializer;
 import org.tensorflow.keras.initializers.Initializers;
-import org.tensorflow.keras.mixin.KerasType;
 import org.tensorflow.keras.utils.TensorShape;
 import org.tensorflow.op.Ops;
 import org.tensorflow.op.core.Variable;
 
-public class Dense extends Layer<Float> implements KerasType<Float> {
+public class Dense<T extends Number> extends Layer<T> {
     private static int DENSE_INPUT_LENGTH = 1;
     private int units;
 
@@ -21,15 +20,15 @@ public class Dense extends Layer<Float> implements KerasType<Float> {
     private static String BIAS_INIT = "biasInit";
 
     // weight tensors
-    private Variable<Float> kernel;
-    private Variable<Float> bias;
+    private Variable<T> kernel;
+    private Variable<T> bias;
 
     // initializers
-    private Initializer<Float> kernelInitializer;
-    private Initializer<Float> biasInitializer;
+    private Initializer<T> kernelInitializer;
+    private Initializer<T> biasInitializer;
 
     // activation function
-    private Activation<Float> activation;
+    private Activation<T> activation;
 
     public Dense(int units, Dense.Options options) {
         super(DENSE_INPUT_LENGTH);
@@ -42,9 +41,9 @@ public class Dense extends Layer<Float> implements KerasType<Float> {
 
     private Dense(
             int units,
-            Activation<Float> activation,
-            Initializer<Float> kernelInitializer,
-            Initializer<Float> biasInitializer) {
+            Activation<T> activation,
+            Initializer<T> kernelInitializer,
+            Initializer<T> biasInitializer) {
         super(DENSE_INPUT_LENGTH);
         this.units = units;
 
@@ -56,7 +55,8 @@ public class Dense extends Layer<Float> implements KerasType<Float> {
         return new Dense.Options();
     }
 
-    public void build(Ops tf, Shape inputShape) {
+    @Override
+    public void build(Ops tf, Shape inputShape, Class<T> dtype) {
         TensorShape tensorShape = new TensorShape(inputShape);
         tensorShape.assertKnown(tensorShape.numDimensions() - 1);
 
@@ -65,18 +65,16 @@ public class Dense extends Layer<Float> implements KerasType<Float> {
         Shape biasShape = Shape.make(this.units);
 
         // Create dense kernel tensor
-        this.kernel = this.addWeight(KERNEL, tf.variable(kernelShape, Float.class));
+        this.kernel = this.addWeight(KERNEL, tf.variable(kernelShape, dtype));
         this.addInitializer(KERNEL_INIT, this.kernelInitializer);
-        this.kernelInitializer.build(tf, this.kernel);
+        this.kernelInitializer.build(tf, this.kernel, dtype);
 
         // Create bias tensor
-        this.bias = this.addWeight(BIAS, tf.variable(biasShape, Float.class));
+        this.bias = this.addWeight(BIAS, tf.variable(biasShape, dtype));
         addInitializer(BIAS_INIT, this.biasInitializer);
-        this.biasInitializer.build(tf, this.bias);
+        this.biasInitializer.build(tf, this.bias, dtype);
 
-        this.activation.build(tf, computeOutputShape(inputShape));
-
-        this.built = true;
+        this.activation.build(tf, computeOutputShape(inputShape), dtype);
     }
 
     public Shape computeOutputShape(Shape inputShape) {
@@ -85,24 +83,25 @@ public class Dense extends Layer<Float> implements KerasType<Float> {
     }
 
     @SafeVarargs
-    public final Operand<Float> call(Ops tf, Operand<Float>... inputs) {
+    public final Operand<T> call(Ops tf, Operand<T>... inputs) {
         return this.call(tf, inputs[0]);
     }
 
-    private Operand<Float> call(Ops tf, Operand<Float> input) {
-        Operand<Float> signal = tf.add(tf.matMul(input, this.kernel), this.bias);
+    private Operand<T> call(Ops tf, Operand<T> input) {
+        Operand<T> signal = tf.add(tf.matMul(input, this.kernel), this.bias);
         return this.activation.apply(tf, signal);
     }
 
-    public static class Options {
+    public static class Options<T extends Number> {
         public static Activations DEFAULT_ACTIVATION = Activations.linear;
         public static Initializers DEFAULT_KERNEL_INITIALIZER = Initializers.randomNormal;
         public static Initializers DEFAULT_BIAS_INITIALIZER = Initializers.zeros;
+        public Class DEFAULT_DTYPE = Float.class;
 
         // Default parameters
-        private Activation<Float> activation = Activations.select(DEFAULT_ACTIVATION);
-        private Initializer<Float> kernelInitializer = Initializers.select(DEFAULT_KERNEL_INITIALIZER);
-        private Initializer<Float> biasInitializer = Initializers.select(DEFAULT_BIAS_INITIALIZER);
+        private Activation<T> activation = Activations.select(DEFAULT_ACTIVATION);
+        private Initializer<T> kernelInitializer = Initializers.select(DEFAULT_KERNEL_INITIALIZER);
+        private Initializer<T> biasInitializer = Initializers.select(DEFAULT_BIAS_INITIALIZER);
 
         public static Builder builder() {
             return new Builder();

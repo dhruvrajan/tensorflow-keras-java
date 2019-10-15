@@ -5,6 +5,7 @@ import org.tensorflow.data.GraphLoader;
 import org.tensorflow.keras.layers.Input;
 import org.tensorflow.keras.layers.Layer;
 import org.tensorflow.keras.losses.Loss;
+import org.tensorflow.keras.metrics.Metric;
 import org.tensorflow.keras.mixin.MetricFunction;
 import org.tensorflow.keras.optimizers.Optimizer;
 import org.tensorflow.op.Ops;
@@ -14,29 +15,31 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class Sequential extends Model<Float> {
-    private Input firstLayer;
-    private Optimizer<Float> optimizer;
-    private List<Layer<Float>> layers;
+public class Sequential<T extends Number> extends Model<T> {
+    private Input<T> firstLayer;
+    private Optimizer<T> optimizer;
+    private List<Layer<T>> layers;
 
-    private Loss loss;
-    private List<MetricFunction> metrics;
+    private Loss<T> loss;
+    private List<Metric<T>> metrics;
 ;
 
-    private List<Variable<Float>> trainableVars;
-    private List<Operand<Float>> initializerOps;
+    private List<Variable<T>> trainableVars;
+    private List<Operand<T>> initializerOps;
 
     @SafeVarargs
-    public Sequential(Input firstLayer, Layer<Float>... layers) {
+    public Sequential(Class<T> dtype, Input<T> firstLayer, Layer<T>... layers) {
+        super(dtype);
         this.firstLayer = firstLayer;
         this.layers = Arrays.asList(layers);
     }
 
-    public static Sequential of(Input firstLayer, Layer<Float>... layers) {
-        return new Sequential(firstLayer, layers);
+    @SafeVarargs
+    public static <T extends Number> Sequential of(Class<T> dtype, Input firstLayer, Layer... layers) {
+        return new Sequential<>(dtype, firstLayer, layers);
     }
 
-    public Sequential addLayer(Layer<Float> layer) {
+    public Sequential addLayer(Layer<T> layer) {
         layers.add(layer);
         return this;
     }
@@ -48,19 +51,20 @@ public class Sequential extends Model<Float> {
 
     @Override
     @SafeVarargs
-    public final Operand<Float> call(Ops tf, Operand<Float>... inputs) {
+    public final Operand<T> call(Ops tf, Operand<T>... inputs) {
         return this.call(tf, inputs[0]);
     }
 
-    public Operand<Float> call(Ops tf, Operand<Float> in) {
-        Operand<Float> out = in;
-        for (Layer<Float> layer : this.layers) {
+    public Operand<T> call(Ops tf, Operand<T> in) {
+        Operand<T> out = in;
+        for (Layer<T> layer : this.layers) {
             out = layer.apply(tf, out);
         }
         return out;
     }
 
-    public void compile(Ops tf, Optimizer optimizer, Loss loss, List<MetricFunction> metrics) {
+    @Override
+    public void compile(Ops tf, Optimizer<T> optimizer, Loss<T> loss, List<Metric<T>> metrics) {
         this.loss = loss;
         this.metrics = metrics;
         this.optimizer = optimizer;
@@ -70,14 +74,18 @@ public class Sequential extends Model<Float> {
         this.initializerOps = new ArrayList<>();
 
         // Build layers
-        this.firstLayer.build(tf);
+        this.firstLayer.doBuild(tf, dtype);
         Shape inputShape = firstLayer.computeOutputShape();
 
-        for (Layer<Float> layer : layers) {
-            layer.build(tf, inputShape);
+        for (Layer<T> layer : layers) {
+            layer.doBuild(tf, inputShape, dtype);
             this.trainableVars.addAll(layer.trainableWeights());
             this.initializerOps.addAll(layer.initializerOps());
             inputShape = layer.computeOutputShape(inputShape);
+        }
+
+        for (Metric<T> metric : metrics) {
+            metric.doBuild(tf, null, dtype);
         }
 
         this.optimizer.build(tf);
@@ -85,39 +93,39 @@ public class Sequential extends Model<Float> {
     }
 
     @Override
-    public void fit(Ops tf, GraphLoader<Float> train, GraphLoader<Float> test, int epochs, int batchSize) {
+    public void fit(Ops tf, GraphLoader<T> train, GraphLoader<T> test, int epochs, int batchSize) {
         try (Session session = new Session(tf.scope().graph())) {
             runTrainingLoop(tf, session, train, epochs, batchSize, true);
             runPredictionLoop(tf, session, test, batchSize);
         }
     }
-    private void runPredictionLoop(Ops tf, Session session, GraphLoader<Float> data, int batchSize) {
+    private void runPredictionLoop(Ops tf, Session session, GraphLoader<T> data, int batchSize) {
         runTrainingLoop(tf, session, data, 1, batchSize, false);
     }
 
-    private void runTrainingLoop(Ops tf, Session session, GraphLoader<Float> data, int epochs, int batchSize, boolean training) {
+    private void runTrainingLoop(Ops tf, Session session, GraphLoader<T> data, int epochs, int batchSize, boolean training) {
         data.batch(batchSize);
         data.build(tf);
-        Operand<Float>[] dataOps = data.getBatchOperands();
+        Operand<T>[] dataOps = data.getBatchOperands();
 
         Session.Runner runner;
-        Operand<Float> XOp = dataOps[0];
-        Operand<Float> yOp = dataOps[1];
+        Operand<T> XOp = dataOps[0];
+        Operand<T> yOp = dataOps[1];
 
         // Compute Output / Loss / Accuracy
-        Operand<Float> yTrue = yOp;
-        Operand<Float> yPred = this.apply(tf, XOp);
+        Operand<T> yTrue = yOp;
+        Operand<T> yPred = this.apply(tf, XOp);
 
-        Operand<Float> batchLoss = loss.apply(tf, yTrue, yPred);
-        Operand<Float> batchAccuracy = this.metrics.get(0).apply(tf, yTrue, yPred);
+        Operand<T> batchLoss = loss.apply(tf, yTrue, yPred);
+        Operand<T> batchAccuracy = this.metrics.get(0).apply(tf, yTrue, yPred);
 
-        List<Operand<Float>> minimize = training ? optimizer.minimize(tf, batchLoss, this.trainableVars) : null;
+        List<Operand<T>> minimize = training ? optimizer.minimize(tf, batchLoss, this.trainableVars) : null;
 
         if (training) {
             runner = session.runner();
 
             // Run initializer ops
-            for (Operand<Float> op : this.initializerOps) {
+            for (Operand<T> op : this.initializerOps) {
                 runner.addTarget(op);
             }
 
@@ -135,7 +143,7 @@ public class Sequential extends Model<Float> {
                 data.feedSessionRunner(runner, i);
 
                 if (training) {
-                    for (Operand<Float> op : minimize) {
+                    for (Operand<T> op : minimize) {
                         runner.addTarget(op);
                     }
                 }
@@ -159,6 +167,4 @@ public class Sequential extends Model<Float> {
         }
 
     }
-
-
 }

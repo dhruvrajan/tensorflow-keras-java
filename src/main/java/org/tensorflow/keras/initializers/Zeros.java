@@ -6,8 +6,9 @@ import org.tensorflow.op.Ops;
 
 public class Zeros<T> extends Initializer<T> {
 
-  public Operand<T> build(Ops tf, Operand<T> in) {
-    this.initializerOp = tf.assign(in, tf.zeros(Keras.shapeOperand(tf, in.asOutput().shape()), this.dtype));
+  @Override
+  public Operand<T> build(Ops tf, Operand<T> in, Class<T> dtype) {
+    this.initializerOp = tf.assign(in, tf.zeros(Keras.shapeOperand(tf, in.asOutput().shape()), dtype));
     this.built = true;
     return this.initializerOp;
   }

@@ -6,7 +6,7 @@ import org.tensorflow.keras.mixin.MetricFunction;
 import org.tensorflow.op.Ops;
 import org.tensorflow.op.core.Placeholder;
 
-public abstract class Metric extends Layer<Float> implements MetricFunction {
+public abstract class Metric<T extends Number> extends Layer<T> implements MetricFunction<T> {
   private Operand<Float> outputOp;
 
   public Metric() {
@@ -28,15 +28,15 @@ public abstract class Metric extends Layer<Float> implements MetricFunction {
   }
 
   @Override
-  public Operand<Float> apply(Ops tf, Operand<Float> yTrue, Operand<Float> yPred) {
+  public Operand<T> apply(Ops tf, Operand<T> yTrue, Operand<T> yPred) {
     return this.call(tf, yTrue, yPred);
   }
 
   @Override
   @SafeVarargs
-  public final Operand<Float> call(Ops tf, Operand<Float>... ops) {
+  public final Operand<T> call(Ops tf, Operand<T>... ops) {
     return call(tf, ops[0], ops[1]);
   }
 
-  public abstract Operand<Float> call(Ops tf, Operand<Float> output, Operand<Float> label);
+  public abstract Operand<T> call(Ops tf, Operand<T> output, Operand<T> label);
 }

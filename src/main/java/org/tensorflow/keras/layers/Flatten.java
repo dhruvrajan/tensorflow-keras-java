@@ -2,19 +2,20 @@ package org.tensorflow.keras.layers;
 
 import org.tensorflow.Operand;
 import org.tensorflow.Shape;
-import org.tensorflow.keras.mixin.KerasType;
 import org.tensorflow.keras.utils.TensorShape;
 import org.tensorflow.op.Ops;
 import org.tensorflow.op.core.Constant;
 
-public class Flatten extends Layer<Float> implements KerasType<Float> {
+public class Flatten<T extends Number> extends Layer<T> {
     private static int FLATTEN_INPUT_LENGTH = 1;
     private Constant<Integer> units;
+
     public Flatten() {
         super(FLATTEN_INPUT_LENGTH);
     }
 
-    public void build(Ops tf, Shape inputShape) {
+    @Override
+    public void build(Ops tf, Shape inputShape, Class<T> dtype) {
         TensorShape tensorShape = new TensorShape(inputShape);
         this.units = tf.constant(new int[] {-1, (int) (tensorShape.numElements() / Math.abs(tensorShape.size(0)))});
         this.built = true;
@@ -26,11 +27,12 @@ public class Flatten extends Layer<Float> implements KerasType<Float> {
     }
 
     @SafeVarargs
-    public final Operand<Float> call(Ops tf, Operand<Float>... inputs) {
+    public final Operand<T> call(Ops tf, Operand<T>... inputs) {
         return this.call(tf, inputs[0]);
     }
 
-    private Operand<Float> call(Ops tf, Operand<Float> input) {
+    private Operand<T> call(Ops tf, Operand<T> input) {
         return tf.reshape(input, this.units);
     }
+
 }

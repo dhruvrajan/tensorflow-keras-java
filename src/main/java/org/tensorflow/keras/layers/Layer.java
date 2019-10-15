@@ -18,9 +18,9 @@ import java.util.stream.Collectors;
  *
  * @param <T> Numeric type of the output (Float, Double)
  */
-public abstract class Layer<T> implements LayerFunction<T> {
-
+public abstract class Layer<T extends Number> implements LayerFunction<T> {
   private int INPUTS_LENGTH;
+  protected Class<T> dtype;
   protected boolean built;
 
   private Map<String, Variable<T>> weights;
@@ -40,7 +40,7 @@ public abstract class Layer<T> implements LayerFunction<T> {
    * @param tf Tensorflow Ops accessor
    * @param inputShape Shape of the layer's input tensor
    */
-  public abstract void build(Ops tf, Shape inputShape);
+  protected abstract void build(Ops tf, Shape inputShape, Class<T> dtype);
 
   /**
    * Computes the output shape of the tensor returned by a Layer from the input tensor's shape
@@ -60,6 +60,26 @@ public abstract class Layer<T> implements LayerFunction<T> {
   @SuppressWarnings("unchecked")
   protected abstract Operand<T> call(Ops tf, Operand<T>... inputs);
 
+
+  /**
+   * Internal wrapper for Layer.build()
+   * @param tf
+   * @param inputShape
+   * @param dtype
+   * @return
+   */
+  public void doBuild(Ops tf, Shape inputShape, Class<T> dtype) {
+    this.dtype = dtype;
+    this.build(tf, inputShape, dtype);
+    this.built = true;
+  }
+
+  /**
+   * Internal wrapper for Layer.call
+   * @param tf
+   * @param inputs
+   * @return
+   */
   @SafeVarargs
   public final Operand<T> apply(Ops tf, Operand<T>... inputs) {
     if (!this.built) {
@@ -106,11 +126,16 @@ public abstract class Layer<T> implements LayerFunction<T> {
         .collect(Collectors.toList());
   }
 
+
   public List<Variable<T>> trainableWeights() {
     return new ArrayList<>(this.weights.values());
   }
 
   public boolean isBuilt() {
     return this.built;
+  }
+
+  public Class<T> getDtype() {
+    return this.dtype;
   }
 }
