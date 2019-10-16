@@ -9,19 +9,19 @@ import org.tensorflow.op.core.*;
  * Helper functions to compute activations using a TF Ops object.
  */
 public enum Activations {
-    linear,
-    sigmoid,
-    tanh,
-    relu,
-    elu,
-    selu,
-    softmax,
-    logsoftmax;
+    // All standard activations
+    linear, sigmoid, tanh, relu, elu, selu, softmax, logSoftmax;
 
+    /**
+     * Create an `Activation` object given a type from the `Activations` enumeration.
+     */
     public static <T extends Number> Activation<T> select(Activations type) {
-        return new Activation<>(getActivationFunction(type));
+        return new Unnamed<>(getActivationFunction(type));
     }
 
+    /**
+     * Map from `Activations` enumeration to respective activation functions.
+     */
     private static <T extends Number> ActivationFunction<T> getActivationFunction(Activations type) {
         switch (type) {
             case linear:
@@ -38,15 +38,15 @@ public enum Activations {
                 return Activations::selu;
             case softmax:
                 return Activations::softmax;
-            case logsoftmax:
+            case logSoftmax:
                 return Activations::logSoftmax;
             default:
-                throw new IllegalArgumentException("Invalid ActivationType");
+                throw new IllegalArgumentException("Invalid Activation Type");
         }
     }
 
     /**
-     * Linear activation function.
+     * Linear activation function (no op).
      */
     public static <T> Operand<T> linear(Ops tf, Operand<T> x) {
         return x;
@@ -67,37 +67,37 @@ public enum Activations {
     }
 
     /**
-     * Rectified Linear Unit.
+     * Rectified linear unit.
      */
-    public static <T> Relu<T> relu(Ops tf, Operand<T> features) {
-        return tf.relu(features);
+    public static <T> Relu<T> relu(Ops tf, Operand<T> x) {
+        return tf.relu(x);
     }
 
     /**
-     * Exponential Linear Unit.
+     * Exponential linear unit.
      */
-    public static <T extends Number> Elu<T> elu(Ops tf, Operand<T> features) {
-        return tf.elu(features);
+    public static <T extends Number> Elu<T> elu(Ops tf, Operand<T> x) {
+        return tf.elu(x);
     }
 
     /**
-     * Scaled Exponential Linear Unit.
+     * Scaled exponential linear Unit.
      */
-    public static <T extends Number> Selu<T> selu(Ops tf, Operand<T> features) {
-        return tf.selu(features);
+    public static <T extends Number> Selu<T> selu(Ops tf, Operand<T> x) {
+        return tf.selu(x);
     }
 
     /**
      * Softmax activation function.
      */
-    public static <T extends Number> Softmax<T> softmax(Ops tf, Operand<T> logits) {
-        return tf.softmax(logits);
+    public static <T extends Number> Softmax<T> softmax(Ops tf, Operand<T> x) {
+        return tf.softmax(x);
     }
 
     /**
-     * Log-Softmax activation function.
+     * Log Softmax activation function.
      */
-    public static <T extends Number> LogSoftmax<T> logSoftmax(Ops tf, Operand<T> logits) {
-        return tf.logSoftmax(logits);
+    public static <T extends Number> LogSoftmax<T> logSoftmax(Ops tf, Operand<T> x) {
+        return tf.logSoftmax(x);
     }
 }

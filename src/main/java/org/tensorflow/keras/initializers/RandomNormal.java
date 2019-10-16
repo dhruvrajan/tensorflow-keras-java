@@ -2,10 +2,9 @@ package org.tensorflow.keras.initializers;
 
 
 import org.tensorflow.Operand;
-import org.tensorflow.keras.utils.Keras;
 import org.tensorflow.op.Ops;
 
-public class RandomNormal<T extends Number > extends Initializer<T> {
+public class RandomNormal<T extends Number> extends Initializer<T> {
     private float mean;
     private float stdev;
     private float p1;
@@ -20,17 +19,13 @@ public class RandomNormal<T extends Number > extends Initializer<T> {
     }
 
     @Override
-    public Operand<T> build(Ops tf, Operand<T> in, Class<T> dtype) {
-
-        this.initializerOp = tf.assign(in, tf.parameterizedTruncatedNormal(
-                Keras.shapeOperand(tf, in.asOutput().shape()),
+    public Operand<T> call(Ops tf, Operand<Integer> shape) {
+        return tf.parameterizedTruncatedNormal(
+                shape,
                 tf.constant(this.mean, dtype),
                 tf.constant(this.stdev, dtype),
                 tf.constant(this.p1, dtype),
                 tf.constant(this.p2, dtype)
-        ));
-
-        this.built = true;
-        return this.initializerOp;
+        );
     }
 }

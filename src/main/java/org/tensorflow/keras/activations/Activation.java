@@ -7,25 +7,19 @@ import org.tensorflow.keras.mixin.ActivationFunction;
 import org.tensorflow.op.Ops;
 
 /**
- * Layer which applies an activation function to an output operand.
+ * Base activation function class.
  */
-public class Activation<T extends Number> extends Layer<T> {
+public abstract class Activation<T extends Number> extends Layer<T> {
 
-  private ActivationFunction<T> activation;
-
-  /**
-   * Creates an Activation function.
-   * @param activation An activation function.
-   */
-  public Activation(ActivationFunction<T> activation) {
+  public Activation() {
     super(1);
-    this.activation = activation;
-    this.built = true;
   }
 
+
   @Override
-  public void build(Ops tf, Shape in, Class<T> dtypeA) {
+  public void build(Ops tf, Shape in, Class<T> dtype) {
     // Activations don't need state to be built and added to a graph. Does nothing.
+    this.built = true;
   }
 
   @Override
@@ -34,12 +28,13 @@ public class Activation<T extends Number> extends Layer<T> {
     return inputShape;
   }
 
-  private Operand<T> call(Ops tf, Operand<T> inputs) {
-    return this.activation.apply(tf, inputs);
-  }
-
   @Override
   public Operand<T> call(Ops tf, Operand<T>... inputs) {
     return call(tf, inputs[0]);
   }
+
+  /**
+   * Calls the activation function. Override this when defining an activation function.
+   */
+  protected abstract Operand<T> call(Ops tf, Operand<T> inputs);
 }
