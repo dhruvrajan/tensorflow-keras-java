@@ -8,37 +8,37 @@ import org.tensorflow.keras.utils.Keras;
 
 public class Layers {
     // Builders for Input Layer
-    public static Input input(long firstDim, long... units) {
-        return new Input(Keras.concatenate(firstDim,units));
+    public static <T extends Number> Input<T> input(long firstDim, long... units) {
+        return new Input<>(Keras.concatenate(firstDim,units));
     }
 
     // Builders for Dense Layer
-    public static Dense dense(int units) {
-        return new Dense(units, Dense.options());
+    public static <T extends Number> Dense<T> dense(int units) {
+        return new Dense<>(units, Dense.Options.defaults());
     }
 
-    public static Dense dense(int units, Dense.Options options) {
-        return new Dense(units, options);
+    public static <T extends Number> Dense<T> dense(int units, Dense.Options options) {
+        return new Dense<>(units, options);
     }
 
-    public static  Dense dense(int units, Activation<Float> activation) {
-        return new Dense(units, Dense.Options.builder().setActivation(activation).build());
+    public static <T extends Number> Dense<T> dense(int units, Activation<T> activation) {
+        return new Dense<T>(units, Dense.Options.builder().setActivation(activation).build());
     }
 
-    public static  Dense dense(int units, Activations activation) {
-        return new Dense(units, Dense.Options.builder().setActivation(activation).build());
+    public static <T extends Number> Dense<T> dense(int units, Activations activation) {
+        return new Dense<>(units, Dense.Options.builder().setActivation(activation).build());
     }
 
-    public static  Dense dense(int units, Activations activation, Initializers kernelInitializer, Initializers biasInitializer) {
-        return new Dense(units, Dense.Options.builder()
+    public static <T extends Number> Dense<T> dense(int units, Activations activation, Initializers kernelInitializer, Initializers biasInitializer) {
+        return new Dense<>(units, Dense.Options.builder()
                 .setActivation(activation)
                 .setKernelInitializer(kernelInitializer)
                 .setBiasInitializer(biasInitializer)
                 .build());
     }
 
-    public static  Dense dense(int units, Activation<Float> activation, Initializer<Float> kernelInitializer, Initializer<Float> biasInitializer) {
-        return new Dense(units, Dense.Options.builder()
+    public static <T extends Number> Dense<T> dense(int units, Activation<Float> activation, Initializer kernelInitializer, Initializer biasInitializer) {
+        return new Dense<>(units, Dense.Options.builder()
                 .setActivation(activation)
                 .setKernelInitializer(kernelInitializer)
                 .setBiasInitializer(biasInitializer)
@@ -46,33 +46,7 @@ public class Layers {
     }
 
     // Builders for Flatten Layer
-    public static Flatten flatten() {
-        return new Flatten();
-    }
-
-
-    public static class Options<T> {
-        Class dtype = Float.class;
-
-        public Builder<T> builder() {
-            return new Builder<>();
-        }
-
-        public static class Builder<T> {
-            Options<T> options;
-
-            public Builder() {
-                this.options = new Options<>();
-            }
-
-            public Builder<T> dtype(Class<T> dtype) {
-                this.options.dtype = dtype;
-                return this;
-            }
-
-            public Options<T> build() {
-                return this.options;
-            }
-        }
+    public static <T extends Number> Flatten<T> flatten() {
+        return new Flatten<>();
     }
 }

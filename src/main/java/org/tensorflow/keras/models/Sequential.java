@@ -6,7 +6,6 @@ import org.tensorflow.keras.layers.Input;
 import org.tensorflow.keras.layers.Layer;
 import org.tensorflow.keras.losses.Loss;
 import org.tensorflow.keras.metrics.Metric;
-import org.tensorflow.keras.mixin.MetricFunction;
 import org.tensorflow.keras.optimizers.Optimizer;
 import org.tensorflow.op.Ops;
 import org.tensorflow.op.core.Variable;
@@ -20,8 +19,8 @@ public class Sequential<T extends Number> extends Model<T> {
     private Optimizer<T> optimizer;
     private List<Layer<T>> layers;
 
-    private Loss<T> loss;
-    private List<Metric<T>> metrics;
+    private Loss loss;
+    private List<Metric> metrics;
 ;
 
     private List<Variable<T>> trainableVars;
@@ -35,7 +34,7 @@ public class Sequential<T extends Number> extends Model<T> {
     }
 
     @SafeVarargs
-    public static <T extends Number> Sequential of(Class<T> dtype, Input firstLayer, Layer... layers) {
+    public static <T extends Number> Sequential<T> of(Class<T> dtype, Input<T> firstLayer, Layer<T>... layers) {
         return new Sequential<>(dtype, firstLayer, layers);
     }
 
@@ -64,7 +63,12 @@ public class Sequential<T extends Number> extends Model<T> {
     }
 
     @Override
-    public void compile(Ops tf, Optimizer<T> optimizer, Loss<T> loss, List<Metric<T>> metrics) {
+    protected void build(Ops tf, Shape inputShape) {
+        throw new UnsupportedOperationException("Cannot build a sequential model");
+    }
+
+    @Override
+    public void compile(Ops tf, Optimizer<T> optimizer, Loss loss, List<Metric> metrics) {
         this.loss = loss;
         this.metrics = metrics;
         this.optimizer = optimizer;
@@ -74,22 +78,17 @@ public class Sequential<T extends Number> extends Model<T> {
         this.initializerOps = new ArrayList<>();
 
         // Build layers
-        this.firstLayer.doBuild(tf, dtype);
+        this.firstLayer.build(tf, dtype);
         Shape inputShape = firstLayer.computeOutputShape();
 
         for (Layer<T> layer : layers) {
-            layer.doBuild(tf, inputShape, dtype);
+            layer.build(tf, inputShape, dtype);
             this.trainableVars.addAll(layer.trainableWeights());
             this.initializerOps.addAll(layer.initializerOps());
             inputShape = layer.computeOutputShape(inputShape);
         }
 
-        for (Metric<T> metric : metrics) {
-            metric.doBuild(tf, null, dtype);
-        }
-
-        this.optimizer.build(tf);
-        this.built = true;
+        this.optimizer.build(tf, dtype);
     }
 
     @Override
@@ -116,8 +115,8 @@ public class Sequential<T extends Number> extends Model<T> {
         Operand<T> yTrue = yOp;
         Operand<T> yPred = this.apply(tf, XOp);
 
-        Operand<T> batchLoss = loss.apply(tf, yTrue, yPred);
-        Operand<T> batchAccuracy = this.metrics.get(0).apply(tf, yTrue, yPred);
+        Operand<T> batchLoss = loss.apply(tf, getDtype(), yTrue, yPred);
+        Operand<T> batchAccuracy = this.metrics.get(0).apply(tf, getDtype(), yTrue, yPred);
 
         List<Operand<T>> minimize = training ? optimizer.minimize(tf, batchLoss, this.trainableVars) : null;
 

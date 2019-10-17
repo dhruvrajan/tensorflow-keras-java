@@ -16,15 +16,9 @@ public class Input<T extends Number> extends Layer<T> {
   }
 
   @Override
-  public void build(Ops tf, Shape inputShape, Class<T> dtype) {
+  public void build(Ops tf, Shape inputShape) {
     throw new UnsupportedOperationException(
         "Cannot build an input layer with an input shape; it doesn't take any inputs. Use Input.build(Ops tf, Class<T> dtype)");
-  }
-
-  @Override
-  public void doBuild(Ops tf, Shape inputShape, Class<T> dtype) {
-    throw new UnsupportedOperationException(
-            "Cannot build an input layer with an input shape; it doesn't take any inputs. Use Input.build(Ops tf, Class<T> dtype)");
   }
 
   @Override
@@ -38,17 +32,10 @@ public class Input<T extends Number> extends Layer<T> {
   }
 
   public void build(Ops tf, Class<T> dtype) {
-    this.input = tf.placeholder(dtype, Placeholder.shape(Keras.shapeFromDims(Keras.concatenate(-1, this.dims))));
-    this.built = true;
-  }
-  public void doBuild(Ops tf, Class<T> dtype) {
     this.dtype = dtype;
     this.input = tf.placeholder(dtype, Placeholder.shape(Keras.shapeFromDims(Keras.concatenate(-1, this.dims))));
     this.built = true;
   }
-
-
-
 
   @SafeVarargs
   public final Operand<T> call(Ops tf, Operand<T>... inputs) {

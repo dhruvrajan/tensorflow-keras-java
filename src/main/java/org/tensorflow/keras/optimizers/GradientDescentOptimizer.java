@@ -9,24 +9,22 @@ import org.tensorflow.op.core.Variable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GradientDescentOptimizer extends Optimizer<Float> {
-    private final float LEARNING_RATE;
-    Constant<Float> alpha;
+public class GradientDescentOptimizer<T extends Number> extends Optimizer<T> {
+    private final float lr;
+    private Constant<T> alpha;
 
     public GradientDescentOptimizer(float lr) {
-        this.targets = new ArrayList<>();
-        this.LEARNING_RATE = lr;
+        this.lr = lr;
     }
 
     @Override
     public void build(Ops tf) {
-        this.alpha = tf.constant(LEARNING_RATE);
+        this.alpha = tf.constant(lr, getDtype());
     }
 
-    public List<Operand<Float>> applyGradients(
-            Ops tf, List<Variable<Float>> weights, Gradients gradients) {
-        tf = tf.withName("GradientDescentOptimizer");
-
+    @Override
+    public List<Operand<T>> applyGradients(Ops tf, List<Variable<T>> weights, Gradients gradients) {
+        List<Operand<T>> targets = new ArrayList<>();
         for (int i = 0; i < weights.size(); i++) {
             targets.add(tf.applyGradientDescent(weights.get(i), alpha, gradients.dy(i)));
         }
@@ -34,3 +32,5 @@ public class GradientDescentOptimizer extends Optimizer<Float> {
         return targets;
     }
 }
+
+

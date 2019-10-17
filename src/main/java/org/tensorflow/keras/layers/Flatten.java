@@ -15,10 +15,9 @@ public class Flatten<T extends Number> extends Layer<T> {
     }
 
     @Override
-    public void build(Ops tf, Shape inputShape, Class<T> dtype) {
+    public void build(Ops tf, Shape inputShape) {
         TensorShape tensorShape = new TensorShape(inputShape);
         this.units = tf.constant(new int[] {-1, (int) (tensorShape.numElements() / Math.abs(tensorShape.size(0)))});
-        this.built = true;
     }
 
     public Shape computeOutputShape(Shape inputShape) {

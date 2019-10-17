@@ -7,28 +7,38 @@ import org.tensorflow.op.core.Variable;
 
 import java.util.List;
 
-public abstract class Optimizer<T> {
-  protected List<Operand<T>> targets;
+public abstract class Optimizer<T extends Number> {
+    private Class<T> dtype;
+    private boolean built;
 
-  public List<Operand<T>> minimize(Ops tf, Operand<T> loss, List<Variable<T>> weights) {
-    Gradients gradients = computeGradients(tf, loss, weights);
-    return applyGradients(tf, weights, gradients);
-  }
+    public List<Operand<T>> minimize(Ops tf, Operand<T> loss, List<Variable<T>> weights) {
+        if (!isBuilt()) {
+            throw new IllegalStateException("Must call optimizer.build(Ops, Class<T>) before calling optimizer.minimize()");
+        }
 
-  public Gradients computeGradients(Ops tf, Operand<T> loss, List<Variable<T>> weights) {
-    return tf.gradients(loss, weights);
-  }
+        Gradients gradients = computeGradients(tf, loss, weights);
+        return applyGradients(tf, weights, gradients);
+    }
 
-  public abstract  void build(Ops tf);
+    private Gradients computeGradients(Ops tf, Operand<T> loss, List<Variable<T>> weights) {
+        return tf.gradients(loss, weights);
+    }
 
-  public abstract List<Operand<T>> applyGradients(
-      Ops tf, List<Variable<T>> weights, Gradients gradients);
+    public void build(Ops tf, Class<T> dtype) {
+        this.dtype = dtype;
+        this.build(tf);
+        this.built = true;
+    }
 
-  public List<Operand<T>> getTargets() {
-    return this.targets;
-  }
+    protected abstract void build(Ops tf);
 
-  public List<Operand<T>> trainingOps() {
-    return targets;
-  }
+    protected abstract List<Operand<T>> applyGradients(Ops tf, List<Variable<T>> weights, Gradients gradients);
+
+    public Class<T> getDtype() {
+        return dtype;
+    }
+
+    public boolean isBuilt() {
+        return built;
+    }
 }

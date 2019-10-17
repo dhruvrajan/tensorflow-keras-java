@@ -4,7 +4,7 @@ package org.tensorflow.keras.initializers;
 import org.tensorflow.Operand;
 import org.tensorflow.op.Ops;
 
-public class RandomNormal<T extends Number> extends Initializer<T> {
+public class RandomNormal extends Initializer {
     private float mean;
     private float stdev;
     private float p1;
@@ -19,7 +19,7 @@ public class RandomNormal<T extends Number> extends Initializer<T> {
     }
 
     @Override
-    public Operand<T> call(Ops tf, Operand<Integer> shape) {
+    public <T extends Number> Operand<T> initialize(Ops tf, Operand<Integer> shape, Class<T> dtype) {
         return tf.parameterizedTruncatedNormal(
                 shape,
                 tf.constant(this.mean, dtype),

@@ -7,6 +7,7 @@ import org.tensorflow.keras.datasets.FashionMNIST;
 import org.tensorflow.keras.initializers.Initializers;
 import org.tensorflow.keras.layers.Dense;
 import org.tensorflow.keras.layers.Flatten;
+import org.tensorflow.keras.layers.Layer;
 import org.tensorflow.keras.layers.Layers;
 import org.tensorflow.keras.losses.Losses;
 import org.tensorflow.keras.metrics.Metrics;
@@ -17,7 +18,7 @@ import org.tensorflow.op.Ops;
 import org.tensorflow.utils.Pair;
 
 public class FashionMNISTKeras {
-    private static Model model;
+    private static Model<Float> model;
     private static Model.CompileOptions compileOptions;
     private static Model.FitOptions fitOptions;
 
@@ -35,7 +36,7 @@ public class FashionMNISTKeras {
                 Layers.dense(256, Activations.relu, Initializers.randomNormal, Initializers.zeros),
 
                 // Using Layer Options Builder
-                new Dense(128, Dense.Options.builder()
+                new Dense<>(128, Dense.Options.builder()
                         .setActivation(Activations.relu)
                         .setKernelInitializer(Initializers.randomNormal)
                         .setBiasInitializer(Initializers.zeros)

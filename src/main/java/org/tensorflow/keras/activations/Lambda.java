@@ -8,14 +8,14 @@ import org.tensorflow.op.Ops;
  * Creates an `Activation` from an unnamed function.
  * @param <T>
  */
-public class Unnamed<T extends Number> extends Activation<T> {
+public class Lambda<T extends Number> extends Activation<T> {
     private ActivationFunction<T> activation;
 
     /**
      * Creates an Activation function.
      * @param unnamedActivation An activation function.
      */
-    public Unnamed(ActivationFunction<T> unnamedActivation) {
+    public Lambda(ActivationFunction<T> unnamedActivation) {
         super();
         this.activation = unnamedActivation;
     }

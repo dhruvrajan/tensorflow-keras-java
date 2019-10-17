@@ -16,7 +16,7 @@ public enum Activations {
      * Create an `Activation` object given a type from the `Activations` enumeration.
      */
     public static <T extends Number> Activation<T> select(Activations type) {
-        return new Unnamed<>(getActivationFunction(type));
+        return new Lambda<>(getActivationFunction(type));
     }
 
     /**

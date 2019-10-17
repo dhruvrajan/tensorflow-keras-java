@@ -7,6 +7,7 @@ import org.tensorflow.keras.activations.Activations;
 import org.tensorflow.keras.initializers.Initializer;
 import org.tensorflow.keras.initializers.Initializers;
 import org.tensorflow.keras.utils.TensorShape;
+import org.tensorflow.op.Op;
 import org.tensorflow.op.Ops;
 import org.tensorflow.op.core.Variable;
 
@@ -24,8 +25,8 @@ public class Dense<T extends Number> extends Layer<T> {
     private Variable<T> bias;
 
     // initializers
-    private Initializer<T> kernelInitializer;
-    private Initializer<T> biasInitializer;
+    private Initializer kernelInitializer;
+    private Initializer biasInitializer;
 
     // activation function
     private Activation<T> activation;
@@ -34,46 +35,30 @@ public class Dense<T extends Number> extends Layer<T> {
         super(DENSE_INPUT_LENGTH);
         this.units = units;
 
-        this.activation = options.activation;
+        this.activation = (Activation<T>) options.activation;
         this.kernelInitializer = options.kernelInitializer;
         this.biasInitializer = options.biasInitializer;
     }
 
-    private Dense(
-            int units,
-            Activation<T> activation,
-            Initializer<T> kernelInitializer,
-            Initializer<T> biasInitializer) {
-        super(DENSE_INPUT_LENGTH);
-        this.units = units;
-
-        this.activation = activation;
-        this.kernelInitializer = kernelInitializer;
-        this.biasInitializer = biasInitializer;
-    }
-    public static Options options() {
-        return new Dense.Options();
-    }
-
     @Override
-    public void build(Ops tf, Shape inputShape, Class<T> dtype) {
-        TensorShape tensorShape = new TensorShape(inputShape);
-        tensorShape.assertKnown(tensorShape.numDimensions() - 1);
+    public void build(Ops tf, Shape inputShape) {
+        // Check that final dimension is known
+        new TensorShape(inputShape).assertKnown(inputShape.numDimensions() - 1);
 
+        // Retrieve Layer's dtype
+        Class<T> dtype = this.getDtype();
+
+        // Compute shapes of kernel and bias matrices
         Shape kernelShape = Shape.make(inputShape.size(inputShape.numDimensions() - 1), this.units);
-
         Shape biasShape = Shape.make(this.units);
 
         // Create dense kernel tensor
-        this.kernel = this.addWeight(KERNEL, tf.variable(kernelShape, dtype));
-        this.addInitializer(KERNEL_INIT, this.kernelInitializer);
-        this.kernelInitializer.build(tf, this.kernel, dtype);
+        this.kernel = this.addWeight(tf, KERNEL, tf.variable(kernelShape, dtype), KERNEL_INIT, this.kernelInitializer);
 
         // Create bias tensor
-        this.bias = this.addWeight(BIAS, tf.variable(biasShape, dtype));
-        addInitializer(BIAS_INIT, this.biasInitializer);
-        this.biasInitializer.build(tf, this.bias, dtype);
+        this.bias = this.addWeight(tf, BIAS, tf.variable(biasShape, dtype), BIAS_INIT, this.biasInitializer);
 
+        // Create Activation
         this.activation.build(tf, computeOutputShape(inputShape), dtype);
     }
 
@@ -92,33 +77,49 @@ public class Dense<T extends Number> extends Layer<T> {
         return this.activation.apply(tf, signal);
     }
 
-    public static class Options<T extends Number> {
-        public static Activations DEFAULT_ACTIVATION = Activations.linear;
-        public static Initializers DEFAULT_KERNEL_INITIALIZER = Initializers.randomNormal;
-        public static Initializers DEFAULT_BIAS_INITIALIZER = Initializers.zeros;
-        public Class DEFAULT_DTYPE = Float.class;
 
+    public static class Options {
         // Default parameters
-        private Activation<T> activation = Activations.select(DEFAULT_ACTIVATION);
-        private Initializer<T> kernelInitializer = Initializers.select(DEFAULT_KERNEL_INITIALIZER);
-        private Initializer<T> biasInitializer = Initializers.select(DEFAULT_BIAS_INITIALIZER);
+        private Activation<? extends Number> activation;
+        private Initializer kernelInitializer;
+        private Initializer biasInitializer;
+
+        public static Options defaults() {
+            return new Builder(new Options())
+                    .setActivation(Activations.linear)
+                    .setKernelInitializer(Initializers.randomNormal)
+                    .setBiasInitializer(Initializers.zeros)
+                    .build();
+        }
+
+        public Activation getActivation() {
+            return activation;
+        }
+
+        public Initializer getKernelInitializer() {
+            return kernelInitializer;
+        }
+
+        public Initializer getBiasInitializer() {
+            return biasInitializer;
+        }
 
         public static Builder builder() {
-            return new Builder();
+            return new Builder(defaults());
         }
 
         public static class Builder {
             private Options options;
 
-            public Builder() {
-                this.options = new Options();
+            public Builder(Options options) {
+                this.options = options;
             }
 
             public Builder setActivation(Activations activation) {
                 return setActivation(Activations.select(activation));
             }
 
-            public Builder setActivation(Activation<Float> activation) {
+            public Builder setActivation(Activation<? extends Number> activation) {
                 this.options.activation = activation;
                 return this;
             }
@@ -147,4 +148,62 @@ public class Dense<T extends Number> extends Layer<T> {
         }
     }
 
+
+//    public static class Options<T extends Number> {
+//        // Default parameters
+//        private Activation<T> activation;
+//        private Initializer<T> kernelInitializer;
+//        private Initializer<T> biasInitializer;
+//
+//        public static <T extends Number> Options<T> defaults() {
+//            return new Builder<T>(new Options<>())
+//                    .setActivation(Activations.linear)
+//                    .setKernelInitializer(Initializers.randomNormal)
+//                    .setBiasInitializer(Initializers.zeros)
+//                    .build();
+//        }
+//
+//        public static <T extends Number> Builder<T> builder() {
+//            return new Builder<>(defaults());
+//        }
+//
+//        public static class Builder<T extends Number> {
+//            private Options<T> options;
+//
+//            public Builder(Options<T> options) {
+//                this.options = options;
+//            }
+//
+//            public Builder<T> setActivation(Activations activation) {
+//                return setActivation(Activations.select(activation));
+//            }
+//
+//            public Builder<T> setActivation(Activation<T> activation) {
+//                this.options.activation = activation;
+//                return this;
+//            }
+//
+//            public Builder<T> setKernelInitializer(Initializers kernelInitializer) {
+//                return setKernelInitializer(Initializers.select(kernelInitializer));
+//            }
+//
+//            public Builder<T> setKernelInitializer(Initializer<T> kernelInitializer) {
+//                this.options.kernelInitializer = kernelInitializer;
+//                return this;
+//            }
+//
+//            public Builder<T> setBiasInitializer(Initializers biasInitializer) {
+//                return setBiasInitializer(Initializers.select(biasInitializer));
+//            }
+//
+//            public Builder<T> setBiasInitializer(Initializer<T> biasInitializer) {
+//                this.options.biasInitializer = biasInitializer;
+//                return this;
+//            }
+//
+//            public Options<T> build() {
+//                return this.options;
+//            }
+//        }
+//    }
 }

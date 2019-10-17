@@ -4,9 +4,9 @@
  import org.tensorflow.keras.utils.Keras;
  import org.tensorflow.op.Ops;
 
- public class Ones<T> extends Initializer<T> {
+ public class Ones extends Initializer {
   @Override
-  public Operand<T> call(Ops tf, Operand<Integer> shape) {
+  public <T extends Number> Operand<T> initialize(Ops tf, Operand<Integer> shape, Class<T> dtype) {
     return tf.fill(shape, tf.constant(1.0f, dtype));
   }
  }
