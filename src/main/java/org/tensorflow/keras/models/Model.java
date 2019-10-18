@@ -106,6 +106,14 @@ public abstract class Model<T extends Number> extends Layer<T> {
         private int epochs;
         private int batchSize;
 
+        public int getEpochs() {
+            return epochs;
+        }
+
+        public int getBatchSize() {
+            return batchSize;
+        }
+
         public static FitOptions defaults() {
             return new Builder()
                     .setEpochs(1)

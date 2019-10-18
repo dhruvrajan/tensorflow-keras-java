@@ -80,7 +80,7 @@ public class Dense<T extends Number> extends Layer<T> {
 
     public static class Options {
         // Default parameters
-        private Activation<? extends Number> activation;
+        private Activation activation;
         private Initializer kernelInitializer;
         private Initializer biasInitializer;
 
@@ -92,8 +92,8 @@ public class Dense<T extends Number> extends Layer<T> {
                     .build();
         }
 
-        public Activation getActivation() {
-            return activation;
+        public <T extends Number> Activation<T> getActivation() {
+            return (Activation<T>) activation;
         }
 
         public Initializer getKernelInitializer() {

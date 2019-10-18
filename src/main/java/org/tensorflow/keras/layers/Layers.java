@@ -37,7 +37,7 @@ public class Layers {
                 .build());
     }
 
-    public static <T extends Number> Dense<T> dense(int units, Activation<Float> activation, Initializer kernelInitializer, Initializer biasInitializer) {
+    public static <T extends Number> Dense<T> dense(int units, Activation<T> activation, Initializer kernelInitializer, Initializer biasInitializer) {
         return new Dense<>(units, Dense.Options.builder()
                 .setActivation(activation)
                 .setKernelInitializer(kernelInitializer)
