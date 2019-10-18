@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>io.github.dhruvrajan</groupId>
+    <groupId>org.tensorflow</groupId>
     <artifactId>tensorflow-keras</artifactId>
     <version>0.0.1</version>
     <name>tensorflow-keras</name>
@@ -17,12 +17,12 @@
         <dependency>
             <groupId>org.tensorflow</groupId>
             <artifactId>tensorflow</artifactId>
-            <version>1.14.0</version>
+            <version>1.13.1</version>
         </dependency>
         <dependency>
             <groupId>org.tensorflow</groupId>
             <artifactId>libtensorflow_jni_gpu</artifactId>
-            <version>1.14.0</version>
+            <version>1.13.1</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

@@ -13,53 +13,161 @@ Example
 Below is a comparison of the Java and Python implementations of a model trained for the MNIST dataset.
  
  
-Python:
+*Python:*
 
 ```python
 import tensorflow as tf
 
-(X_train, y_train), (X_val, y_val) = tf.keras.datasets.load_mnist()
-
 model = tf.keras.models.Sequential([
-    tf.keras.layers.Dense(10, activation="softmax"),
+  tf.keras.layers.Flatten(input_shape=(28, 28)),
+  tf.keras.layers.Dense(128, activation='relu', kernel_initializer="random_normal", bias_initializer="zeros"),
+  tf.keras.layers.Dense(10, activation='softmax', kernel_initializer="random_normal", bias_initializer="zeros")
 ])
 
-model.compile(optimizer="sgd", loss="softmax_crossentropy", metrics=["accuracy"])
-tf.keras.
-model.fit(X_train, y_train, val_data=(X_test, y_test), epochs=100, batch_size=100)
+model.compile(optimizer='sgd', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
 
+(X_train, y_train), (X_val, y_val) = tf.keras.datasets.load_mnist()
+model.fit(X_train, y_train, val_data=(X_val, y_val), epochs=10, batch_size=100)
 ```
  
-Java:
+*Java* (org.tensorflow.keras.examples.mnist.MNISTKeras.java):
 ```java
+package org.tensorflow.keras.examples.mnist;
+
+import org.tensorflow.Graph;
+import org.tensorflow.data.GraphLoader;
+import org.tensorflow.keras.activations.Activations;
+import org.tensorflow.keras.datasets.MNIST;
+import org.tensorflow.keras.initializers.Initializers;
+import org.tensorflow.keras.layers.Dense;
+import org.tensorflow.keras.layers.Layers;
+import org.tensorflow.keras.losses.Losses;
+import org.tensorflow.keras.metrics.Metrics;
+import org.tensorflow.keras.models.Model;
+import org.tensorflow.keras.models.Sequential;
+import org.tensorflow.keras.optimizers.Optimizers;
+import org.tensorflow.op.Ops;
+import org.tensorflow.utils.Pair;
+
 public class MNISTKeras {
+    private static Model<Float> model;
+    private static Model.CompileOptions compileOptions;
+    private static Model.FitOptions fitOptions;
 
-    public static void main(String[] args) throws Exception {
-        try (Graph graph = new Graph()) {
-            Ops tf = Ops.create(graph);
+    static {
+        // Define Neural Network Model
+        
+        // Note: Layers can be constructed either from individual
+        //       Option.Builder classes, or from the static helper
+        //       methods defined in `Layers` which wrap the explicit builders
+        //       to decrease verbosity.
+        model = Sequential.of(
+                Layers.input(28, 28),
+                Layers.flatten(28 * 28),
 
-            Dataset data = MNISTLoader.loadDataset();
-            Sequential model = new Sequential(
-                    new InputLayer(28 * 28),
-                    new Dense(10)
-                            .setActivation(Activations.softmax)
-                            .setKernelInitializer(Initializers.zeros)
-                            .setBiasInitializer(Initializers.zeros)
-            );
+                // Using Layer Options Builder
+                new Dense(128, Dense.Options.builder()
+                        .setActivation(Activations.relu)
+                        .setKernelInitializer(Initializers.randomNormal)
+                        .setBiasInitializer(Initializers.zeros)
+                        .build()),
+                
+                // Using static helper Layers.dense(...)
+                Layers.dense(10, Activations.softmax, Initializers.randomNormal, Initializers.zeros)
+        );
 
-            // Build Graph
-            model.compile(tf, new Model.CompilerOptions(graph)
-                    .setOptimizer(Optimizers.sgd)
-                    .setLoss(Losses.softmax_crossentropy)
-                    .addMetric(Metrics.accuracy));
+        // Model Compile Configuration
+        compileOptions = Model.CompileOptions.builder()
+                .setOptimizer(Optimizers.sgd)
+                .setLoss(Losses.sparseCategoricalCrossentropy)
+                .addMetric(Metrics.accuracy)
+                .build();
 
-            // Run training and evaluation
-            model.fit(tf, data, 100, 100);
-        }
+        // Model Training Loop Configuration
+        fitOptions = Model.FitOptions.builder()
+                .setEpochs(10)
+                .setBatchSize(100)
+                .build();
     }
 
+
+    public static Model<Float> train() throws Exception {
+        try (Graph graph = new Graph()) {
+            // Create Tensorflow Ops Accessor
+            Ops tf = Ops.create(graph);
+
+            // Compile Model
+            model.compile(tf, compileOptions);
+
+            Pair<GraphLoader<Float>, GraphLoader<Float>> loaders = MNIST.graphLoaders2D();
+            // GraphLoader objects contain AutoCloseable `Tensor` objects.
+            try (GraphLoader<Float> train = loaders.first();
+                 GraphLoader<Float> test = loaders.second()) {
+                // Fit model
+                model.fit(tf, train, test, fitOptions);
+            }
+        }
+
+        return model;
+    }
+
+    public static void main(String[] args) throws Exception {
+        train();
+    }
 }
 ```
+
+*Scala* (See https://github.com/dhruvrajan/tensorflow-keras-scala)
+```scala
+package org.tensorflow.keras.scala.examples
+
+import org.tensorflow.Graph
+import org.tensorflow.data.GraphLoader
+import org.tensorflow.keras.activations.Activations.{relu, softmax}
+import org.tensorflow.keras.datasets.FashionMNIST
+import org.tensorflow.keras.losses.Losses.sparseCategoricalCrossentropy
+import org.tensorflow.keras.metrics.Metrics.accuracy
+import org.tensorflow.keras.models.Sequential
+import org.tensorflow.keras.optimizers.Optimizers.sgd
+import org.tensorflow.keras.scala.{Layers, Model}
+import org.tensorflow.op.Ops
+import org.tensorflow.utils.Pair
+
+import scala.util.Using
+
+object FashionMNISTKeras {
+  val model: Model[java.lang.Float] = Sequential.of(
+    Layers.input(28, 28),
+    Layers.flatten(28 * 28),
+    Layers.dense(128, activation = relu),
+    Layers.dense(10, activation = softmax)
+  )
+
+  def train(model: Model[java.lang.Float]): Model[java.lang.Float] = {
+    Using.resource(new Graph()) { graph => {
+      val tf: Ops = Ops.create(graph)
+      // Compile Model
+      model.compile(tf, optimizer = sgd, loss = sparseCategoricalCrossentropy, metrics = List(accuracy))
+
+      val data: Pair[GraphLoader[java.lang.Float], GraphLoader[java.lang.Float]] = FashionMNIST.graphLoaders2D()
+      // GraphLoader objects contain AutoCloseable `Tensors`.
+      Using.resources(data.first(), data.second()) { (train, test) => {
+        // Fit Model
+        model.fit(tf, train, test, epochs = 10, batchSize = 100)
+      }
+      }
+    }
+    }
+    // Output Model
+    model
+  }
+
+  def main(args: Array[String]): Unit = {
+    train(model)
+  }
+}
+```
+
 
 Overview
 ==

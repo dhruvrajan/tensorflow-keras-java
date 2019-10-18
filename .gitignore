@@ -31,5 +31,9 @@ project/plugins/project/
 .ensime_cache/
 .ensime
 venv
+<<<<<<< HEAD
 .classpath
 .project
+=======
+bin/
+>>>>>>> dev
