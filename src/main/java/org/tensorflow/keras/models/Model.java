@@ -15,6 +15,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.tensorflow.keras.callbacks.Callback;
+import org.tensorflow.keras.callbacks.Callbacks;
+
 public abstract class Model<T extends Number> extends Layer<T> {
     public Model(Class<T> dtype) {
         // TODO:  For now, models take in only 1 input
@@ -30,10 +33,10 @@ public abstract class Model<T extends Number> extends Layer<T> {
         compile(tf, (Optimizer<T>) compilerBuilder.optimizer, compilerBuilder.loss,compilerBuilder.metrics);
     }
 
-    public abstract void fit(Ops tf, GraphLoader<T> train, GraphLoader<T> test, int epochs, int batchSize);
+    public abstract void fit(Ops tf, GraphLoader<T> train, GraphLoader<T> test, int epochs, int batchSize, List<Callback> callbacks);
 
     public void fit(Ops tf, GraphLoader<T> train, GraphLoader<T> test, FitOptions fitOptions) {
-        fit(tf, train, test, fitOptions.epochs, fitOptions.batchSize);
+        fit(tf, train, test, fitOptions.epochs, fitOptions.batchSize, fitOptions.callbacks);
     }
 
     public static class CompileOptions {
@@ -105,7 +108,9 @@ public abstract class Model<T extends Number> extends Layer<T> {
     public static class FitOptions {
         private int epochs;
         private int batchSize;
+        private List<Callback> callbacks;
 
+    
         public int getEpochs() {
             return epochs;
         }
@@ -128,7 +133,7 @@ public abstract class Model<T extends Number> extends Layer<T> {
         public static class Builder {
             private FitOptions options;
 
-            public Builder() { options = new FitOptions(); }
+            public Builder() { options = new FitOptions(); options.callbacks = new ArrayList<>();}
             private Builder(FitOptions options) {
                 this.options = options;
             }
@@ -142,6 +147,17 @@ public abstract class Model<T extends Number> extends Layer<T> {
                 options.batchSize = batchSize;
                 return this;
             }
+
+            public Builder addCallback(Callback callback) {
+                options.callbacks.add(callback);
+                return this;
+            }
+
+            public Builder addCallback(Callbacks callbackType) {
+                return addCallback(Callbacks.select(callbackType));
+            }
+
+
 
             public FitOptions build() {
                 return options;

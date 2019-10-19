@@ -9,7 +9,7 @@ import org.tensorflow.keras.utils.Keras;
 public class Layers {
     // Builders for Input Layer
     public static <T extends Number> Input<T> input(long firstDim, long... units) {
-        return new Input<>(Keras.concatenate(firstDim,units));
+        return new Input<>(Keras.concatenate(firstDim, units));
     }
 
     // Builders for Dense Layer
@@ -29,20 +29,16 @@ public class Layers {
         return new Dense<>(units, Dense.Options.builder().setActivation(activation).build());
     }
 
-    public static <T extends Number> Dense<T> dense(int units, Activations activation, Initializers kernelInitializer, Initializers biasInitializer) {
-        return new Dense<>(units, Dense.Options.builder()
-                .setActivation(activation)
-                .setKernelInitializer(kernelInitializer)
-                .setBiasInitializer(biasInitializer)
-                .build());
+    public static <T extends Number> Dense<T> dense(int units, Activations activation, Initializers kernelInitializer,
+            Initializers biasInitializer) {
+        return new Dense<>(units, Dense.Options.builder().setActivation(activation)
+                .setKernelInitializer(kernelInitializer).setBiasInitializer(biasInitializer).build());
     }
 
-    public static <T extends Number> Dense<T> dense(int units, Activation<T> activation, Initializer kernelInitializer, Initializer biasInitializer) {
-        return new Dense<>(units, Dense.Options.builder()
-                .setActivation(activation)
-                .setKernelInitializer(kernelInitializer)
-                .setBiasInitializer(biasInitializer)
-                .build());
+    public static <T extends Number> Dense<T> dense(int units, Activation<T> activation, Initializer kernelInitializer,
+            Initializer biasInitializer) {
+        return new Dense<>(units, Dense.Options.builder().setActivation(activation)
+                .setKernelInitializer(kernelInitializer).setBiasInitializer(biasInitializer).build());
     }
 
     // Builders for Flatten Layer

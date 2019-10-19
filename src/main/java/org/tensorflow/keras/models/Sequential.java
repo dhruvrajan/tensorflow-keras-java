@@ -1,18 +1,26 @@
 package org.tensorflow.keras.models;
 
-import org.tensorflow.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.tensorflow.Operand;
+import org.tensorflow.Session;
+import org.tensorflow.Shape;
+import org.tensorflow.Tensor;
 import org.tensorflow.data.GraphLoader;
+import org.tensorflow.keras.callbacks.Callback;
 import org.tensorflow.keras.layers.Input;
 import org.tensorflow.keras.layers.Layer;
+import org.tensorflow.keras.logs.BatchBeginLogs;
+import org.tensorflow.keras.logs.BatchEndLogs;
+import org.tensorflow.keras.logs.EpochBeginLogs;
+import org.tensorflow.keras.logs.EpochEndLogs;
 import org.tensorflow.keras.losses.Loss;
 import org.tensorflow.keras.metrics.Metric;
 import org.tensorflow.keras.optimizers.Optimizer;
 import org.tensorflow.op.Ops;
 import org.tensorflow.op.core.Variable;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class Sequential<T extends Number> extends Model<T> {
     private Input<T> firstLayer;
@@ -20,8 +28,7 @@ public class Sequential<T extends Number> extends Model<T> {
     private List<Layer<T>> layers;
 
     private Loss loss;
-    private List<Metric> metrics;
-;
+    private List<Metric> metrics;;
 
     private List<Variable<T>> trainableVars;
     private List<Operand<T>> initializerOps;
@@ -92,17 +99,20 @@ public class Sequential<T extends Number> extends Model<T> {
     }
 
     @Override
-    public void fit(Ops tf, GraphLoader<T> train, GraphLoader<T> test, int epochs, int batchSize) {
+    public void fit(Ops tf, GraphLoader<T> train, GraphLoader<T> test, int epochs, int batchSize,
+            List<Callback> callbacks) {
         try (Session session = new Session(tf.scope().graph())) {
-            runTrainingLoop(tf, session, train, epochs, batchSize, true);
-            runPredictionLoop(tf, session, test, batchSize);
+            runTrainingLoop(tf, session, train, epochs, batchSize, callbacks, true);
+            runPredictionLoop(tf, session, test, batchSize, callbacks);
         }
     }
-    private void runPredictionLoop(Ops tf, Session session, GraphLoader<T> data, int batchSize) {
-        runTrainingLoop(tf, session, data, 1, batchSize, false);
+
+    private void runPredictionLoop(Ops tf, Session session, GraphLoader<T> data, int batchSize, List<Callback> callbacks) {
+        runTrainingLoop(tf, session, data, 1, batchSize, callbacks, false);
     }
 
-    private void runTrainingLoop(Ops tf, Session session, GraphLoader<T> data, int epochs, int batchSize, boolean training) {
+    private void runTrainingLoop(Ops tf, Session session, GraphLoader<T> data, int epochs, int batchSize,
+            List<Callback> callbacks, boolean training) {
         data.batch(batchSize);
         data.build(tf);
         Operand<T>[] dataOps = data.getBatchOperands();
@@ -120,6 +130,10 @@ public class Sequential<T extends Number> extends Model<T> {
 
         List<Operand<T>> minimize = training ? optimizer.minimize(tf, batchLoss, this.trainableVars) : null;
 
+        for (Callback clbk : callbacks) {
+            clbk.onTrainBegin();
+        }
+
         if (training) {
             runner = session.runner();
 
@@ -131,13 +145,24 @@ public class Sequential<T extends Number> extends Model<T> {
             runner.run();
         }
 
-
         for (int epoch = 0; epoch < epochs; epoch++) {
+
+            for (Callback clbk : callbacks) {
+                clbk.onEpochBegin(epoch, new EpochBeginLogs());
+            }
+
             float trainEpochAccuracy = 0;
             float trainEpochLoss = 0;
 
             // Load Batches
             for (int i = 0; i < data.numBatches(); i++) {
+
+                for (Callback clbk : callbacks) {
+                    BatchBeginLogs logs = new BatchBeginLogs();
+                    logs.batchSize = batchSize;
+                    clbk.onBatchBegin(i, logs);
+                }
+
                 runner = session.runner();
                 data.feedSessionRunner(runner, i);
 
@@ -151,17 +176,39 @@ public class Sequential<T extends Number> extends Model<T> {
                 runner.fetch(batchAccuracy);
 
                 List<Tensor<?>> values = runner.run();
-                try (Tensor<?> lossTensor = values.get(0);
-                     Tensor<?> accuracyTensor = values.get(1)) {
+                try (Tensor<?> lossTensor = values.get(0); Tensor<?> accuracyTensor = values.get(1)) {
                     trainEpochAccuracy += accuracyTensor.floatValue() / data.numBatches();
                     trainEpochLoss += lossTensor.floatValue() / data.numBatches();
+
+                    for (Callback clbk : callbacks) {
+                        BatchEndLogs logs = new BatchEndLogs();
+                        logs.batchAccuracy = accuracyTensor.floatValue();
+                        logs.batchLoss = lossTensor.floatValue();
+                        clbk.onBatchEnd(i, logs);
+                    }
                 }
             }
 
             if (training) {
+                for (Callback clbk : callbacks) {
+                    EpochEndLogs logs = new EpochEndLogs();
+                    logs.trainAccuracy = trainEpochAccuracy;
+                    logs.trainLoss = trainEpochLoss;
+                    clbk.onEpochEnd(epoch, logs);
+                }
                 System.out.println("Epoch " + epoch + " train accuracy: " + trainEpochAccuracy + "  loss: " + trainEpochLoss);
             } else {
+                for (Callback clbk : callbacks) {
+                    EpochEndLogs logs = new EpochEndLogs();
+                    logs.valAccuracy = trainEpochAccuracy;
+                    logs.valLoss = trainEpochLoss;
+                    clbk.onEpochEnd(epoch, logs);
+                }
                 System.out.println("Test accuracy: " + trainEpochAccuracy + " loss: " + trainEpochLoss);
+            }
+
+            for (Callback clbk : callbacks) {
+                clbk.onTrainEnd();
             }
         }
 
