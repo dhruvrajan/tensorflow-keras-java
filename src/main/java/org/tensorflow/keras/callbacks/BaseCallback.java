@@ -13,28 +13,31 @@ public class BaseCallback extends Callback {
 
     @Override
     public void onEpochBegin(int epoch, EpochBeginLogs logs) {
-        if (epoch % epochInterval == 0) {
+        if (epochInterval > 0  && epoch % epochInterval == 0) {
             System.out.println("Epoch #" + epoch + " ");
         }
     }
 
     @Override
     public void onEpochEnd(int epoch, EpochEndLogs logs) {
-        if (epoch % epochInterval == 0) {
-            System.out.println("acc = " + logs.trainAccuracy + " loss = " + logs.trainLoss);
+        if (epochInterval > 0 && epoch % epochInterval == 0) {
+            if (logs.trainAccuracy != null || logs.trainLoss != null)
+                System.out.println("acc = " + logs.trainAccuracy + " loss = " + logs.trainLoss);
+            if (logs.valAccuracy != null || logs.valLoss != null)
+                System.out.println("val acc = " + logs.valAccuracy + " val loss = " + logs.valLoss);
         }
     }
 
     @Override
     public void onBatchBegin(int batch, BatchBeginLogs logs) {
-        if (batch % batchInterval == 0) {
+        if (batchInterval > 0 && batch % batchInterval == 0) {
             System.out.print("Training batch #" + batch + ", size = " + logs.batchSize );
         }
     }
 
     @Override
     public void onBatchEnd(int batch, BatchEndLogs logs) {
-        if (batch % batchInterval == 0) {
+        if (batchInterval > 0 && batch % batchInterval == 0) {
             System.out.println(" acc = " + logs.batchAccuracy + " loss = " + logs.batchLoss);
         }
     }

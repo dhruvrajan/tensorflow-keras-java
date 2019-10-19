@@ -1,10 +1,10 @@
 package org.tensorflow.keras.logs;
 
 public class EpochEndLogs extends Logs {
-    public float trainAccuracy;
-    public float trainLoss;
+    public Float trainAccuracy;
+    public Float trainLoss;
     
     // Validation Logs
-    public float valAccuracy;
-    public float valLoss;
+    public Float valAccuracy;
+    public Float valLoss;
 }

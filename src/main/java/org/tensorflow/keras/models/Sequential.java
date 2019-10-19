@@ -159,7 +159,7 @@ public class Sequential<T extends Number> extends Model<T> {
 
                 for (Callback clbk : callbacks) {
                     BatchBeginLogs logs = new BatchBeginLogs();
-                    logs.batchSize = batchSize;
+                    logs.batchSize = (long) batchSize;
                     clbk.onBatchBegin(i, logs);
                 }
 
