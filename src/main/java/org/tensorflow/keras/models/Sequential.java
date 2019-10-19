@@ -196,7 +196,6 @@ public class Sequential<T extends Number> extends Model<T> {
                     logs.trainLoss = trainEpochLoss;
                     clbk.onEpochEnd(epoch, logs);
                 }
-                System.out.println("Epoch " + epoch + " train accuracy: " + trainEpochAccuracy + "  loss: " + trainEpochLoss);
             } else {
                 for (Callback clbk : callbacks) {
                     EpochEndLogs logs = new EpochEndLogs();
@@ -204,7 +203,6 @@ public class Sequential<T extends Number> extends Model<T> {
                     logs.valLoss = trainEpochLoss;
                     clbk.onEpochEnd(epoch, logs);
                 }
-                System.out.println("Test accuracy: " + trainEpochAccuracy + " loss: " + trainEpochLoss);
             }
 
             for (Callback clbk : callbacks) {

@@ -3,27 +3,39 @@ package org.tensorflow.keras.callbacks;
 import org.tensorflow.keras.logs.*;
 
 public class BaseCallback extends Callback {
+    private int epochInterval;
+    private int batchInterval;
+
+    public BaseCallback(int epochInterval, int batchInterval) {
+        this.epochInterval = epochInterval;
+        this.batchInterval = batchInterval;
+    }
+
     @Override
     public void onEpochBegin(int epoch, EpochBeginLogs logs) {
-        //System.out.println("Begin Epoch: " + epoch);
+        if (epoch % epochInterval == 0) {
+            System.out.println("Epoch #" + epoch + " ");
+        }
     }
 
     @Override
     public void onEpochEnd(int epoch, EpochEndLogs logs) {
-        System.out.println("Finished Epoch " + epoch + " acc = " + logs.trainAccuracy + " loss = " + logs.trainLoss);
+        if (epoch % epochInterval == 0) {
+            System.out.println("acc = " + logs.trainAccuracy + " loss = " + logs.trainLoss);
+        }
     }
 
     @Override
     public void onBatchBegin(int batch, BatchBeginLogs logs) {
-        if (batch % 100 == 0) {
-//            System.out.print("Training batch #" + batch + ", size = " + logs.batchSize);
+        if (batch % batchInterval == 0) {
+            System.out.print("Training batch #" + batch + ", size = " + logs.batchSize );
         }
     }
 
     @Override
     public void onBatchEnd(int batch, BatchEndLogs logs) {
-        if (batch % 100 == 0) {
-//            System.out.println("acc = " + logs.batchAccuracy + " loss = " + logs.batchLoss);
+        if (batch % batchInterval == 0) {
+            System.out.println(" acc = " + logs.batchAccuracy + " loss = " + logs.batchLoss);
         }
     }
 

@@ -6,7 +6,7 @@ public enum Callbacks {
     public static Callback select(Callbacks callbackType) {
         switch(callbackType) {
             case baseCallback:
-                return new BaseCallback();
+                return new BaseCallback(1, -1);
             default:
                 throw new IllegalArgumentException("Invalid callback type");
         }
