@@ -55,7 +55,7 @@ public class DataUtils {
                     System.out.println(fname + " already exists; no need to download.");
                     return;
                 } else {
-                    System.out.println(fname + " exists but is corrupted. Re-downloading...");
+//                    System.out.println(fname + " exists but is corrupted. Re-downloading...");
                     return;
                 }
             }

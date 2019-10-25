@@ -14,9 +14,11 @@ import org.tensorflow.op.Ops;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.tensorflow.keras.callbacks.Callback;
 import org.tensorflow.keras.callbacks.Callbacks;
+import org.tensorflow.op.core.SummaryWriter;
 
 public abstract class Model<T extends Number> extends Layer<T> {
     public Model(Class<T> dtype) {
@@ -26,12 +28,25 @@ public abstract class Model<T extends Number> extends Layer<T> {
         this.built = true;
     }
 
-    public abstract void compile(Ops tf, Optimizer<T> optimizer, Loss loss, List<Metric> metric)
-            throws Exception;
+    public abstract void compile(Ops tf, Optimizer<T> optimizer, Loss loss, List<Metric> metric) throws Exception;
+
+    public void compile(Ops tf, Optimizers optimizer, Losses loss, Metrics... metrics) throws Exception {
+        compile(tf, Optimizers.select(optimizer), Losses.select(loss),
+                Arrays.stream(metrics).map(Metrics::select).collect(Collectors.toList()));
+    }
 
     public void compile(Ops tf, CompileOptions compilerBuilder) throws Exception {
-        compile(tf, (Optimizer<T>) compilerBuilder.optimizer, compilerBuilder.loss,compilerBuilder.metrics);
+        compile(tf, compilerBuilder.getOptimizer(), compilerBuilder.loss, compilerBuilder.metrics);
     }
+
+    public void fit(Ops tf, GraphLoader<T> train, GraphLoader<T> test, int epochs, int batchSize) {
+        fit(tf, train, test, epochs, batchSize, Callbacks.baseCallback);
+    }
+
+    public void fit(Ops tf, GraphLoader<T> train, GraphLoader<T> test, int epochs, int batchSize, Callbacks... callbacks) {
+        fit(tf, train, test, epochs, batchSize, Arrays.stream(callbacks).map(Callbacks::select).collect(Collectors.toList()));
+    }
+
 
     public abstract void fit(Ops tf, GraphLoader<T> train, GraphLoader<T> test, int epochs, int batchSize, List<Callback> callbacks);
 
@@ -44,6 +59,14 @@ public abstract class Model<T extends Number> extends Layer<T> {
         private Optimizer optimizer;
 
         private Loss loss;
+
+        public static CompileOptions defaults() {
+            return builder()
+                    .setOptimizer(Optimizers.sgd)
+                    .setLoss(Losses.sparseCategoricalCrossentropy)
+                    .addMetric(Metrics.accuracy)
+                    .build();
+        }
 
         public static Builder builder() {
             return new Builder();
@@ -96,8 +119,8 @@ public abstract class Model<T extends Number> extends Layer<T> {
             return this.metrics;
         }
 
-        public Optimizer getOptimizer() {
-            return this.optimizer;
+        public <T extends Number> Optimizer<T> getOptimizer() {
+            return (Optimizer<T>) this.optimizer;
         }
 
         public Loss getLoss() {
@@ -119,10 +142,15 @@ public abstract class Model<T extends Number> extends Layer<T> {
             return batchSize;
         }
 
+        public List<Callback> getCallbacks() {
+            return callbacks;
+        }
+
         public static FitOptions defaults() {
             return new Builder()
                     .setEpochs(1)
                     .setBatchSize(32)
+                    .addCallback(Callbacks.baseCallback)
                     .build();
         }
 

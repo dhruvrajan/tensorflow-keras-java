@@ -1,80 +1,54 @@
-//package org.tensorflow.keras.layers;
-//
-//import org.tensorflow.Operand;
-//import org.tensorflow.Shape;
-//import org.tensorflow.keras.activations.Activation;
-//import org.tensorflow.keras.activations.Activations;
-//import org.tensorflow.keras.initializers.Initializer;
-//import org.tensorflow.keras.initializers.Initializers;
-//import org.tensorflow.op.Ops;
-//
-//public class Conv2D extends Layer<Float> {
-//
-//    enum Padding {valid, same}
-//
-//    enum DataFormat {channelsLast, channelsFirst}
-//
-//    org.tensorflow.op.core.Conv2D<Float> convOp;
-//
-//    private Conv2D(long filters, long[] kernel) {
-//        super(1);
-//    }
-//
-//    @Override
-//    public void build(Ops tf, Shape inputShape) {
-//    }
-//
-//    @Override
-//    public Shape computeOutputShape(Shape inputShape) {
-//
-//    }
-//
-//    @Override
-//    protected Operand<Float> call(Ops tf, Operand<Float>... inputs) {
-//        return this.call(tf, inputs[0]);
-//    }
-//
-//    private Operand<Float> call(Ops tf, Operand<Float> input) {
-//    }
-//
-//    class Options {
-//        long[] strides = new long[]{1, 1};
-//        long[] dilationRate = new long[]{1, 1};
-//
-//        Padding padding = Padding.valid;
-//        DataFormat dataFormat = DataFormat.channelsLast;
-//
-//        Activation<Float> activation = Activations.select(Activations.linear);
-//        Initializer<Float> kernelInitializer = Initializers.select(Initializers.randomNormal);
-//        Initializer<Float> biasInitializer = Initializers.select(Initializers.zeros);
-//        boolean useBias = true;
-//
-//        public Builder builder() {
-//            return new Builder();
-//        }
-//
-//        class Builder {
-//            Options options = new Options();
-//
-//            public Builder setStrides(long strideHeight, long strideWidth) {
-//                options.strides = new long[]{strideHeight, strideWidth};
-//                return this;
-//            }
-//
-//            public Builder setDilationRate(long dilationHeight, long dilationWidth) {
-//                options.strides = new long[]{dilationHeight, dilationWidth};
-//                return this;
-//            }
-//
-//          public Builder setPadding(Padding padding) {
-//            options.padding = padding;
-//            return this;
-//          }
-//
-//          public Builder setDataFormat(DataFormat dataFormat) {
-////            options.strides ;
-//            return this;
-//          }
-//        }
-//    }
-//}
+package org.tensorflow.keras.layers;
+
+import org.tensorflow.Operand;
+import org.tensorflow.Shape;
+import org.tensorflow.op.Ops;
+import org.tensorflow.op.core.Constant;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class Conv2D extends Layer<Float> {
+    ConvOptions options;
+    long filtersIn;
+    long[] kernelIn;
+    Constant<Float> filters;
+    Constant<Long> strides;
+    private Conv2D(long filters, long[] kernel) {
+        super(1);
+        this.options = ConvOptions.defaults(2, filters, kernel);
+        this.filtersIn = filters;
+        this.kernelIn = kernel;
+    }
+
+    @Override
+    public void build(Ops tf, Shape inputShape) {
+        filters = tf.constant(filtersIn, Float.class);
+        strides = tf.constant(options.getStrides());
+    }
+
+    @Override
+    public Shape computeOutputShape(Shape inputShape) {
+        return inputShape;
+    }
+
+    @Override
+    protected Operand<Float> call(Ops tf, Operand<Float>... inputs) {
+        return this.call(tf, inputs[0]);
+    }
+
+    public static List<Long> toList(long[] arr) {
+        return Arrays.stream(arr).boxed().collect(Collectors.toList());
+    }
+
+    private Operand<Float> call(Ops tf, Operand<Float> input) {
+        return tf.conv2D(input, filters,
+                toList(options.getStrides()),
+                options.getPadding().name(),
+                org.tensorflow.op.core.Conv2D
+                        .dataFormat(options.getDataFormat().name())
+                        .dilations(toList(options.getDilationRate())));
+    }
+
+}
