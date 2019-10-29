@@ -8,9 +8,9 @@ import org.tensorflow.op.core.Placeholder;
 public class Accuracy extends Metric {
   @Override
   public <T extends Number> Operand<T> apply(Ops tf, Class<T> dtype, Operand<T> output, Operand<T> label) {
-    Operand<Long> predicted = tf.argMax(output, tf.constant(1));
-    Operand<Long> expected = tf.argMax(label, tf.constant(1));
+    Operand<Long> predicted = tf.math.argMax(output, tf.constant(1));
+    Operand<Long> expected = tf.math.argMax(label, tf.constant(1));
 
-    return tf.mean(tf.cast(tf.equal(predicted, expected), dtype), tf.constant(0));
+    return tf.math.mean(tf.dtypes.cast(tf.math.equal(predicted, expected), dtype), tf.constant(0));
   }
 }

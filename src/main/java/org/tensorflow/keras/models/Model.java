@@ -1,7 +1,9 @@
 package org.tensorflow.keras.models;
 
-import org.tensorflow.Shape;
+import org.tensorflow.Graph;
 import org.tensorflow.data.GraphLoader;
+import org.tensorflow.keras.callbacks.Callback;
+import org.tensorflow.keras.callbacks.Callbacks;
 import org.tensorflow.keras.layers.Layer;
 import org.tensorflow.keras.losses.Loss;
 import org.tensorflow.keras.losses.Losses;
@@ -15,10 +17,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import org.tensorflow.keras.callbacks.Callback;
-import org.tensorflow.keras.callbacks.Callbacks;
-import org.tensorflow.op.core.SummaryWriter;
 
 public abstract class Model<T extends Number> extends Layer<T> {
     public Model(Class<T> dtype) {
@@ -39,19 +37,19 @@ public abstract class Model<T extends Number> extends Layer<T> {
         compile(tf, compilerBuilder.getOptimizer(), compilerBuilder.loss, compilerBuilder.metrics);
     }
 
-    public void fit(Ops tf, GraphLoader<T> train, GraphLoader<T> test, int epochs, int batchSize) {
-        fit(tf, train, test, epochs, batchSize, Callbacks.baseCallback);
+    public void fit(Ops tf, Graph graph, GraphLoader<T> train, GraphLoader<T> test, int epochs, int batchSize) {
+        fit(tf, graph, train, test, epochs, batchSize, Callbacks.baseCallback);
     }
 
-    public void fit(Ops tf, GraphLoader<T> train, GraphLoader<T> test, int epochs, int batchSize, Callbacks... callbacks) {
-        fit(tf, train, test, epochs, batchSize, Arrays.stream(callbacks).map(Callbacks::select).collect(Collectors.toList()));
+    public void fit(Ops tf, Graph graph, GraphLoader<T> train, GraphLoader<T> test, int epochs, int batchSize, Callbacks... callbacks) {
+        fit(tf, graph, train, test, epochs, batchSize, Arrays.stream(callbacks).map(Callbacks::select).collect(Collectors.toList()));
     }
 
 
-    public abstract void fit(Ops tf, GraphLoader<T> train, GraphLoader<T> test, int epochs, int batchSize, List<Callback> callbacks);
+    public abstract void fit(Ops tf, Graph graph, GraphLoader<T> train, GraphLoader<T> test, int epochs, int batchSize, List<Callback> callbacks);
 
-    public void fit(Ops tf, GraphLoader<T> train, GraphLoader<T> test, FitOptions fitOptions) {
-        fit(tf, train, test, fitOptions.epochs, fitOptions.batchSize, fitOptions.callbacks);
+    public void fit(Ops tf, Graph graph, GraphLoader<T> train, GraphLoader<T> test, FitOptions fitOptions) {
+        fit(tf, graph, train, test, fitOptions.epochs, fitOptions.batchSize, fitOptions.callbacks);
     }
 
     public static class CompileOptions {

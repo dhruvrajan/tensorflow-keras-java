@@ -10,12 +10,5 @@ import org.tensorflow.utils.SessionRunner;
 import java.util.Iterator;
 
 public interface GraphLoader<T> extends Dataset<T> {
-
-  Operand<T>[] getBatchOperands();
-
-  void build(Ops tf);
-
-  long size();
-
-  Session.Runner  feedSessionRunner(Session.Runner runner, long batch);
+  Iterator<Tensor<?>[]> batchIterator(Ops tf);
 }

@@ -2,12 +2,15 @@ package org.tensorflow.data;
 
 import org.tensorflow.*;
 import org.tensorflow.op.Ops;
+import org.tensorflow.op.core.Constant;
 import org.tensorflow.op.core.Placeholder;
 import org.tensorflow.op.core.Slice;
 
-import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
-public class GraphModeTensorFrame<T> extends TensorFrame<T> implements GraphLoader<T>, AutoCloseable {
+public class GraphModeTensorFrame<T> extends TensorFrame<T> implements AutoCloseable {
+    private Graph graphRef;
     private Class<T> dtype;
 
     private Tensor<T>[] dataTensors;
@@ -20,7 +23,8 @@ public class GraphModeTensorFrame<T> extends TensorFrame<T> implements GraphLoad
     private boolean built = false;
 
     @SafeVarargs
-    public GraphModeTensorFrame(Class<T> dtype, Tensor<T> firstTensor, Tensor<T>... tensors) {
+    public GraphModeTensorFrame(Graph graph, Class<T> dtype, Tensor<T> firstTensor, Tensor<T>... tensors) {
+        this.graphRef = graph;
         this.dtype = dtype;
 
         // Check first dimension matches
@@ -64,7 +68,6 @@ public class GraphModeTensorFrame<T> extends TensorFrame<T> implements GraphLoad
             batchSize[i] = tf.placeholder(Long.class, Placeholder.shape(Shape.make(this.dataTensors[i].numDimensions())));
         }
 
-
         // Create batch slice operands
         this.batchOperands = new Slice[this.length()];
         for (int i = 0; i < this.length(); i++) {
@@ -75,43 +78,67 @@ public class GraphModeTensorFrame<T> extends TensorFrame<T> implements GraphLoad
     }
 
     @Override
-    public Session.Runner feedSessionRunner(Session.Runner runner, long batch) {
-        // Feed Data Tensors
-        for (int i = 0; i < dataPlaceholders.length; i++) {
-            runner.feed(dataPlaceholders[i].asOutput(), dataTensors[i]);
-        }
+    public long numTensors() {
+        return this.batchOperands.length;
+    }
 
-        // Feed Batch Selectors
-        for (int i = 0; i < this.length(); i++) {
-            long[] start = new long[dataTensors[i].numDimensions()];
-            Arrays.fill(start, 0);
-            start[0] = batch * this.batchSize();
+    @Override
+    public long numElementsPerTensor() {
+        return this.dataTensors[0].shape()[0];
+    }
 
-            long[] size = new long[dataTensors[i].numDimensions()];
-            Arrays.fill(size, -1);
-            size[0] = this.batchSize();
+//    @Override
+    public Iterator<Tensor<?>[]> batchIterator(Ops tf) {
 
-            runner.feed(this.batchStart[i].asOutput(), Tensors.create(start));
-            runner.feed(this.batchSize[i].asOutput(), Tensors.create(size));
-        }
+            return new Iterator<>() {
+                long currentBatch = 0;
 
-        return runner;
+                @Override
+                public boolean hasNext() {
+                    return this.currentBatch < numBatches();
+                }
+
+                @Override
+                public Tensor<?>[] next() {
+                    try (Session session = new Session(graphRef)) {
+                        Session.Runner runner = session.runner();
+
+                        // Feed Data Tensors
+                        for (int i = 0; i < dataPlaceholders.length; i++) {
+                            runner.feed(dataPlaceholders[i].asOutput(), dataTensors[i]);
+                        }
+
+                        // Feed Batch Selectors
+                        for (int i = 0; i < length(); i++) {
+                            long[] startSelector = Utils.batchStartSelector(tf, currentBatch * getBatchSize(), dataTensors[i].numDimensions());
+                            long[] sizeSelector = Utils.batchSizeSelector(tf, getBatchSize(), dataTensors[i].numDimensions());
+
+                            runner.feed(batchStart[i].asOutput(), Tensors.create(startSelector));
+                            runner.feed(batchSize[i].asOutput(), Tensors.create(sizeSelector));
+                        }
+
+                        // Fetch Sliced Batch Operands
+                        for (Operand<T> op : batchOperands) {
+                            runner.fetch(op);
+                        }
+
+                        List<Tensor<?>> outTensors = runner.run();
+
+                        Tensor<?>[] tensors = new Tensor[outTensors.size()];
+                        for (int i = 0; i < outTensors.size(); i++) {
+                            tensors[i] = outTensors.get(i);
+                        }
+
+                        currentBatch++;
+                        return tensors;
+                    }
+                }
+            };
+
     }
 
     public boolean isBuilt() {
         return built;
-    }
-
-    public Tensor<T>[] getDataTensors() {
-        return dataTensors;
-    }
-
-    public Placeholder<T>[] getDataPlaceholders() {
-        return dataPlaceholders;
-    }
-
-    public Operand<T>[] getBatchOperands() {
-        return batchOperands;
     }
 
     /**

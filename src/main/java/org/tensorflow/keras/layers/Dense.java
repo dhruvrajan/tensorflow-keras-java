@@ -73,7 +73,7 @@ public class Dense<T extends Number> extends Layer<T> {
     }
 
     private Operand<T> call(Ops tf, Operand<T> input) {
-        Operand<T> signal = tf.add(tf.matMul(input, this.kernel), this.bias);
+        Operand<T> signal = tf.math.add(tf.linalg.matMul(input, this.kernel), this.bias);
         return this.activation.apply(tf, signal);
     }
 

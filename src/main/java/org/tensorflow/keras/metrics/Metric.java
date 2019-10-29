@@ -1,9 +1,10 @@
 package org.tensorflow.keras.metrics;
 
-import org.tensorflow.Operand;
 import org.tensorflow.keras.mixin.LossOrMetric;
-import org.tensorflow.op.Ops;
 
+/**
+ * Base class for Metric types.
+ */
 public abstract class Metric implements LossOrMetric {
 
 }

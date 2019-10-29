@@ -17,12 +17,12 @@
         <dependency>
             <groupId>org.tensorflow</groupId>
             <artifactId>tensorflow</artifactId>
-            <version>1.13.1</version>
+            <version>1.15.0</version>
         </dependency>
         <dependency>
             <groupId>org.tensorflow</groupId>
             <artifactId>libtensorflow_jni_gpu</artifactId>
-            <version>1.13.1</version>
+            <version>1.15.0</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

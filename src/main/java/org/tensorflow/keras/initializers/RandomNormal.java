@@ -20,7 +20,8 @@ public class RandomNormal extends Initializer {
 
     @Override
     public <T extends Number> Operand<T> initialize(Ops tf, Operand<Integer> shape, Class<T> dtype) {
-        return tf.parameterizedTruncatedNormal(
+
+        return tf.random.parameterizedTruncatedNormal(
                 shape,
                 tf.constant(this.mean, dtype),
                 tf.constant(this.stdev, dtype),

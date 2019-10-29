@@ -4,14 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.tensorflow.*;
 import org.tensorflow.keras.utils.Keras;
 import org.tensorflow.op.Ops;
-import org.tensorflow.op.core.Batch;
-import org.tensorflow.op.core.ConcatenateDataset;
 import org.tensorflow.op.core.Placeholder;
-import org.tensorflow.op.core.Slice;
 
-import java.nio.IntBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;

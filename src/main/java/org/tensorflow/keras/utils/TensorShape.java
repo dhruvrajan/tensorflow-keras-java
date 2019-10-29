@@ -2,6 +2,7 @@ package org.tensorflow.keras.utils;
 
 import java.lang.Math;
 import org.tensorflow.Shape;
+import org.tensorflow.Tensors;
 
 import static org.tensorflow.keras.utils.Keras.*;
 
@@ -61,6 +62,19 @@ public class TensorShape {
   public TensorShape addToFront(long dim) {
     this.dims = Keras.concatenate(dim, dims);
     return this;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof TensorShape) {
+      TensorShape ts  = (TensorShape) obj;
+      for (int i = 0; i < dims.length; i++) {
+        if (dims[i] != ts.dims[i]) return false;
+      }
+      return true;
+    }
+
+    return false;
   }
 
   public Shape toShape() {

@@ -3,7 +3,6 @@ package org.tensorflow.keras.activations;
 import org.tensorflow.Operand;
 import org.tensorflow.Shape;
 import org.tensorflow.keras.layers.Layer;
-import org.tensorflow.keras.mixin.ActivationFunction;
 import org.tensorflow.op.Ops;
 
 /**

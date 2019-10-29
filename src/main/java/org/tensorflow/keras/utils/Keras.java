@@ -2,8 +2,10 @@ package org.tensorflow.keras.utils;
 
 import org.tensorflow.Operand;
 import org.tensorflow.Shape;
+import org.tensorflow.Tensor;
 import org.tensorflow.op.Ops;
 
+import java.nio.FloatBuffer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -81,6 +83,12 @@ public class Keras {
       dims[i] = shape.size(i);
     }
     return dims;
+  }
+
+  public static void printTensor(Tensor<Float> tensor) {
+    FloatBuffer buffer = FloatBuffer.allocate(new TensorShape(shapeFromDims(tensor.shape())).numElements());
+    tensor.writeTo(buffer);
+    System.out.println(Arrays.toString(buffer.array()));
   }
 
   public static Shape shapeFromDims(long... dims) {

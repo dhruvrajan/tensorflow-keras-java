@@ -26,7 +26,7 @@ public class GradientDescentOptimizer<T extends Number> extends Optimizer<T> {
     public List<Operand<T>> applyGradients(Ops tf, List<Variable<T>> weights, Gradients gradients) {
         List<Operand<T>> targets = new ArrayList<>();
         for (int i = 0; i < weights.size(); i++) {
-            targets.add(tf.applyGradientDescent(weights.get(i), alpha, gradients.dy(i)));
+            targets.add(tf.train.applyGradientDescent(weights.get(i), alpha, gradients.dy(i)));
         }
 
         return targets;

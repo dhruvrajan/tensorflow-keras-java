@@ -5,6 +5,7 @@ import org.tensorflow.*;
 import org.tensorflow.op.Ops;
 
 import java.nio.FloatBuffer;
+import java.util.Iterator;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,41 +31,40 @@ class GraphModeTensorFrameTest {
 
              Tensor<Float> yTensor = Tensors.create(new float[]{0, 1, 2, 3, 4, 5, 6, 7, 8});
              GraphModeTensorFrame<Float> graphModeTensorFrame
-                     = new GraphModeTensorFrame<>(Float.class, XTensor, yTensor)) {
+                     = new GraphModeTensorFrame<>(graph, Float.class, XTensor, yTensor)) {
 
             Ops tf = Ops.create(graph);
 
             graphModeTensorFrame.build(tf);
-            graphModeTensorFrame.batch(batchSize);
+            graphModeTensorFrame.batch(batchSize, true);
 
-            Operand<Float>[] operands = graphModeTensorFrame.getBatchOperands();
-            Operand<Float> XOp = operands[0];
-            Operand<Float> yOp = operands[1];
-            try (Session session = new Session(graph)) {
-                for (int b = 0; b < graphModeTensorFrame.numBatches(); b++) {
-                    List<Tensor<?>> batches = graphModeTensorFrame
-                            .feedSessionRunner(session.runner(), b)
-                            .fetch(XOp).fetch(yOp).run();
 
-                    try (Tensor<?> XBatch = batches.get(0);
-                         Tensor<?> yBatch = batches.get(1)) {
-                        FloatBuffer XBuffer = FloatBuffer.allocate(3 * 2);
-                        FloatBuffer yBuffer = FloatBuffer.allocate(2);
+            Iterator<Tensor<?>[]> batchIterator = graphModeTensorFrame.batchIterator(tf);
 
-                        XBatch.writeTo(XBuffer);
-                        yBatch.writeTo(yBuffer);
+            int batchIndex = 0;
+            while (batchIterator.hasNext()) {
+                System.out.println(batchIndex);
+                Tensor<?>[] batch = batchIterator.next();
 
-                        float[] xarray = XBuffer.array();
+                try (Tensor<?> XBatch = batch[0];
+                     Tensor<?> yBatch = batch[1]) {
+                    FloatBuffer XBuffer = FloatBuffer.allocate(3 * 2);
+                    FloatBuffer yBuffer = FloatBuffer.allocate(2);
 
-                        for (int i = 0; i < XBatch.shape()[0]; i++) {
-                            for (int j = 0; j < XBatch.shape()[1]; j++) {
-                                float real = xarray[i * batchSize + j];
-                                assertEquals(b * graphModeTensorFrame.batchSize() * XBatch.shape()[1] + i * batchSize + j + 1, real);
-                            }
+                    XBatch.writeTo(XBuffer);
+                    yBatch.writeTo(yBuffer);
+
+                    float[] xarray = XBuffer.array();
+
+                    for (int i = 0; i < XBatch.shape()[0]; i++) {
+                        for (int j = 0; j < XBatch.shape()[1]; j++) {
+                            float real = xarray[i * batchSize + j];
+                            assertEquals(batchIndex * graphModeTensorFrame.getBatchSize() * XBatch.shape()[1] + i * batchSize + j + 1, real);
                         }
-
                     }
                 }
+
+                batchIndex++;
             }
         }
     }

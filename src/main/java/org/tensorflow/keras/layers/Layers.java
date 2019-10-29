@@ -22,17 +22,24 @@ public class Layers {
     }
 
     public static <T extends Number> Dense<T> dense(int units, Activation<T> activation) {
-        return new Dense<T>(units, Dense.Options.builder().setActivation(activation).build());
+        return new Dense<>(units, Dense.Options.builder()
+                .setActivation(activation)
+                .build());
     }
 
     public static <T extends Number> Dense<T> dense(int units, Activations activation) {
-        return new Dense<>(units, Dense.Options.builder().setActivation(activation).build());
+        return new Dense<>(units, Dense.Options.builder()
+                .setActivation(activation)
+                .build());
     }
 
     public static <T extends Number> Dense<T> dense(int units, Activations activation, Initializers kernelInitializer,
             Initializers biasInitializer) {
-        return new Dense<>(units, Dense.Options.builder().setActivation(activation)
-                .setKernelInitializer(kernelInitializer).setBiasInitializer(biasInitializer).build());
+        return new Dense<>(units, Dense.Options.builder()
+                .setActivation(activation)
+                .setKernelInitializer(kernelInitializer)
+                .setBiasInitializer(biasInitializer)
+                .build());
     }
 
     public static <T extends Number> Dense<T> dense(int units, Activation<T> activation, Initializer kernelInitializer,
