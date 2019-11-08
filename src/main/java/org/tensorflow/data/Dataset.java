@@ -1,8 +1,7 @@
 package org.tensorflow.data;
 
-import org.tensorflow.Operand;
-
-import java.util.function.Function;
+import java.util.Iterator;
+import java.util.stream.Stream;
 
 /**
  * Represents a potentially large list of independent elements (samples),
@@ -10,6 +9,17 @@ import java.util.function.Function;
  * these elements.
  */
 public interface Dataset<T> {
+
+    /**
+     * Creates a new stream of dataset elements (data batches).
+     */
+//    Stream<T> stream();
+
+    /**
+     * Creates a new iterator over dataset elements (data batches).
+//     */
+//    Iterator<T> iterator();
+
     /**
      * Groups elements of this dataset into batches.
      *
@@ -25,13 +35,10 @@ public interface Dataset<T> {
         return batch(batchSize, true);
     }
 
-    /**
-     * Concatenates this `Dataset` with another.
-     *
-     * @param dataset A `Dataset` to be concatenated with this one.
-     * @return A `Dataset`.
-     */
-    Dataset<T> concatenate(Dataset<T> dataset);
 
-    Dataset<T> filter(Function<Operand<T>, Operand<T>> filterFunc);
+    long getBatchSize();
+    long numBatches();
+
+    long numTensors();
+    long numElementsPerTensor();
 }

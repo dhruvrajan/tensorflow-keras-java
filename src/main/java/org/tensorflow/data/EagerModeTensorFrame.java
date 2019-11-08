@@ -8,7 +8,7 @@ import org.tensorflow.op.core.Slice;
 
 import java.util.Iterator;
 
-public class EagerModeTensorFrame<T> extends TensorFrame<T> {
+public class EagerModeTensorFrame<T> extends TensorFrame<T> implements EagerLoader<T> {
     // Number of elements in this tensor frame
     private long numElements;
 
