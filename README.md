@@ -1,3 +1,10 @@
+NOTE: Development has moved to [`tensorflow/java`](https://github.com/tensorflow/java).
+
+
+
+
+
+
 # Tensorflow-Keras (Java)
 
 This repository contains a JVM implementation of the Keras API, built on [Tensorflow Java](https://www.tensorflow.org/api_docs/java/reference/org/tensorflow/package-summary).
