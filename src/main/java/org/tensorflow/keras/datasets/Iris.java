@@ -1,11 +1,16 @@
  package org.tensorflow.keras.datasets;
 
- import org.tensorflow.Tensors;
+ import org.tensorflow.Tensor;
  import org.tensorflow.data.GraphLoader;
  import org.tensorflow.data.GraphModeTensorFrame;
  import org.tensorflow.keras.utils.DataUtils;
  import org.tensorflow.keras.utils.Keras;
+ import org.tensorflow.ndarray.FloatNdArray;
+ import org.tensorflow.ndarray.Shape;
+ import org.tensorflow.ndarray.StdArrays;
+ import org.tensorflow.types.TFloat32;
  import org.tensorflow.utils.Pair;
+ import org.tensorflow.utils.Tensors;
 
  import java.io.BufferedReader;
  import java.io.FileReader;
@@ -39,7 +44,7 @@
         DataUtils.getFile(LOCAL_PREFIX + LOCAL_FILE, IRIS_ORIGIN);
     }
 
-    public static Pair<GraphLoader<Float>, GraphLoader<Float>> loadData(double val_split) throws IOException {
+    public static Pair<GraphLoader<TFloat32>, GraphLoader<TFloat32>> loadData(double val_split) throws IOException {
         Iris.download();
         try (BufferedReader br = new BufferedReader(new FileReader(
                 Keras.kerasPath(LOCAL_PREFIX + LOCAL_FILE).toFile()))) {
@@ -68,8 +73,7 @@
                     xvector[i] = Float.parseFloat(xstring[i]);
                 }
 
-                float[] yvector = oneHot(COLOR.valueOf(values[1]).getValue(),
- COLOR.values().length);
+                float[] yvector = oneHot(COLOR.valueOf(values[1]).getValue(), COLOR.values().length);
 
                 XTrain[count] = xvector;
                 yTrain[count] = yvector;
@@ -87,19 +91,16 @@
                     xvector[i] = Float.parseFloat(xstring[i]);
                 }
 
-                float[] yvector = oneHot(COLOR.valueOf(values[1]).getValue(),
- COLOR.values().length);
+                float[] yvector = oneHot(COLOR.valueOf(values[1]).getValue(), COLOR.values().length);
 
                 XVal[count - trainSize] = xvector;
                 yVal[count - trainSize] = yvector;
                 count ++;
             }
 
-
-
             return new Pair<>(
-                    new GraphModeTensorFrame<>(Float.class, Tensors.create(XTrain), Tensors.create(yTrain)),
-                    new GraphModeTensorFrame<>(Float.class, Tensors.create(XVal), Tensors.create(yVal))
+                    new GraphModeTensorFrame<>(TFloat32.class, Tensors.create(XTrain), Tensors.create(yTrain)),
+                    new GraphModeTensorFrame<>(TFloat32.class, Tensors.create(XVal  ), Tensors.create(yVal  ))
             );
         }
     }

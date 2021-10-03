@@ -3,6 +3,7 @@ package org.tensorflow.utils;
 import org.tensorflow.Operand;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
+import org.tensorflow.types.family.TType;
 
 import java.util.List;
 
@@ -30,7 +31,7 @@ public class SessionRunner {
     return this;
   }
 
-  public <T> SessionRunner addTargets(List<Operand<T>> operands) {
+  public <T extends TType> SessionRunner addTargets(List<Operand<T>> operands) {
     for (Operand<?> operand : operands) {
       this.runner.addTarget(operand);
     }
@@ -77,14 +78,14 @@ public class SessionRunner {
     return this;
   }
 
-  public <T> SessionRunner fetch(List<Operand<T>> operands) {
+  public <T extends TType> SessionRunner fetch(List<Operand<T>> operands) {
     for (Operand<?> operand : operands) {
       this.runner.fetch(operand);
     }
     return this;
   }
 
-  public List<Tensor<?>> run() {
+  public List<Tensor/*<?>*/> run() {
     return this.runner.run();
   }
 }

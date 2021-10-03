@@ -1,6 +1,5 @@
 package org.tensorflow.keras.models;
 
-import org.tensorflow.Shape;
 import org.tensorflow.data.GraphLoader;
 import org.tensorflow.keras.layers.Layer;
 import org.tensorflow.keras.losses.Loss;
@@ -10,12 +9,13 @@ import org.tensorflow.keras.metrics.Metrics;
 import org.tensorflow.keras.optimizers.Optimizer;
 import org.tensorflow.keras.optimizers.Optimizers;
 import org.tensorflow.op.Ops;
+import org.tensorflow.types.family.TNumber;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public abstract class Model<T extends Number> extends Layer<T> {
+public abstract class Model<T extends TNumber> extends Layer<T> {
     public Model(Class<T> dtype) {
         // TODO:  For now, models take in only 1 input
         super(1);

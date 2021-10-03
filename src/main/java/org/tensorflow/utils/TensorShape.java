@@ -1,6 +1,6 @@
 package org.tensorflow.utils;
 
-import org.tensorflow.Shape;
+import org.tensorflow.ndarray.Shape;
 
 import java.util.Arrays;
 
@@ -163,6 +163,6 @@ public class TensorShape {
   }
 
   public Shape toShape() {
-    return Shape.make(head(dims), tail(dims));
+    return Shape.of(dims); // Shape.make(head(dims), tail(dims));
   }
 }

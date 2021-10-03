@@ -1,35 +1,35 @@
 package org.tensorflow.keras.layers;
 
 import org.tensorflow.Operand;
-import org.tensorflow.Shape;
 import org.tensorflow.keras.activations.Activation;
 import org.tensorflow.keras.activations.Activations;
 import org.tensorflow.keras.initializers.Initializer;
 import org.tensorflow.keras.initializers.Initializers;
 import org.tensorflow.keras.utils.TensorShape;
-import org.tensorflow.op.Op;
+import org.tensorflow.ndarray.Shape;
 import org.tensorflow.op.Ops;
 import org.tensorflow.op.core.Variable;
+import org.tensorflow.types.family.TNumber;
 
-public class Dense<T extends Number> extends Layer<T> {
-    private static int DENSE_INPUT_LENGTH = 1;
-    private int units;
+public class Dense<T extends TNumber> extends Layer<T> {
+    private static final int DENSE_INPUT_LENGTH = 1;
+    private final int units;
 
-    private static String KERNEL = "kernel";
-    private static String KERNEL_INIT = "kernelInit";
-    private static String BIAS = "bias";
-    private static String BIAS_INIT = "biasInit";
+    private static final String KERNEL      = "kernel";
+    private static final String KERNEL_INIT = "kernelInit";
+    private static final String BIAS        = "bias";
+    private static final String BIAS_INIT   = "biasInit";
 
     // weight tensors
     private Variable<T> kernel;
     private Variable<T> bias;
 
     // initializers
-    private Initializer kernelInitializer;
-    private Initializer biasInitializer;
+    private final Initializer kernelInitializer;
+    private final Initializer biasInitializer;
 
     // activation function
-    private Activation<T> activation;
+    private final Activation<T> activation;
 
     public Dense(int units, Dense.Options options) {
         super(DENSE_INPUT_LENGTH);
@@ -49,8 +49,8 @@ public class Dense<T extends Number> extends Layer<T> {
         Class<T> dtype = this.getDtype();
 
         // Compute shapes of kernel and bias matrices
-        Shape kernelShape = Shape.make(inputShape.size(inputShape.numDimensions() - 1), this.units);
-        Shape biasShape = Shape.make(this.units);
+        Shape kernelShape = Shape.of(inputShape.size(inputShape.numDimensions() - 1), this.units);
+        Shape biasShape   = Shape.of(this.units);
 
         // Create dense kernel tensor
         this.kernel = this.addWeight(tf, KERNEL, tf.variable(kernelShape, dtype), KERNEL_INIT, this.kernelInitializer);
@@ -73,7 +73,7 @@ public class Dense<T extends Number> extends Layer<T> {
     }
 
     private Operand<T> call(Ops tf, Operand<T> input) {
-        Operand<T> signal = tf.add(tf.matMul(input, this.kernel), this.bias);
+        Operand<T> signal = tf.math.add(tf.linalg.matMul(input, this.kernel), this.bias);
         return this.activation.apply(tf, signal);
     }
 
@@ -92,7 +92,7 @@ public class Dense<T extends Number> extends Layer<T> {
                     .build();
         }
 
-        public <T extends Number> Activation<T> getActivation() {
+        public <T extends TNumber> Activation<T> getActivation() {
             return (Activation<T>) activation;
         }
 
@@ -109,7 +109,7 @@ public class Dense<T extends Number> extends Layer<T> {
         }
 
         public static class Builder {
-            private Options options;
+            private final Options options;
 
             public Builder(Options options) {
                 this.options = options;
@@ -119,7 +119,7 @@ public class Dense<T extends Number> extends Layer<T> {
                 return setActivation(Activations.select(activation));
             }
 
-            public Builder setActivation(Activation<? extends Number> activation) {
+            public Builder setActivation(Activation<? extends TNumber> activation) {
                 this.options.activation = activation;
                 return this;
             }

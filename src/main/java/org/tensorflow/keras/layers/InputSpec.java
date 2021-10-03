@@ -1,7 +1,7 @@
 package org.tensorflow.keras.layers;
 
-import org.tensorflow.Shape;
 import org.tensorflow.Tensor;
+import org.tensorflow.ndarray.Shape;
 
 import java.util.List;
 import java.util.Map;

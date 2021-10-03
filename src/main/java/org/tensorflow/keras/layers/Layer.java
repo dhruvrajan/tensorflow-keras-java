@@ -1,13 +1,15 @@
 package org.tensorflow.keras.layers;
 
 import org.tensorflow.Operand;
-import org.tensorflow.Shape;
 import org.tensorflow.keras.initializers.Initializer;
 import org.tensorflow.keras.initializers.Initializers;
 import org.tensorflow.keras.mixin.LayerFunction;
+import org.tensorflow.ndarray.Shape;
 import org.tensorflow.op.Ops;
 import org.tensorflow.op.core.Assign;
 import org.tensorflow.op.core.Variable;
+import org.tensorflow.types.family.TNumber;
+import org.tensorflow.types.family.TType;
 
 import java.util.*;
 
@@ -19,7 +21,7 @@ import java.util.*;
  *
  * @param <T> Numeric type of the output (Float, Double)
  */
-public abstract class Layer<T extends Number> implements LayerFunction<T> {
+public abstract class Layer<T extends TNumber> implements LayerFunction<T> {
     private int INPUTS_LENGTH;
 
     // Input() layer needs to access dtype and built.

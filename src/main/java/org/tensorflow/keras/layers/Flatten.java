@@ -1,14 +1,16 @@
 package org.tensorflow.keras.layers;
 
 import org.tensorflow.Operand;
-import org.tensorflow.Shape;
 import org.tensorflow.keras.utils.TensorShape;
+import org.tensorflow.ndarray.Shape;
 import org.tensorflow.op.Ops;
 import org.tensorflow.op.core.Constant;
+import org.tensorflow.types.TInt32;
+import org.tensorflow.types.family.TNumber;
 
-public class Flatten<T extends Number> extends Layer<T> {
-    private static int FLATTEN_INPUT_LENGTH = 1;
-    private Constant<Integer> units;
+public class Flatten<T extends TNumber> extends Layer<T> {
+    private static final int FLATTEN_INPUT_LENGTH = 1;
+    private Constant<TInt32> units;
 
     public Flatten() {
         super(FLATTEN_INPUT_LENGTH);
@@ -22,7 +24,7 @@ public class Flatten<T extends Number> extends Layer<T> {
 
     public Shape computeOutputShape(Shape inputShape) {
         // leaves unknown dimensions unknown
-        return Shape.make(new TensorShape(inputShape).numElements());
+        return Shape.of(new TensorShape(inputShape).numElements());
     }
 
     @SafeVarargs

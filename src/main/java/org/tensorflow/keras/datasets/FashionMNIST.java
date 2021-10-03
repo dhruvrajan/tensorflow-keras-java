@@ -1,11 +1,12 @@
 package org.tensorflow.keras.datasets;
 
-import org.tensorflow.Tensors;
 import org.tensorflow.data.GraphLoader;
 import org.tensorflow.data.GraphModeTensorFrame;
 import org.tensorflow.keras.utils.DataUtils;
 import org.tensorflow.keras.utils.Keras;
+import org.tensorflow.types.TFloat32;
 import org.tensorflow.utils.Pair;
+import org.tensorflow.utils.Tensors;
 
 import java.io.IOException;
 
@@ -34,25 +35,25 @@ public class FashionMNIST {
                 "bb300cfdad3c16e7a12a480ee83cd310", DataUtils.Checksum.md5);
     }
 
-    public static Pair<GraphLoader<Float>, GraphLoader<Float>> graphLoaders() throws IOException {
+    public static Pair<GraphLoader<TFloat32>, GraphLoader<TFloat32>> graphLoaders() throws IOException {
         // Download MNIST files if they don't exist.
         FashionMNIST.download();
 
         // Read data files into arrays
         float[][] trainImages = MNIST.readImages(Keras.kerasPath(LOCAL_PREFIX, TRAIN_IMAGES).toString());
         float[][] trainLabels = MNIST.readLabelsOneHot(Keras.kerasPath(LOCAL_PREFIX, TRAIN_LABELS).toString());
-        float[][] testImages = MNIST.readImages(Keras.kerasPath(LOCAL_PREFIX, TEST_IMAGES).toString());
-        float[][] testLabels = MNIST.readLabelsOneHot(Keras.kerasPath(LOCAL_PREFIX + TEST_LABELS).toString());
+        float[][] testImages  = MNIST.readImages(Keras.kerasPath(LOCAL_PREFIX, TEST_IMAGES).toString());
+        float[][] testLabels  = MNIST.readLabelsOneHot(Keras.kerasPath(LOCAL_PREFIX + TEST_LABELS).toString());
 
         // Return a pair of graph loaders; train and test sets
         return new Pair<>(
                 new GraphModeTensorFrame<>(
-                        Float.class, Tensors.create(trainImages), Tensors.create(trainLabels)),
+                        TFloat32.class, Tensors.create(trainImages), Tensors.create(trainLabels)),
                 new GraphModeTensorFrame<>(
-                        Float.class, Tensors.create(testImages), Tensors.create(testLabels)));
+                        TFloat32.class, Tensors.create(testImages), Tensors.create(testLabels)));
     }
 
-    public static Pair<GraphLoader<Float>, GraphLoader<Float>> graphLoaders2D() throws IOException {
+    public static Pair<GraphLoader<TFloat32>, GraphLoader<TFloat32>> graphLoaders2D() throws IOException {
         // Download MNIST files if they don't exist.
         FashionMNIST.download();
 
@@ -65,9 +66,9 @@ public class FashionMNIST {
         // Return a pair of graph loaders; train and test sets
         return new Pair<>(
                 new GraphModeTensorFrame<>(
-                        Float.class, Tensors.create(trainImages), Tensors.create(trainLabels)),
+                        TFloat32.class, Tensors.create(trainImages), Tensors.create(trainLabels)),
                 new GraphModeTensorFrame<>(
-                        Float.class, Tensors.create(testImages), Tensors.create(testLabels)));
+                        TFloat32.class, Tensors.create(testImages), Tensors.create(testLabels)));
     }
 
 }

@@ -4,6 +4,8 @@ import org.tensorflow.Operand;
 import org.tensorflow.keras.utils.Keras;
 import org.tensorflow.op.Ops;
 import org.tensorflow.op.core.Assign;
+import org.tensorflow.types.TInt32;
+import org.tensorflow.types.family.TNumber;
 
 public abstract class Initializer {
     /**
@@ -14,7 +16,7 @@ public abstract class Initializer {
      * @param in Variable to initialize
      * @return Assign Operand created
      */
-    public <T extends Number> Assign<T> apply(Ops tf, Operand<T> in, Class<T> dtype) {
+    public <T extends TNumber> Assign<T> apply(Ops tf, Operand<T> in, Class<T> dtype) {
         return tf.assign(in, this.initialize(tf, Keras.shapeOperand(tf, in.asOutput().shape()), dtype));
     }
 
@@ -25,5 +27,5 @@ public abstract class Initializer {
      * @param tf    Tensorflow Ops Handle
      * @param shape Shape of the tensor
      */
-    public abstract <T extends Number> Operand<T> initialize(Ops tf, Operand<Integer> shape, Class<T> dtype);
+    public abstract <T extends TNumber> Operand<T> initialize(Ops tf, Operand<TInt32> shape, Class<T> dtype);
 }

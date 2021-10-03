@@ -6,8 +6,6 @@ import org.tensorflow.keras.activations.Activations;
 import org.tensorflow.keras.datasets.FashionMNIST;
 import org.tensorflow.keras.initializers.Initializers;
 import org.tensorflow.keras.layers.Dense;
-import org.tensorflow.keras.layers.Flatten;
-import org.tensorflow.keras.layers.Layer;
 import org.tensorflow.keras.layers.Layers;
 import org.tensorflow.keras.losses.Losses;
 import org.tensorflow.keras.metrics.Metrics;
@@ -15,10 +13,11 @@ import org.tensorflow.keras.models.Model;
 import org.tensorflow.keras.models.Sequential;
 import org.tensorflow.keras.optimizers.Optimizers;
 import org.tensorflow.op.Ops;
+import org.tensorflow.types.TFloat32;
 import org.tensorflow.utils.Pair;
 
 public class FashionMNISTKeras {
-    private static Model<Float> model;
+    private static Model<TFloat32> model;
     private static Model.CompileOptions compileOptions;
     private static Model.FitOptions fitOptions;
 
@@ -29,7 +28,7 @@ public class FashionMNISTKeras {
         //       Option.Builder classes, or from the static helper
         //       methods defined in `Layers` which wrap the explicit builders
         //       to decrease verbosity.
-        model = Sequential.of(Float.class,
+        model = Sequential.of(TFloat32.class,
                 Layers.input(28, 28),
                 Layers.flatten(),
 
@@ -61,7 +60,7 @@ public class FashionMNISTKeras {
     }
 
 
-    public static Model<Float> train(Model<Float> model) throws Exception {
+    public static Model<TFloat32> train(Model<TFloat32> model) throws Exception {
         try (Graph graph = new Graph()) {
             // Create Tensorflow Ops Accessor
             Ops tf = Ops.create(graph);
@@ -70,10 +69,10 @@ public class FashionMNISTKeras {
             model.compile(tf, compileOptions);
 
             // Accessors for MNIST Data
-            Pair<GraphLoader<Float>, GraphLoader<Float>> loaders = FashionMNIST.graphLoaders2D();
+            Pair<GraphLoader<TFloat32>, GraphLoader<TFloat32>> loaders = FashionMNIST.graphLoaders2D();
             // GraphLoader objects contain AutoCloseable `Tensor` objects.
-            try (GraphLoader<Float> train = loaders.first();
-                 GraphLoader<Float> test = loaders.second()) {
+            try (GraphLoader<TFloat32> train = loaders.first();
+                 GraphLoader<TFloat32> test = loaders.second()) {
                 // Fit model
                 model.fit(tf, train, test, fitOptions);
             }

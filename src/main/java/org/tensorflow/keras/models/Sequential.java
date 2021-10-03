@@ -7,14 +7,16 @@ import org.tensorflow.keras.layers.Layer;
 import org.tensorflow.keras.losses.Loss;
 import org.tensorflow.keras.metrics.Metric;
 import org.tensorflow.keras.optimizers.Optimizer;
+import org.tensorflow.ndarray.Shape;
 import org.tensorflow.op.Ops;
 import org.tensorflow.op.core.Variable;
+import org.tensorflow.types.family.TNumber;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class Sequential<T extends Number> extends Model<T> {
+public class Sequential<T extends TNumber> extends Model<T> {
     private Input<T> firstLayer;
     private Optimizer<T> optimizer;
     private List<Layer<T>> layers;
@@ -34,7 +36,7 @@ public class Sequential<T extends Number> extends Model<T> {
     }
 
     @SafeVarargs
-    public static <T extends Number> Sequential<T> of(Class<T> dtype, Input<T> firstLayer, Layer<T>... layers) {
+    public static <T extends TNumber> Sequential<T> of(Class<T> dtype, Input<T> firstLayer, Layer<T>... layers) {
         return new Sequential<>(dtype, firstLayer, layers);
     }
 
@@ -150,9 +152,9 @@ public class Sequential<T extends Number> extends Model<T> {
                 runner.fetch(batchLoss);
                 runner.fetch(batchAccuracy);
 
-                List<Tensor<?>> values = runner.run();
-                try (Tensor<?> lossTensor = values.get(0);
-                     Tensor<?> accuracyTensor = values.get(1)) {
+                List<Tensor/*<?>*/> values = runner.run();
+                try (Tensor/*<?>*/ lossTensor = values.get(0);
+                     Tensor/*<?>*/ accuracyTensor = values.get(1)) {
                     trainEpochAccuracy += accuracyTensor.floatValue() / data.numBatches();
                     trainEpochLoss += lossTensor.floatValue() / data.numBatches();
                 }

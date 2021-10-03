@@ -3,12 +3,14 @@ package org.tensorflow.keras.initializers;
 
 import org.tensorflow.Operand;
 import org.tensorflow.op.Ops;
+import org.tensorflow.types.TInt32;
+import org.tensorflow.types.family.TNumber;
 
 public class RandomNormal extends Initializer {
-    private float mean;
-    private float stdev;
-    private float p1;
-    private float p2;
+    private final float mean;
+    private final float stdev;
+    private final float p1;
+    private final float p2;
 
     public RandomNormal(float mean, float stdev, float p1, float p2) {
         super();
@@ -19,8 +21,8 @@ public class RandomNormal extends Initializer {
     }
 
     @Override
-    public <T extends Number> Operand<T> initialize(Ops tf, Operand<Integer> shape, Class<T> dtype) {
-        return tf.parameterizedTruncatedNormal(
+    public <T extends TNumber> Operand<T> initialize(Ops tf, Operand<TInt32> shape, Class<T> dtype) {
+        return tf.random.parameterizedTruncatedNormal(
                 shape,
                 tf.constant(this.mean, dtype),
                 tf.constant(this.stdev, dtype),

@@ -1,11 +1,12 @@
 package org.tensorflow.keras.datasets;
 
-import org.tensorflow.Tensors;
 import org.tensorflow.data.GraphLoader;
 import org.tensorflow.data.GraphModeTensorFrame;
 import org.tensorflow.keras.utils.DataUtils;
 import org.tensorflow.keras.utils.Keras;
+import org.tensorflow.types.TFloat32;
 import org.tensorflow.utils.Pair;
+import org.tensorflow.utils.Tensors;
 
 import java.io.DataInputStream;
 import java.io.FileInputStream;
@@ -49,7 +50,7 @@ public class MNIST {
                 "986c5b8cbc6074861436f5581f7798be35c7c0025262d33b4df4c9ef668ec773", DataUtils.Checksum.sha256);
     }
 
-    public static Pair<GraphLoader<Float>, GraphLoader<Float>> graphLoaders() throws IOException {
+    public static Pair<GraphLoader<TFloat32>, GraphLoader<TFloat32>> graphLoaders() throws IOException {
         // Download MNIST files if they don't exist.
         MNIST.download();
 
@@ -62,12 +63,12 @@ public class MNIST {
         // Return a pair of graph loaders; train and test sets
         return new Pair<>(
                 new GraphModeTensorFrame<>(
-                        Float.class, Tensors.create(trainImages), Tensors.create(trainLabels)),
+                        TFloat32.class, Tensors.create(trainImages), Tensors.create(trainLabels)),
                 new GraphModeTensorFrame<>(
-                        Float.class, Tensors.create(testImages), Tensors.create(testLabels)));
+                        TFloat32.class, Tensors.create(testImages), Tensors.create(testLabels)));
     }
 
-    public static Pair<GraphLoader<Float>, GraphLoader<Float>> graphLoaders2D() throws IOException {
+    public static Pair<GraphLoader<TFloat32>, GraphLoader<TFloat32>> graphLoaders2D() throws IOException {
         // Download MNIST files if they don't exist.
         MNIST.download();
 
@@ -80,9 +81,9 @@ public class MNIST {
         // Return a pair of graph loaders; train and test sets
         return new Pair<>(
                 new GraphModeTensorFrame<>(
-                        Float.class, Tensors.create(trainImages), Tensors.create(trainLabels)),
+                        TFloat32.class, Tensors.create(trainImages), Tensors.create(trainLabels)),
                 new GraphModeTensorFrame<>(
-                        Float.class, Tensors.create(testImages), Tensors.create(testLabels)));
+                        TFloat32.class, Tensors.create(testImages), Tensors.create(testLabels)));
     }
 
     /**
