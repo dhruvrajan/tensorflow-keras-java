@@ -12,7 +12,6 @@ import org.tensorflow.op.Ops;
 import org.tensorflow.types.family.TNumber;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public abstract class Model<T extends TNumber> extends Layer<T> {
@@ -26,8 +25,8 @@ public abstract class Model<T extends TNumber> extends Layer<T> {
     public abstract void compile(Ops tf, Optimizer<T> optimizer, Loss loss, List<Metric> metric)
             throws Exception;
 
-    public void compile(Ops tf, CompileOptions compilerBuilder) throws Exception {
-        compile(tf, (Optimizer<T>) compilerBuilder.optimizer, compilerBuilder.loss,compilerBuilder.metrics);
+    public void compile(Ops tf, CompileOptions<T> compilerBuilder) throws Exception {
+        compile(tf, compilerBuilder.optimizer, compilerBuilder.loss,compilerBuilder.metrics);
     }
 
     public abstract void fit(Ops tf, GraphLoader<T> train, GraphLoader<T> test, int epochs, int batchSize);
@@ -36,46 +35,46 @@ public abstract class Model<T extends TNumber> extends Layer<T> {
         fit(tf, train, test, fitOptions.epochs, fitOptions.batchSize);
     }
 
-    public static class CompileOptions {
+    public static class CompileOptions<T extends TNumber> {
         private List<Metric> metrics;
-        private Optimizer optimizer;
+        private Optimizer<T> optimizer;
 
         private Loss loss;
 
-        public static Builder builder() {
-            return new Builder();
-        }
+//        public static Builder builder() {
+//            return new Builder();
+//        }
 
-        public static class Builder {
-            private CompileOptions options;
+        public static class Builder<T extends TNumber> {
+            private final CompileOptions<T> options;
 
             public Builder() {
-                this.options = new CompileOptions();
+                this.options = new CompileOptions<>();
             }
 
-            public Builder setLoss(Losses lossType) {
+            public Builder<T> setLoss(Losses lossType) {
                 return setLoss(Losses.select(lossType));
             }
 
-            public Builder setLoss(Loss loss) {
+            public Builder<T> setLoss(Loss loss) {
                 options.loss = loss;
                 return this;
             }
 
-            public Builder setOptimizer(Optimizer optimizer) {
+            public Builder<T> setOptimizer(Optimizer<T> optimizer) {
                 options.optimizer = optimizer;
                 return this;
             }
 
-            public Builder setOptimizer(Optimizers optimizerType) {
+            public Builder<T> setOptimizer(Optimizers optimizerType) {
                 return setOptimizer(Optimizers.select(optimizerType));
             }
 
-            public Builder addMetric(Metrics metric) {
+            public Builder<T> addMetric(Metrics metric) {
                 return addMetric(Metrics.select(metric));
             }
 
-            public Builder addMetric(Metric metric) {
+            public Builder<T> addMetric(Metric metric) {
                 if (options.metrics == null) {
                     options.metrics = new ArrayList<>();
                 }
@@ -83,7 +82,7 @@ public abstract class Model<T extends TNumber> extends Layer<T> {
                 return this;
             }
 
-            public CompileOptions build() {
+            public CompileOptions<T> build() {
                 return options;
             }
         }
@@ -93,7 +92,7 @@ public abstract class Model<T extends TNumber> extends Layer<T> {
             return this.metrics;
         }
 
-        public Optimizer getOptimizer() {
+        public Optimizer<T> getOptimizer() {
             return this.optimizer;
         }
 
@@ -126,7 +125,7 @@ public abstract class Model<T extends TNumber> extends Layer<T> {
         }
 
         public static class Builder {
-            private FitOptions options;
+            private final FitOptions options;
 
             public Builder() { options = new FitOptions(); }
             private Builder(FitOptions options) {

@@ -11,11 +11,11 @@ import org.tensorflow.utils.Tensors;
 import java.io.IOException;
 
 public class FashionMNIST {
-    private static String ORIGIN_BASE = "http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/";
-    private static String TRAIN_IMAGES = "train-images-idx3-ubyte.gz";
-    private static String TRAIN_LABELS = "train-labels-idx1-ubyte.gz";
-    private static String TEST_IMAGES = "t10k-images-idx3-ubyte.gz";
-    private static String TEST_LABELS = "t10k-labels-idx1-ubyte.gz";
+    private static final String ORIGIN_BASE  = "http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/";
+    private static final String TRAIN_IMAGES = "train-images-idx3-ubyte.gz";
+    private static final String TRAIN_LABELS = "train-labels-idx1-ubyte.gz";
+    private static final String TEST_IMAGES  = "t10k-images-idx3-ubyte.gz";
+    private static final String TEST_LABELS  = "t10k-labels-idx1-ubyte.gz";
 
     private static final String LOCAL_PREFIX = "datasets/fasion_mnist/";
 

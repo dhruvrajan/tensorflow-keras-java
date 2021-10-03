@@ -1,8 +1,5 @@
 package org.tensorflow.data;
 
-import org.tensorflow.Operand;
-import org.tensorflow.Session;
-import org.tensorflow.op.Ops;
 import org.tensorflow.types.family.TType;
 
 public abstract class TensorFrame<T extends TType> implements Dataset<T>, GraphLoader<T> {

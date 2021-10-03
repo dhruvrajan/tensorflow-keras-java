@@ -8,7 +8,7 @@ import org.tensorflow.types.family.TType;
 import java.util.List;
 
 public class SessionRunner {
-  private Session.Runner runner;
+  private final Session.Runner runner;
 
   public SessionRunner(Session.Runner runner) {
     this.runner = runner;
@@ -19,7 +19,7 @@ public class SessionRunner {
     return this;
   }
 
-  public SessionRunner addTarget(Operand operand) {
+  public SessionRunner addTarget(Operand<?> operand) {
     this.runner.addTarget(operand);
     return this;
   }
@@ -46,7 +46,7 @@ public class SessionRunner {
     return this;
   }
 
-  public SessionRunner feed(Tensor[] tensors, Operand[] ops) {
+  public SessionRunner feed(Tensor[] tensors, Operand<?>[] ops) {
     for (Pair<Tensor, Operand> pairs :
         (Iterable<Pair<Tensor, Operand>>) () -> Pair.zip(tensors, ops)) {
       this.runner.feed(pairs.second().asOutput(), pairs.first());
@@ -59,7 +59,7 @@ public class SessionRunner {
     return this;
   }
 
-  public SessionRunner fetch(Operand operand) {
+  public SessionRunner fetch(Operand<?> operand) {
     this.runner.fetch(operand);
     return this;
   }

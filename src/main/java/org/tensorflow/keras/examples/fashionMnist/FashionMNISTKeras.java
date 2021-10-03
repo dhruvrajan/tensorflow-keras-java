@@ -17,9 +17,9 @@ import org.tensorflow.types.TFloat32;
 import org.tensorflow.utils.Pair;
 
 public class FashionMNISTKeras {
-    private static Model<TFloat32> model;
-    private static Model.CompileOptions compileOptions;
-    private static Model.FitOptions fitOptions;
+    private static final Model<TFloat32> model;
+    private static final Model.CompileOptions<TFloat32> compileOptions;
+    private static final Model.FitOptions fitOptions;
 
     static {
         // Define Neural Network Model
@@ -35,7 +35,7 @@ public class FashionMNISTKeras {
                 Layers.dense(256, Activations.relu, Initializers.randomNormal, Initializers.zeros),
 
                 // Using Layer Options Builder
-                new Dense<>(128, Dense.Options.builder()
+                new Dense<>(128, Dense.Options.<TFloat32>builder()
                         .setActivation(Activations.relu)
                         .setKernelInitializer(Initializers.randomNormal)
                         .setBiasInitializer(Initializers.zeros)
@@ -46,7 +46,7 @@ public class FashionMNISTKeras {
         );
 
         // Model Compile Configuration
-        compileOptions = Model.CompileOptions.builder()
+        compileOptions = new Model.CompileOptions.Builder<TFloat32>()
                 .setOptimizer(Optimizers.sgd)
                 .setLoss(Losses.sparseCategoricalCrossentropy)
                 .addMetric(Metrics.accuracy)

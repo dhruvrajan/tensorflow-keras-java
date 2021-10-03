@@ -11,6 +11,6 @@ public class Accuracy extends Metric {
     Operand<TInt64> predicted = tf.math.argMax(output, tf.constant(1));
     Operand<TInt64> expected = tf.math.argMax(label, tf.constant(1));
 
-    return tf.math.mean(tf.cast(tf.math.equal(predicted, expected), dtype), tf.constant(0));
+    return tf.math.mean(tf.dtypes.cast(tf.math.equal(predicted, expected), dtype), tf.constant(0));
   }
 }

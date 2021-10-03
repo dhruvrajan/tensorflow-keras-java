@@ -24,10 +24,10 @@ public class RandomNormal extends Initializer {
     public <T extends TNumber> Operand<T> initialize(Ops tf, Operand<TInt32> shape, Class<T> dtype) {
         return tf.random.parameterizedTruncatedNormal(
                 shape,
-                tf.constant(this.mean, dtype),
-                tf.constant(this.stdev, dtype),
-                tf.constant(this.p1, dtype),
-                tf.constant(this.p2, dtype)
+                tf.dtypes.cast(tf.constant(this.mean ), dtype),
+                tf.dtypes.cast(tf.constant(this.stdev), dtype),
+                tf.dtypes.cast(tf.constant(this.p1   ), dtype),
+                tf.dtypes.cast(tf.constant(this.p2   ), dtype)
         );
     }
 }

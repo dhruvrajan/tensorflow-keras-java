@@ -2,7 +2,6 @@ package org.tensorflow.keras.activations;
 
 import org.tensorflow.Operand;
 import org.tensorflow.keras.layers.Layer;
-import org.tensorflow.keras.mixin.ActivationFunction;
 import org.tensorflow.ndarray.Shape;
 import org.tensorflow.op.Ops;
 import org.tensorflow.types.family.TNumber;
@@ -27,8 +26,9 @@ public abstract class Activation<T extends TNumber> extends Layer<T> {
     return inputShape;
   }
 
+  @SafeVarargs
   @Override
-  public Operand<T> call(Ops tf, Operand<T>... inputs) {
+  public final Operand<T> call(Ops tf, Operand<T>... inputs) {
     return call(tf, inputs[0]);
   }
 

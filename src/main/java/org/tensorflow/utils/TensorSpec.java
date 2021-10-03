@@ -11,9 +11,9 @@ import org.tensorflow.proto.framework.DataType;
  */
 public class TensorSpec {
 
-  private Shape shape;
-  private DataType dtype;
-  private String name;
+  private final Shape shape;
+  private final DataType dtype;
+  private final String name;
 
   /**
    * Creates a `TensorSpec`.
@@ -24,6 +24,7 @@ public class TensorSpec {
   private TensorSpec(Shape shape, DataType dtype) {
     this.shape = shape;
     this.dtype = dtype;
+    this.name  = null;
   }
 
   /**

@@ -1,13 +1,9 @@
  package org.tensorflow.keras.datasets;
 
- import org.tensorflow.Tensor;
  import org.tensorflow.data.GraphLoader;
  import org.tensorflow.data.GraphModeTensorFrame;
  import org.tensorflow.keras.utils.DataUtils;
  import org.tensorflow.keras.utils.Keras;
- import org.tensorflow.ndarray.FloatNdArray;
- import org.tensorflow.ndarray.Shape;
- import org.tensorflow.ndarray.StdArrays;
  import org.tensorflow.types.TFloat32;
  import org.tensorflow.utils.Pair;
  import org.tensorflow.utils.Tensors;
@@ -34,11 +30,9 @@
         int getValue() { return this.value; }
     }
 
-
     public static void main(String[] args) throws IOException {
 
     }
-
 
     public static void download() throws IOException {
         DataUtils.getFile(LOCAL_PREFIX + LOCAL_FILE, IRIS_ORIGIN);
@@ -51,7 +45,6 @@
             float[][] X = new float[NUM_EXAMPLES][INPUT_LENGTH];
             float[][] y = new float[NUM_EXAMPLES][OUTPUT_LENGTH];
 
-            assert X.length == y.length;
             int trainSize = (int) (NUM_EXAMPLES * (1 - val_split));
 
             float[][] XTrain = new float[trainSize][INPUT_LENGTH];

@@ -10,7 +10,7 @@ import org.tensorflow.types.family.TNumber;
  * @param <T>
  */
 public class Lambda<T extends TNumber> extends Activation<T> {
-    private ActivationFunction<T> activation;
+    private final ActivationFunction<T> activation;
 
     /**
      * Creates an Activation function.

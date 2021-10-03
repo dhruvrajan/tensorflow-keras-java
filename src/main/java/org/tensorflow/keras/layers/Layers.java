@@ -18,20 +18,20 @@ public class Layers {
         return new Dense<>(units, Dense.Options.defaults());
     }
 
-    public static <T extends TNumber> Dense<T> dense(int units, Dense.Options options) {
+    public static <T extends TNumber> Dense<T> dense(int units, Dense.Options<T> options) {
         return new Dense<>(units, options);
     }
 
     public static <T extends TNumber> Dense<T> dense(int units, Activation<T> activation) {
-        return new Dense<T>(units, Dense.Options.builder().setActivation(activation).build());
+        return new Dense<>(units, Dense.Options.<T>builder().setActivation(activation).build());
     }
 
     public static <T extends TNumber> Dense<T> dense(int units, Activations activation) {
-        return new Dense<>(units, Dense.Options.builder().setActivation(activation).build());
+        return new Dense<>(units, Dense.Options.<T>builder().setActivation(activation).build());
     }
 
     public static <T extends TNumber> Dense<T> dense(int units, Activations activation, Initializers kernelInitializer, Initializers biasInitializer) {
-        return new Dense<>(units, Dense.Options.builder()
+        return new Dense<>(units, Dense.Options.<T>builder()
                 .setActivation(activation)
                 .setKernelInitializer(kernelInitializer)
                 .setBiasInitializer(biasInitializer)
@@ -39,7 +39,7 @@ public class Layers {
     }
 
     public static <T extends TNumber> Dense<T> dense(int units, Activation<T> activation, Initializer kernelInitializer, Initializer biasInitializer) {
-        return new Dense<>(units, Dense.Options.builder()
+        return new Dense<>(units, Dense.Options.<T>builder()
                 .setActivation(activation)
                 .setKernelInitializer(kernelInitializer)
                 .setBiasInitializer(biasInitializer)

@@ -8,7 +8,7 @@ import java.util.Map;
  */
 public class State {
     private static long UNIQUE_TENSOR_ID = 0L;
-    private static Map<String, Long> UNIQUE_PREFIX_ID = new HashMap<>();
+    private static final Map<String, Long> UNIQUE_PREFIX_ID = new HashMap<>();
 
     public static long getUniqueTensorId() {
         return UNIQUE_TENSOR_ID++;

@@ -1,6 +1,9 @@
 package org.tensorflow.keras.models;
 
-import org.tensorflow.*;
+import org.tensorflow.Graph;
+import org.tensorflow.Operand;
+import org.tensorflow.Session;
+import org.tensorflow.Tensor;
 import org.tensorflow.data.GraphLoader;
 import org.tensorflow.keras.layers.Input;
 import org.tensorflow.keras.layers.Layer;
@@ -10,6 +13,7 @@ import org.tensorflow.keras.optimizers.Optimizer;
 import org.tensorflow.ndarray.Shape;
 import org.tensorflow.op.Ops;
 import org.tensorflow.op.core.Variable;
+import org.tensorflow.types.TFloat32;
 import org.tensorflow.types.family.TNumber;
 
 import java.util.ArrayList;
@@ -17,13 +21,12 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Sequential<T extends TNumber> extends Model<T> {
-    private Input<T> firstLayer;
+    private final Input<T> firstLayer;
     private Optimizer<T> optimizer;
-    private List<Layer<T>> layers;
+    private final List<Layer<T>> layers;
 
     private Loss loss;
     private List<Metric> metrics;
-;
 
     private List<Variable<T>> trainableVars;
     private List<Operand<T>> initializerOps;
@@ -40,7 +43,7 @@ public class Sequential<T extends TNumber> extends Model<T> {
         return new Sequential<>(dtype, firstLayer, layers);
     }
 
-    public Sequential addLayer(Layer<T> layer) {
+    public Sequential<T> addLayer(Layer<T> layer) {
         layers.add(layer);
         return this;
     }
@@ -95,7 +98,8 @@ public class Sequential<T extends TNumber> extends Model<T> {
 
     @Override
     public void fit(Ops tf, GraphLoader<T> train, GraphLoader<T> test, int epochs, int batchSize) {
-        try (Session session = new Session(tf.scope().graph())) {
+        final Graph g = (Graph) tf.scope().env();   // XXX TODO ugly
+        try (Session session = new Session(g)) {
             runTrainingLoop(tf, session, train, epochs, batchSize, true);
             runPredictionLoop(tf, session, test, batchSize);
         }
@@ -153,10 +157,10 @@ public class Sequential<T extends TNumber> extends Model<T> {
                 runner.fetch(batchAccuracy);
 
                 List<Tensor/*<?>*/> values = runner.run();
-                try (Tensor/*<?>*/ lossTensor = values.get(0);
-                     Tensor/*<?>*/ accuracyTensor = values.get(1)) {
-                    trainEpochAccuracy += accuracyTensor.floatValue() / data.numBatches();
-                    trainEpochLoss += lossTensor.floatValue() / data.numBatches();
+                try (TFloat32 lossTensor     = (TFloat32) values.get(0);
+                     TFloat32 accuracyTensor = (TFloat32) values.get(1)) {
+                    trainEpochAccuracy += accuracyTensor.getFloat() / data.numBatches();
+                    trainEpochLoss += lossTensor.getFloat() / data.numBatches();
                 }
             }
 

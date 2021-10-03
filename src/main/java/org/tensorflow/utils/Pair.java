@@ -3,8 +3,8 @@ package org.tensorflow.utils;
 import java.util.Iterator;
 
 public class Pair<T, S> {
-  private T first;
-  private S second;
+  private final T first;
+  private final S second;
 
   public Pair(T t, S s) {
     this.first = t;
@@ -25,7 +25,7 @@ public class Pair<T, S> {
 
   public static <T, S> Iterator<Pair<T, S>> zip(T[] first, S[] second) {
     int length = Math.min(first.length, second.length);
-    return new Iterator<Pair<T, S>>() {
+    return new Iterator<>() {
       int index = 0;
 
       @Override

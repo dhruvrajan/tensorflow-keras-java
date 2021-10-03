@@ -31,7 +31,7 @@ public class Dense<T extends TNumber> extends Layer<T> {
     // activation function
     private final Activation<T> activation;
 
-    public Dense(int units, Dense.Options options) {
+    public Dense(int units, Dense.Options<T> options) {
         super(DENSE_INPUT_LENGTH);
         this.units = units;
 
@@ -78,22 +78,22 @@ public class Dense<T extends TNumber> extends Layer<T> {
     }
 
 
-    public static class Options {
+    public static class Options<T extends TNumber> {
         // Default parameters
-        private Activation activation;
+        private Activation<T> activation;
         private Initializer kernelInitializer;
         private Initializer biasInitializer;
 
-        public static Options defaults() {
-            return new Builder(new Options())
+        public static <T extends TNumber> Options<T> defaults() {
+            return new Builder<T>(new Options<>())
                     .setActivation(Activations.linear)
                     .setKernelInitializer(Initializers.randomNormal)
                     .setBiasInitializer(Initializers.zeros)
                     .build();
         }
 
-        public <T extends TNumber> Activation<T> getActivation() {
-            return (Activation<T>) activation;
+        public Activation<T> getActivation() {
+            return activation;
         }
 
         public Initializer getKernelInitializer() {
@@ -104,45 +104,45 @@ public class Dense<T extends TNumber> extends Layer<T> {
             return biasInitializer;
         }
 
-        public static Builder builder() {
-            return new Builder(defaults());
+        public static <T extends TNumber> Builder<T> builder() {
+            return new Builder<T>(defaults());
         }
 
-        public static class Builder {
-            private final Options options;
+        public static class Builder<T extends TNumber> {
+            private final Options<T> options;
 
-            public Builder(Options options) {
+            public Builder(Options<T> options) {
                 this.options = options;
             }
 
-            public Builder setActivation(Activations activation) {
+            public Builder<T> setActivation(Activations activation) {
                 return setActivation(Activations.select(activation));
             }
 
-            public Builder setActivation(Activation<? extends TNumber> activation) {
+            public Builder<T> setActivation(Activation<T> activation) {
                 this.options.activation = activation;
                 return this;
             }
 
-            public Builder setKernelInitializer(Initializers kernelInitializer) {
+            public Builder<T> setKernelInitializer(Initializers kernelInitializer) {
                 return setKernelInitializer(Initializers.select(kernelInitializer));
             }
 
-            public Builder setKernelInitializer(Initializer kernelInitializer) {
+            public Builder<T> setKernelInitializer(Initializer kernelInitializer) {
                 this.options.kernelInitializer = kernelInitializer;
                 return this;
             }
 
-            public Builder setBiasInitializer(Initializers biasInitializer) {
+            public Builder<T> setBiasInitializer(Initializers biasInitializer) {
                 return setBiasInitializer(Initializers.select(biasInitializer));
             }
 
-            public Builder setBiasInitializer(Initializer biasInitializer) {
+            public Builder<T> setBiasInitializer(Initializer biasInitializer) {
                 this.options.biasInitializer = biasInitializer;
                 return this;
             }
 
-            public Options build() {
+            public Options<T> build() {
                 return this.options;
             }
         }

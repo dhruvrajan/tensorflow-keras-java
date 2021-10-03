@@ -3,11 +3,9 @@ package org.tensorflow.keras.activations;
 import org.tensorflow.Operand;
 import org.tensorflow.keras.mixin.ActivationFunction;
 import org.tensorflow.op.Ops;
-import org.tensorflow.op.core.*;
 import org.tensorflow.op.math.Sigmoid;
 import org.tensorflow.op.math.Tanh;
 import org.tensorflow.op.nn.*;
-import org.tensorflow.types.family.TFloating;
 import org.tensorflow.types.family.TNumber;
 import org.tensorflow.types.family.TType;
 
