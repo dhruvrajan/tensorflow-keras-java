@@ -9,7 +9,7 @@ import org.tensorflow.types.family.TNumber;
 
 public class Input<T extends TNumber> extends Layer<T> {
   private Placeholder<T> input;
-  private long[] dims;
+  private final long[] dims;
 
   public Input(long... otherDims) {
     super(0);
@@ -34,7 +34,7 @@ public class Input<T extends TNumber> extends Layer<T> {
 
   public void build(Ops tf, Class<T> dtype) {
     this.dtype = dtype;
-    System.out.println(dtype);
+    // System.out.println(dtype);
     this.input = tf.placeholder(dtype, Placeholder.shape(Keras.shapeFromDims(Keras.concatenate(-1, this.dims))));
     this.built = true;
   }

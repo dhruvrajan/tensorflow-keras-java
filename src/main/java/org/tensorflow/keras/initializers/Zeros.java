@@ -1,7 +1,6 @@
 package org.tensorflow.keras.initializers;
 
 import org.tensorflow.Operand;
-import org.tensorflow.keras.utils.Keras;
 import org.tensorflow.op.Ops;
 import org.tensorflow.types.TInt32;
 import org.tensorflow.types.family.TNumber;

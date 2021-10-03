@@ -35,9 +35,9 @@ public class Dense<T extends TNumber> extends Layer<T> {
         super(DENSE_INPUT_LENGTH);
         this.units = units;
 
-        this.activation = (Activation<T>) options.activation;
-        this.kernelInitializer = options.kernelInitializer;
-        this.biasInitializer = options.biasInitializer;
+        this.activation         = options.activation;
+        this.kernelInitializer  = options.kernelInitializer;
+        this.biasInitializer    = options.biasInitializer;
     }
 
     @Override
@@ -105,7 +105,7 @@ public class Dense<T extends TNumber> extends Layer<T> {
         }
 
         public static <T extends TNumber> Builder<T> builder() {
-            return new Builder<T>(defaults());
+            return new Builder<>(defaults());
         }
 
         public static class Builder<T extends TNumber> {

@@ -1,4 +1,7 @@
+lazy val baseName       = "tensorflow-keras"
 lazy val projectVersion = "0.1.0-SNAPSHOT"
+
+// ---- dependencies ----
 
 lazy val deps = new {
   val main = new {
@@ -13,16 +16,25 @@ lazy val deps = new {
 // change this according to your OS and CPU
 val tfClassifier = "linux-x86_64"
 
+ThisBuild / version       := projectVersion
+ThisBuild / organization  := "de.sciss"
+ThisBuild / versionScheme := Some("pvp")
+
+// ---- project ----
+
+def basicJavaOpts = Seq("-source", "1.8")
+
 lazy val root = project.in(file("."))
+  .settings(publishSettings)
   .settings(
-    name             := "tensorflow-keras",
-    version          := projectVersion,
-    organization     := "de.sciss",
+    name             := baseName,
     licenses         := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt")),
     scalaVersion     := "2.13.6",
     crossPaths       := false,
     autoScalaLibrary := false,
     javacOptions    ++= Seq("-Xlint:unchecked"),
+    javacOptions                 := basicJavaOpts ++ Seq("-Xlint:unchecked", "-target", "1.8"),
+    Compile / doc / javacOptions := basicJavaOpts,
     libraryDependencies ++= Seq(
       "org.tensorflow"  %  "tensorflow-core-api"    % deps.main.tensorflow,
       "org.tensorflow"  %  "tensorflow-core-api"    % deps.main.tensorflow classifier tfClassifier, // "linux-x86_64-mkl",
@@ -31,3 +43,30 @@ lazy val root = project.in(file("."))
       "com.github.sbt"  % "junit-interface"         % deps.test.junitInterface  % Test
     )
   )
+
+// ---- publishing ----
+
+lazy val publishSettings = Seq(
+  publishMavenStyle := true,
+  Test / publishArtifact := false,
+  pomIncludeRepository := { _ => false },
+  developers := List(
+    Developer(
+      id    = "dhruvrajan",
+      name  = "Dhruv Rajan",
+      email = "dhruv@krishnaprem.com",
+      url   = url("https://github.com/dhruvrajan")
+    ),
+    Developer(
+      id    = "sciss",
+      name  = "Hanns Holger Rutz",
+      email = "contact@sciss.de",
+      url   = url("https://www.sciss.de")
+    ),
+  ),
+  scmInfo := {
+    val h = "github.com"
+    val a = s"Sciss/$baseName"
+    Some(ScmInfo(url(s"https://$h/$a"), s"scm:git@$h:$a.git"))
+  },
+)

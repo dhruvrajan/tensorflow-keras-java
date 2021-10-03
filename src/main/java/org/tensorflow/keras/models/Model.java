@@ -41,9 +41,9 @@ public abstract class Model<T extends TNumber> extends Layer<T> {
 
         private Loss loss;
 
-//        public static Builder builder() {
-//            return new Builder();
-//        }
+        public static <T extends TNumber> Builder<T> builder() {
+            return new Builder<>();
+        }
 
         public static class Builder<T extends TNumber> {
             private final CompileOptions<T> options;

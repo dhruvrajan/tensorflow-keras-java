@@ -25,7 +25,7 @@ public class Pair<T, S> {
 
   public static <T, S> Iterator<Pair<T, S>> zip(T[] first, S[] second) {
     int length = Math.min(first.length, second.length);
-    return new Iterator<>() {
+    return new Iterator<Pair<T, S>>() {
       int index = 0;
 
       @Override

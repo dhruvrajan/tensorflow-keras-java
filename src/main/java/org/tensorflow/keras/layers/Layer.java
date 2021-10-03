@@ -9,7 +9,6 @@ import org.tensorflow.op.Ops;
 import org.tensorflow.op.core.Assign;
 import org.tensorflow.op.core.Variable;
 import org.tensorflow.types.family.TNumber;
-import org.tensorflow.types.family.TType;
 
 import java.util.*;
 
@@ -22,25 +21,24 @@ import java.util.*;
  * @param <T> Numeric type of the output (Float, Double)
  */
 public abstract class Layer<T extends TNumber> implements LayerFunction<T> {
-    private int INPUTS_LENGTH;
+    private final int INPUTS_LENGTH;
 
     // Input() layer needs to access dtype and built.
     protected Class<T> dtype;
     protected boolean built;
 
-    private Map<String, Variable<T>> weights;
-    private Map<String, Assign<T>> initializerOps;
+    private final Map<String, Variable<T>> weights;
+    private final Map<String, Assign<T>> initializerOps;
 
     public Layer(int numInputs) {
-        this.INPUTS_LENGTH = numInputs;
-
-        this.built = false;
-        this.weights = new HashMap<>();
+        this.INPUTS_LENGTH  = numInputs;
+        this.built          = false;
+        this.weights        = new HashMap<>();
         this.initializerOps = new HashMap<>();
     }
 
     /**
-     * Override create(Ops) to add variables (weight tensors) to the layer.
+     * Overrides create(Ops) to add variables (weight tensors) to the layer.
      *
      * The addWeight function and some tf ops require passing a Class<T> "dtype" object
      *
@@ -80,10 +78,6 @@ public abstract class Layer<T extends TNumber> implements LayerFunction<T> {
 
     /**
      * Internal wrapper for Layer.call
-     *
-     * @param tf
-     * @param inputs
-     * @return
      */
     @SafeVarargs
     public final Operand<T> apply(Ops tf, Operand<T>... inputs) {

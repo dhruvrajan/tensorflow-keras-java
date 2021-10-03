@@ -10,7 +10,7 @@ import org.tensorflow.types.family.TNumber;
 public class Layers {
     // Builders for Input Layer
     public static <T extends TNumber> Input<T> input(long firstDim, long... units) {
-        return new Input<>(Keras.concatenate(firstDim,units));
+        return new Input<>(Keras.concatenate(firstDim, units));
     }
 
     // Builders for Dense Layer

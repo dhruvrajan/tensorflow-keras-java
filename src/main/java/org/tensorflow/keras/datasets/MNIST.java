@@ -11,7 +11,6 @@ import org.tensorflow.utils.Tensors;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -21,21 +20,21 @@ import java.util.zip.GZIPInputStream;
  * Utility for downloading and using MNIST data with a local keras installation.
  */
 public class MNIST {
-    private static final int IMAGE_MAGIC = 2051;
-    private static final int LABELS_MAGIC = 2049;
+    private static final int IMAGE_MAGIC    = 2051;
+    private static final int LABELS_MAGIC   = 2049;
     private static final int OUTPUT_CLASSES = 10;
 
     private static final String TRAIN_IMAGES = "train-images-idx3-ubyte.gz";
     private static final String TRAIN_LABELS = "train-labels-idx1-ubyte.gz";
-    private static final String TEST_IMAGES = "t10k-images-idx3-ubyte.gz";
-    private static final String TEST_LABELS = "t10k-labels-idx1-ubyte.gz";
+    private static final String TEST_IMAGES  = "t10k-images-idx3-ubyte.gz";
+    private static final String TEST_LABELS  = "t10k-labels-idx1-ubyte.gz";
 
-    private static final String ORIGIN_BASE = "http://yann.lecun.com/exdb/mnist/";
+    private static final String ORIGIN_BASE  = "http://yann.lecun.com/exdb/mnist/";
 
     private static final String LOCAL_PREFIX = "datasets/mnist/";
 
     /**
-     * Download MNIST dataset files to the local .keras/ directory.
+     * Downloads MNIST dataset files to the local .keras/ directory.
      *
      * @throws IOException when the download fails
      */
@@ -187,18 +186,17 @@ public class MNIST {
 
         float[][] labels = new float[numLabels][OUTPUT_CLASSES];
         for (int i = 0; i < entries.length; i++) {
-            labelToOneHotVector(entries[i][0] & 0xFF, labels[i], false);
+            labelToOneHotVector(entries[i][0] & 0xFF, labels[i]);
         }
 
         return labels;
     }
 
-    private static void labelToOneHotVector(int label, float[] oneHot, boolean fill) {
+    private static void labelToOneHotVector(int label, float[] oneHot) {
         if (label >= oneHot.length) {
             throw new IllegalArgumentException("Invalid Index for One-Hot Vector");
         }
 
-        if (fill) Arrays.fill(oneHot, 0);
         oneHot[label] = 1.0f;
     }
 }
