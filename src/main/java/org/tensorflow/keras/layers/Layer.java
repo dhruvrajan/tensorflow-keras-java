@@ -113,7 +113,8 @@ public abstract class Layer<T extends TNumber> implements LayerFunction<T> {
      * @param variable variable to add
      * @return the created variable.
      */
-    protected final Variable<T> addWeight(Ops tf, String name, Variable<T> variable, String initializerName, Initializers initializer) {
+    protected final Variable<T> addWeight(Ops tf, String name, Variable<T> variable, String initializerName,
+                                          Initializers initializer) {
         return addWeight(tf, name, variable, initializerName, Initializers.select(initializer));
     }
 
@@ -124,7 +125,8 @@ public abstract class Layer<T extends TNumber> implements LayerFunction<T> {
      * @param variable variable to add
      * @return the created variable.
      */
-    protected final Variable<T> addWeight(Ops tf, String name, Variable<T> variable, String initializerName, Initializer initializer) {
+    protected final Variable<T> addWeight(Ops tf, String name, Variable<T> variable, String initializerName,
+                                          Initializer initializer) {
         this.weights.put(name, variable);
         this.initializerOps.put(initializerName, initializer.apply(tf, variable, dtype));
         return variable;

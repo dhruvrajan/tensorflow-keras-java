@@ -3,7 +3,7 @@ package org.tensorflow.keras.initializers;
 public enum Initializers {
     zeros, ones, randomNormal, glorotUniform;
 
-    public static  Initializer select(Initializers initializer) {
+    public static Initializer select(Initializers initializer) {
         switch (initializer) {
             case zeros:
                 return new Zeros();
