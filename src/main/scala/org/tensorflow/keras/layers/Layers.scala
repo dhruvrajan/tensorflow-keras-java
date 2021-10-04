@@ -40,7 +40,7 @@ object Layers {
     )
 
   // Builders for Flatten Layer
-  def flatten[T <: TNumber] = new Flatten[T]
+  def flatten[T <: TNumber]() = new Flatten[T]
 
   // Builders for Conv2D Layer
   def conv2D(filters: Int, kernelSize: Seq[Long], options: Conv2D.Options = Conv2D.Options()) =

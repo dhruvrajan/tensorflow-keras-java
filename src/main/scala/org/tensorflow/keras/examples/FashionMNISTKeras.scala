@@ -45,7 +45,7 @@ object FashionMNISTKeras {
   private val model =
   Sequential.of(classOf[TFloat32],
     Layers.input(28, 28),
-    Layers.flatten,
+    Layers.flatten(),
     Layers.dense(256, Activations.relu, Initializers.randomNormal, Initializers.zeros), // Using Layer Options Builder
     new Dense[TFloat32](128, Dense.Options.builder[TFloat32]
       .setActivation(Activations.relu)
