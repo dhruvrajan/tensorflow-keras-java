@@ -13,7 +13,7 @@ object Layers {
     new Input[T](Keras.concatenate(firstDim, units: _*): _*)
 
   // Builders for Dense Layer
-  def dense[T <: TNumber](units: Int) = new Dense[T](units, Dense.Options.defaults)
+  def dense[T <: TNumber](units: Int) = new Dense[T](units, Dense.Options.defaults[T])
 
   def dense[T <: TNumber](units: Int, options: Dense.Options[T]) = new Dense[T](units, options)
 
@@ -43,6 +43,6 @@ object Layers {
   def flatten[T <: TNumber] = new Flatten[T]
 
   // Builders for Conv2D Layer
-  def conv2D(filters: Int, kernelSize: Seq[Int], options: Conv2D.Options = Conv2D.Options()) =
+  def conv2D(filters: Int, kernelSize: Seq[Long], options: Conv2D.Options = Conv2D.Options()) =
     new Conv2D(filters = filters, kernelSize = kernelSize, options = options)
 }
