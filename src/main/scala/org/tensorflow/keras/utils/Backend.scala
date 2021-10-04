@@ -86,4 +86,38 @@ object Backend {
 //    */
 //  private def toTensor(tf: Ops, x: Float, dtype) =
 //    tf.convert_to_tensor(x, dtype = dtype)
+
+  class RandomGenerator(seed: Option[Long] = None, forceGenerator: Boolean = false) {
+    private var built = false
+
+    /** Lazily init the RandomGenerator.
+      * The TF API executing_eagerly_outside_functions() has some side effect, and
+      * couldn't be used before API like tf.enable_eager_execution(). Some of the
+      * client side code was creating the initializer at the code load time, which
+      * triggers the creation of RandomGenerator. Lazy init this class to walkaround
+      * this issue until it is resolved on TF side.
+      */
+    private[keras] def maybeInit(tf: Ops): Unit = {
+      // TODO(b/167482354): Change this back to normal init when the bug is fixed.
+      if (built) return
+
+      //if (tf.compat.v1.executing_eagerly_outside_functions() &&
+      //  (use_generator_for_rng() || forceGenerator)) {
+      //  // In the case of V2, we use tf.random.Generator to create all the random
+      //  // numbers and seeds.
+      //  import keras.utils.tf_utils // pylint: disable=g-import-not-at-top
+      //  with tf_utils.maybe_init_scope(self):
+      //  if (seed.isDefined) {
+      //    self._generator = tf.random.Generator.from_seed(seed)
+      //  } else {
+      //    self._generator = tf.random.Generator.from_seed(random.randint(1, 1e9))
+      //  }
+      // } else {
+        // In the v1 case, we use stateful op, regardless whether user provide a
+        // seed or not. Seeded stateful op will ensure generating same sequences.
+      // self._generator = None
+      built = true
+      // }
+    }
+  }
 }

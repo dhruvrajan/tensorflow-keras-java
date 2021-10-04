@@ -5,6 +5,7 @@ import org.tensorflow.keras.activations.Activations
 import org.tensorflow.keras.initializers.Initializer
 import org.tensorflow.keras.initializers.Initializers
 import org.tensorflow.keras.utils.Keras
+import org.tensorflow.ndarray.Shape
 import org.tensorflow.types.family.TNumber
 
 object Layers {
@@ -48,4 +49,8 @@ object Layers {
 
   // Builders for LeakyReLU Layer
   def leakyReLU[T <: TNumber](alpha: Float = 0.3f) = new LeakyReLU[T](alpha = alpha)
+
+  // Builders for Dropout Layer
+  def dropout[T <: TNumber](rate: Float, noiseShape: Shape = Shape.unknown(), seed: Option[Long] = None) =
+    new Dropout[T](rate = rate, noiseShape = noiseShape, seed = seed)
 }
