@@ -45,4 +45,7 @@ object Layers {
   // Builders for Conv2D Layer
   def conv2D(filters: Int, kernelSize: Seq[Long], options: Conv2D.Options = Conv2D.Options()) =
     new Conv2D(filters = filters, kernelSize = kernelSize, options = options)
+
+  // Builders for LeakyReLU Layer
+  def leakyReLU[T <: TNumber](alpha: Float = 0.3f) = new LeakyReLU[T](alpha = alpha)
 }

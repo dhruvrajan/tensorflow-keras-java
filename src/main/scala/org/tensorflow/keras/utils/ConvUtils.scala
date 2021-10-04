@@ -1,4 +1,4 @@
-package org.tensorflow.keras.utilss
+package org.tensorflow.keras.utils
 
 import org.tensorflow.Operand
 import org.tensorflow.keras.layers.Conv

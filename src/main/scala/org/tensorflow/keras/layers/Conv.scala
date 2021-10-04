@@ -6,7 +6,7 @@ package org.tensorflow.keras.layers
 import org.tensorflow.keras.activations.Activations
 import org.tensorflow.keras.initializers.{Initializer, Initializers}
 import org.tensorflow.keras.layers.Conv.{DataFormat, Padding}
-import org.tensorflow.keras.utilss.ConvUtils
+import org.tensorflow.keras.utils.ConvUtils
 import org.tensorflow.ndarray.Shape
 import org.tensorflow.{Operand, op}
 import org.tensorflow.op.Ops
