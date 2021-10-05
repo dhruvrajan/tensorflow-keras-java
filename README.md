@@ -1,11 +1,28 @@
-NOTE: Development has moved to [`tensorflow/java`](https://github.com/tensorflow/java).
+# tensorflow-keras-scala
 
+[![Build Status](https://github.com/Sciss/tensorflow-keras-scala/workflows/Scala%20CI/badge.svg?branch=main)](https://github.com/Sciss/tensorflow-keras-scala/actions?query=workflow%3A%22Scala+CI%22)
 
+## statement
 
+This is a project for testing a Scala-based Keras API for the [Java bindings](https://github.com/tensorflow/java) to 
+TensorFlow. It is a fork from a [Java-based project](https://github.com/dhruvrajan/tensorflow-keras-java). The original
+author of the Java project was Dhruv Rajan, the original project was released under MIT license.
 
+This project is (C)opyright 2021 by Hanns Holger Rutz. All rights reserved. The project is released under
+the [GNU Lesser General Public License](https://raw.github.com/Sciss/tensorflow-keras-scala/main/LICENSE) v2.1+ and
+comes with absolutely no warranties. To contact the author, send an e-mail to `contact at sciss.de`.
 
+## requirements / installation
 
-# Tensorflow-Keras (Java)
+The project build with [sbt](https://www.scala-sbt.org/). You may need to edit `build.sbt` to adjust `tfClassifer`.
+
+-------
+
+Below are the original README notes.
+
+-------
+
+## Tensorflow-Keras (Java)
 
 This repository contains a JVM implementation of the Keras API, built on [Tensorflow Java](https://www.tensorflow.org/api_docs/java/reference/org/tensorflow/package-summary).
 Keras is a high-level API for building and training deep learning models. 
