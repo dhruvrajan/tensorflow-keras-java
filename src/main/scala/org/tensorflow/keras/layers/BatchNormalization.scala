@@ -1,12 +1,14 @@
 package org.tensorflow.keras.layers
 
-import org.tensorflow.{Operand, Tensor}
+import org.tensorflow.keras.initializers.{Initializer, Initializers}
 import org.tensorflow.keras.layers.BatchNormalization.RenormClipping
-import org.tensorflow.keras.utils.Backend
 import org.tensorflow.ndarray.Shape
 import org.tensorflow.op.Ops
 import org.tensorflow.op.core.Variable
+import org.tensorflow.proto.framework.{VariableAggregation, VariableSynchronization}
 import org.tensorflow.types.family.TNumber
+import org.tensorflow.types.{TBfloat16, TFloat16, TFloat32}
+import org.tensorflow.{Operand, Tensor}
 
 import scala.util.Try
 
@@ -49,26 +51,26 @@ object BatchNormalization {
   * inference data*.
   */
 class BatchNormalization[T <: TNumber](
-                                        axis0: Seq[Int] = Seq(-1),
-                                        momentum: Float = 0.99f,
-                                        epsilon: Float = 1e-3f,
-                                        center: Boolean = true,
-                                        scale: Boolean = true,
-                                        //  betaInitializer='zeros',
-                                        //  gammaInitializer='ones',
-                                        //  movingMeanInitializer='zeros',
-                                        //  movingVarianceInitializer='ones',
-                                        //  betaRegularizer=None,
-                                        //  gammaRegularizer=None,
-                                        //  betaConstraint=None,
-                                        //  gammaConstraint=None,
-                                        renorm: Boolean = false,
-                                        renorm_clipping: Map[RenormClipping, Tensor] = Map.empty,
-                                        renorm_momentum: Float = 0.99f,
-                                        fused0    : Option[Boolean] = None,
-                                        trainable : Boolean = true,
-                                        virtual_batch_size: Option[Int] = None,
-                                        adjustment : Option[Nothing] = None,
+                                        axis0           : Seq[Int]        = Seq(-1),
+                                        momentum        : Float           = 0.99f,
+                                        epsilon         : Float           = 1e-3f,
+                                        center          : Boolean         = true,
+                                        scale           : Boolean         = true,
+                                        betaInitializer : Initializer     = Initializers.select(Initializers.zeros),
+                                        gammaInitializer: Initializer     = Initializers.select(Initializers.ones ),
+                                        movingMeanInitializer: Initializer = Initializers.select(Initializers.zeros),
+                                        movingVarianceInitializer: Initializer = Initializers.select(Initializers.ones ),
+                                        betaRegularizer : Option[Nothing] = None,
+                                        gammaRegularizer: Option[Nothing] = None,
+                                        betaConstraint  : Option[Nothing] = None,
+                                        gammaConstraint : Option[Nothing] = None,
+                                        renorm          : Boolean         = false,
+                                        renormClipping  : Map[RenormClipping, Tensor] = Map.empty,
+                                        renormMomentum  : Float           = 0.99f,
+                                        fused0          : Option[Boolean] = None,
+                                        trainable       : Boolean         = true,
+                                        virtualBatchSize: Option[Int]     = None,
+                                        adjustment      : Option[Nothing] = None,
                                         //  name=None,
                                       ) extends Layer[T](1) with ScalaLayer[T] {
 
@@ -100,7 +102,16 @@ class BatchNormalization[T <: TNumber](
 
   private def fusedCanBeUsed(): Boolean = Try(raiseIfFusedCannotBeUsed()).isSuccess
 
-  private var _data_format: String = null
+  private var dataFormat: String = null
+
+  // @property
+  private def paramDType: Class[_ <: TNumber] = {
+    // Raise parameters of fp16 batch norm to fp32
+    if (dtype == classOf[TFloat16] || dtype == classOf[TBfloat16])
+      classOf[TFloat32]
+    else
+      if (dtype != null) dtype else classOf[TFloat32]
+  }
 
   override protected def build(tf: Ops, inputShape: Shape): Unit = {
     // val inputShape = tf.TensorShape(inputShape)
@@ -126,12 +137,12 @@ class BatchNormalization[T <: TNumber](
     if (axis != axis.distinct)
       throw new IllegalArgumentException(s"Duplicate axis = $axis")
 
-    if (virtual_batch_size.isDefined) {
-      if (virtual_batch_size.exists(_ <= 0))
+    if (virtualBatchSize.isDefined) {
+      if (virtualBatchSize.exists(_ <= 0))
         throw new IllegalArgumentException(
           "virtual_batch_size must be a positive integer that divides the " ++
             "true batch size of the input tensor. Received =  " ++
-            s"virtual_batch_size=$virtual_batch_size"
+            s"virtual_batch_size=$virtualBatchSize"
         )
       // If using virtual batches, the first dimension must be the batch
       // dimension and cannot be the batch norm axis
@@ -176,13 +187,13 @@ class BatchNormalization[T <: TNumber](
 
     if (fused.contains(true)) {
       if (axis == Seq(1) && ndims == 4)
-        this._data_format = "NCHW"
+        this.dataFormat = "NCHW"
       else if (this.axis == Seq(1) && ndims == 5)
-        this._data_format = "NCDHW"
+        this.dataFormat = "NCDHW"
       else if (this.axis == Seq(3) && ndims == 4)
-        this._data_format = "NHWC"
+        this.dataFormat = "NHWC"
       else if (this.axis == Seq(4) && ndims == 5)
-        this._data_format = "NDHWC"
+        this.dataFormat = "NDHWC"
       else if (ndims == 5) {
         // 5D tensors that can be passed in but should not use fused batch norm
         // due to unsupported axis.
@@ -201,8 +212,8 @@ class BatchNormalization[T <: TNumber](
     }
 
     // val axis_to_dim = {x =  inputShape.dims[x].value for x in this.axis}
-    val axis_to_dim = axis.map { x => inputShape.size(x) }
-    if (axis_to_dim.contains(Shape.UNKNOWN_SIZE))
+    val axisToDim = axis.map { x => inputShape.size(x) }
+    if (axisToDim.contains(Shape.UNKNOWN_SIZE))
       throw new IllegalArgumentException(
         "Input has undefined `axis` dimension. Received input " ++
         s"with shape $inputShape. Axis value =  $axis"
@@ -211,88 +222,99 @@ class BatchNormalization[T <: TNumber](
     // XXX TODO
     // this.input_spec = (new InputSpec).ndim(ndims).axes(axis_to_dim)
 
-    var param_shape: Seq[Long] = null
+    var paramShape: Seq[Long] = null
 
-    if (axis_to_dim.size == 1 && virtual_batch_size.isEmpty) {
+    if (axisToDim.size == 1 && virtualBatchSize.isEmpty) {
       // Single axis batch norm (most common/default use-case)
-      param_shape = axis_to_dim.head :: Nil // (list(axis_to_dim.values())[0],)
+      paramShape = axisToDim.head :: Nil // (list(axis_to_dim.values())[0],)
     } else {
       // Parameter shape is the original shape but with 1 in all non-axis dims
-      param_shape = Seq.tabulate(ndims) { i =>
-        if (axis_to_dim.contains(i)) axis_to_dim(i) else 1L
+      paramShape = Seq.tabulate(ndims) { i =>
+        if (axisToDim.contains(i)) axisToDim(i) else 1L
       }
-      if (virtual_batch_size.isDefined) {
+      if (virtualBatchSize.isDefined) {
         // When using virtual batches, add an extra dim at index 1
-        param_shape = param_shape.patch(1, 1L :: Nil, 0)
+        paramShape = paramShape.patch(1, 1L :: Nil, 0)
         axis = axis.map(_ + 1) // Account for added dimension
       }
     }
     if (scale) {
       /*this.gamma =*/ addWeightExt(
-        /*name =*/ "gamma",
-        /*shape =*/ param_shape,
-        dtype = this._param_dtype,
-        initializer = this.gammaInitializer,
-        regularizer = this.gammaRegularizer,
-        constraint  = this.gammaConstraint,
-        trainable   = true,
-        experimental_autocast = False
+        name        = "gamma",
+        shape       = Shape.of(paramShape: _*),
+        dtype       = paramDType,
+        initializer = Some(gammaInitializer),
+        regularizer = gammaRegularizer,
+        constraint  = gammaConstraint,
+        trainable   = Some(true),
+//        experimental_autocast = False
       )
     } else {
       // this.gamma = None
-      if (fused.contains(true))
-        /*this._gamma_const =*/ Backend.constant(
-          1.0, dtype = this._param_dtype, shape = param_shape)
+      if (fused.contains(true)) {
+        // /*this._gamma_const =*/ Backend.constant(
+        //   1.0, dtype = paramDType, shape = param_shape)
+        /*this._gamma_const =*/ tf.reshape(
+          tf.dtypes.cast(tf.constant(1.0), paramDType),
+          tf.constant(paramShape.toArray)
+        )
+      }
     }
 
     if (this.center) {
-      /*this.beta =*/ addWeight(
-        /*name =*/ "beta",
-        /*shape =*/ param_shape,
-        dtype = this._param_dtype,
-        initializer = this.betaInitializer,
-        regularizer = this.betaRegularizer,
-        constraint = this.betaConstraint,
-        trainable = true,
-        experimental_autocast = false
+      /*this.beta =*/ addWeightExt(
+        name        = "beta",
+        shape       = Shape.of(paramShape: _*),
+        dtype       = paramDType,
+        initializer = Some(betaInitializer),
+        regularizer = betaRegularizer,
+        constraint  = betaConstraint,
+        trainable   = Some(true),
+//        experimental_autocast = false
       )
     } else {
       // this.beta = None
-      if (this.fused)
-        /*this._beta_const =*/ Backend.constant(
-          0.0, dtype = this._param_dtype, shape = param_shape)
+      if (fused.contains(true)) {
+        // /*this._beta_const =*/ Backend.constant(
+        //   0.0, dtype = paramDType, shape = paramShape)
+        /*this._beta_const =*/ tf.reshape(
+          tf.dtypes.cast(tf.constant(0.0), paramDType),
+          tf.constant(paramShape.toArray)
+        )
+      }
     }
 
     var partitioner: Option[Any] = None
 
     try {
       // Disable variable partitioning when creating the moving mean and variance
-      if (hasattr(this, "_scope") && this._scope) {
-        partitioner = this._scope.partitioner
-        this._scope.set_partitioner(None)
-      } else {
-        partitioner = None
-      }
-      this.moving_mean = Some(addWeight(
-        /*name =*/ "moving_mean",
-        /*shape =*/ param_shape,
-        dtype = this._param_dtype,
-        initializer = this.moving_mean_initializer,
-        synchronization = tf.VariableSynchronization.ON_READ,
-        trainable = false,
-        aggregation = tf.VariableAggregation.MEAN,
-        experimental_autocast = false
+      // XXX TODO
+      // if (hasattr(this, "_scope") && this._scope) {
+      //   partitioner = this._scope.partitioner
+      //   this._scope.set_partitioner(None)
+      // } else {
+      //   partitioner = None
+      // }
+      this.moving_mean = Some(addWeightExt(
+        name            = "moving_mean",
+        shape           = Shape.of(paramShape: _*),
+        dtype           = paramDType,
+        initializer     = Some(movingMeanInitializer),
+        synchronization = VariableSynchronization.VARIABLE_SYNCHRONIZATION_ON_READ,
+        trainable       = Some(false),
+        aggregation     = VariableAggregation.VARIABLE_AGGREGATION_MEAN,
+//        experimental_autocast = false
       ))
 
-      this.moving_variance = Some(addWeight(
-        /*name =*/ "moving_variance",
-        /*shape =*/ param_shape,
-        dtype = this._param_dtype,
-        initializer = this.moving_variance_initializer,
-        synchronization = tf.VariableSynchronization.ON_READ,
-        trainable = false,
-        aggregation = tf.VariableAggregation.MEAN,
-        experimental_autocast = false
+      this.moving_variance = Some(addWeightExt(
+        name            = "moving_variance",
+        shape           = Shape.of(paramShape: _*),
+        dtype           = paramDType,
+        initializer     = Some(movingVarianceInitializer),
+        synchronization = VariableSynchronization.VARIABLE_SYNCHRONIZATION_ON_READ,
+        trainable       = Some(false),
+        aggregation     = VariableAggregation.VARIABLE_AGGREGATION_MEAN,
+//        experimental_autocast = false
       ))
 
       if (this.renorm) {
@@ -341,15 +363,16 @@ class BatchNormalization[T <: TNumber](
 //        with tf.distribute.get_strategy(
 //        ).extended.colocate_vars_with(this.moving_mean) =
 //          this.renorm_mean = _renorm_variable("renorm_mean", param_shape,
-//            this.moving_mean_initializer)
+//            this.movingMeanInitializer)
 //        with tf.distribute.get_strategy(
 //        ).extended.colocate_vars_with(this.moving_stddev) =
 //          this.renorm_stddev = _renorm_variable("renorm_stddev", param_shape,
 //            moving_stddev_initializer)
       }
     } finally {
-      if (partitioner.isDefined)
-        this._scope.set_partitioner(partitioner)
+      // XXX TODO
+      // if (partitioner.isDefined)
+      //   this._scope.set_partitioner(partitioner)
     }
     built = true
   }

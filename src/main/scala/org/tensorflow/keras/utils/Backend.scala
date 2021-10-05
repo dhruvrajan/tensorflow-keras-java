@@ -120,4 +120,21 @@ object Backend {
       // }
     }
   }
+
+//  /** Creates a constant tensor.
+//    * Args:
+//    *     value: A constant value (or list)
+//    *     dtype: The type of the elements of the resulting tensor.
+//    *     shape: Optional dimensions of resulting tensor.
+//    *     name: Optional name for the tensor.
+//    * @param value
+//    * @param dtype
+//    * @param shape
+//    * @param name
+//    */
+//  def constant(tf: Ops, value, dtype = None, shape=None, name=None) = {
+//    if (dtype == None) dtype = floatx()
+//
+//    tf.constant(value, dtype = dtype, shape = shape, name = name)
+//  }
 }

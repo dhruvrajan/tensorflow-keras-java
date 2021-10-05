@@ -1,27 +1,19 @@
 package org.tensorflow.keras.layers
 
+import org.tensorflow.keras.initializers.Initializer
+import org.tensorflow.ndarray.Shape
 import org.tensorflow.op.core.Variable
-import org.tensorflow.types.family.{TNumber, TType}
+import org.tensorflow.proto.framework.{VariableAggregation, VariableSynchronization}
+import org.tensorflow.types.family.TNumber
 
 trait ScalaLayer[T <: TNumber] {
-  this: Layer[T] =>
+  self: Layer[T] =>
 
   /** Adds a new variable to the layer.
-
-     *  trainable: Boolean,
-     *  constraint:
-     *  use_resource: Whether to use `ResourceVariable`.
-     *  synchronization: Indicates when a distributed a variable will be
-     *    aggregated. Accepted values are constants defined in the class
-     *    `tf.VariableSynchronization`. By default the synchronization is set to
-     *    `AUTO` and the current `DistributionStrategy` chooses
-     *    when to synchronize. If `synchronization` is set to `ON_READ`,
-     *    `trainable` must not be set to `True`.
-     *  aggregation: Indicates how a distributed variable will be aggregated.
-     *    Accepted values are constants defined in the class
-     *    `tf.VariableAggregation`.
-     ***kwargs: Additional keyword arguments. Accepted values are `getter`,
-     *    `collections`, `experimental_autocast` and `caching_device`.
+    *
+    * kwargs: Additional keyword arguments. Accepted values are `getter`,
+    *    `collections`, `experimental_autocast` and `caching_device`.
+    *
     * @param name             Variable name.
     * @param shape            Variable shape. Defaults to scalar if unspecified.
     * @param dtype            The type of the variable. Defaults to `self.dtype`.
@@ -33,23 +25,32 @@ trait ScalaLayer[T <: TNumber] {
     *    Note that `trainable` cannot be `True` if `synchronization`
     *    is set to `ON_READ`.
     * @param constraint       Constraint instance (function).
-    * @param use_resource
-    * @param synchronization
-    * @param aggregation
+    * @param use_resource     Whether to use `ResourceVariable`.
+    * @param synchronization  Indicates when a distributed a variable will be
+    *    aggregated. Accepted values are constants defined in the class
+    *    `tf.VariableSynchronization`. By default the synchronization is set to
+    *    `AUTO` and the current `DistributionStrategy` chooses
+    *    when to synchronize. If `synchronization` is set to `ON_READ`,
+    *    `trainable` must not be set to `True`.
+    * @param aggregation      Indicates how a distributed variable will be aggregated.
+    *    Accepted values are constants defined in the class
+    *    `tf.VariableAggregation`.
     * @return
     */
   protected final def addWeightExt(
-                                    name    : Option[String] = None,
-                                    shape=None,
-                                    dtype=None,
-                                    initializer=None,
-                                    regularizer=None,
-                                    trainable : Option[Boolean] = None,
-                                    constraint=None,
-                                    use_resource=None,
-                                    synchronization=tf.VariableSynchronization.AUTO,
-                                    aggregation=tf.VariableAggregation.NONE,
+                                    name            : String, //                 = None,
+                                    shape           : Shape                   = Shape.scalar() /*unknown()*/,
+                                    dtype           : Class[_ <: TNumber]     = self.dtype,
+                                    initializer     : Option[Initializer]     = None,
+                                    regularizer     : Option[Nothing]         = None,
+                                    trainable       : Option[Boolean]         = None,
+                                    constraint      : Option[Nothing]         = None,
+                                    use_resource    : Boolean                 = false,
+                                    synchronization: VariableSynchronization  = VariableSynchronization.VARIABLE_SYNCHRONIZATION_AUTO,
+                                    aggregation     : VariableAggregation     = VariableAggregation.VARIABLE_AGGREGATION_NONE,
                                   ): Variable[T] = {
+
+
     ???
   }
 }

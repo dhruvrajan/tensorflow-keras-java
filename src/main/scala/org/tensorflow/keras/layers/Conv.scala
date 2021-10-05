@@ -4,17 +4,17 @@
 package org.tensorflow.keras.layers
 
 import org.tensorflow.keras.activations.Activations
-import org.tensorflow.keras.initializers.{Initializer, Initializers}
+import org.tensorflow.keras.initializers.Initializer
 import org.tensorflow.keras.layers.Conv.{DataFormat, Padding}
 import org.tensorflow.keras.utils.ConvUtils
 import org.tensorflow.ndarray.Shape
-import org.tensorflow.{Operand, op}
 import org.tensorflow.op.Ops
 import org.tensorflow.op.core.Variable
 import org.tensorflow.op.nn.BiasAdd
 import org.tensorflow.types.TFloat32
+import org.tensorflow.{Operand, op}
 
-import scala.collection.JavaConverters.seqAsJavaListConverter
+import scala.collection.JavaConverters._
 
 object Conv {
   object Padding {
@@ -50,15 +50,6 @@ object Conv {
     }
   }
   sealed trait DataFormat { def tfName(ndim: Int): String }
-
-  trait Options {
-    def groups              : Int
-    def strides             : Seq[Long]
-    def padding             : Padding
-    def useBias             : Boolean
-    def dataFormat          : DataFormat
-    def dilationRate        : Seq[Long]
-  }
 }
 /** Abstract N-D convolution layer (private, used as implementation base).
   * This layer creates a convolution kernel that is convolved
@@ -71,14 +62,34 @@ object Conv {
   *
   * @param  rank  the rank of the convolution, e.g. `2` for 2D convolution.
   */
-class Conv(rank: Int, filters: Int, kernelSize: Seq[Long], options: Conv.Options)
-  extends Layer[TFloat32](1) {
+class Conv(
+            rank                : Int,
+            filters             : Int,
+            kernelSize          : Seq[Long],
+            strides             : Seq[Long],
+            padding             : Padding,
+            dataFormat          : DataFormat,
+            dilationRate        : Seq[Long],
+            groups              : Int,
+            activation          : Option[Activations],
+            useBias             : Boolean,
+            kernelInitializer   : Initializer,
+            biasInitializer     : Initializer,
+            kernelRegularizer   : Option[Nothing],
+            biasRegularizer     : Option[Nothing],
+            activityRegularizer : Option[Nothing],
+            kernelConstraint    : Option[Nothing],
+            biasConstraint      : Option[Nothing],
+            trainable           : Boolean = true,
+//            convOp              : Option[Nothing],
+          )
+  extends Layer[TFloat32](1) with ScalaLayer[TFloat32] {
 
   type T = TFloat32
 
-  private val isCausal        = options.padding == Padding.Causal
-  private val tfDataFormat    = options.dataFormat.tfName(rank + 2)
-  private val isChannelsFirst = options.dataFormat == DataFormat.ChannelsFirst
+  private val isCausal        = /*options.*/padding == Padding.Causal
+  private val tfDataFormat    = /*options.*/dataFormat.tfName(rank + 2)
+  private val isChannelsFirst = /*options.*/dataFormat == DataFormat.ChannelsFirst
 
   private var kernel: Variable[T] = _
   private var bias  : Variable[T] = _
@@ -86,10 +97,10 @@ class Conv(rank: Int, filters: Int, kernelSize: Seq[Long], options: Conv.Options
   validateInit()
 
   private def validateInit(): Unit = {
-    if (filters != 0 && filters % options.groups != 0)
+    if (filters != 0 && filters % groups != 0)
       throw new IllegalArgumentException(
         "The number of filters must be evenly divisible by the number of groups. " ++
-        s"Received: groups=${options.groups}, filters=$filters"
+        s"Received: groups=$groups, filters=$filters"
       )
 
     if (!kernelSize.forall(_ > 0))
@@ -97,19 +108,19 @@ class Conv(rank: Int, filters: Int, kernelSize: Seq[Long], options: Conv.Options
         s"The argument `kernelSize` cannot contain 0(s). Received: $kernelSize"
       )
 
-    if (!options.strides.forall(_ > 0))
+    if (!strides.forall(_ > 0))
       throw new IllegalArgumentException(
-        s"The argument `strides` cannot contains 0(s). Received: ${options.strides}"
+        s"The argument `strides` cannot contains 0(s). Received: $strides"
       )
 
-    if (options.padding == Padding.Causal && !(rank == 1))
+    if (padding == Padding.Causal && !(rank == 1))
       throw new IllegalArgumentException(
         "Causal padding is only supported for `Conv1D` and `SeparableConv1D`."
       )
   }
 
   private def getChannelAxis: Int =
-    if (options.dataFormat == DataFormat.ChannelsFirst) -1 - rank else -1
+    if (dataFormat == DataFormat.ChannelsFirst) -1 - rank else -1
 
   private def getInputChannel(inputShape: Shape): Int = {
     val channelAxis = getChannelAxis
@@ -125,32 +136,32 @@ class Conv(rank: Int, filters: Int, kernelSize: Seq[Long], options: Conv.Options
 
   override protected def build(tf: Ops, inputShape: Shape): Unit = {
     val inputChannel = getInputChannel(inputShape)
-    if (inputChannel % options.groups != 0)
+    if (inputChannel % groups != 0)
       throw new IllegalArgumentException(
         "The number of input channels must be evenly divisible by the number " ++
-        s"of groups. Received groups=${options.groups}, but the input has $inputChannel channels " ++
+        s"of groups. Received groups=$groups, but the input has $inputChannel channels " ++
         s"(full input shape is $inputShape)."
       )
 
     require (kernelSize.size == rank)
-    val kernelShape: Array[Long] = kernelSize.toArray[Long] ++ Array[Long](inputChannel / options.groups, this.filters)
+    val kernelShape: Array[Long] = kernelSize.toArray[Long] ++ Array[Long](inputChannel / groups, this.filters)
 
     // compute_output_shape contains some validation logic for the input shape,
     // and make sure the output shape has all positive dimensions.
     computeOutputShape(inputShape)
 
-    // XXX TODO
-    kernel = addWeight(
-      "kernel",
-      tf.variable(Shape.of(kernelShape: _*), dtype): Variable[T], // XXX TODO
-//      /*initializer =*/ options.kernelInitializer,
-//      /*regularizer =*/ options.kernelRegularizer,
-//      /*constraint  =*/ options.kernelConstraint,
-//      trainable   = true,
-//      dtype       = this.dtype
+    kernel = addWeightExt(
+      name        = "kernel",
+      shape       = Shape.of(kernelShape: _*),
+      initializer = Some(kernelInitializer),
+      regularizer = kernelRegularizer,
+      constraint  = kernelConstraint,
+      trainable   = Some(true),
+      dtype       = this.dtype
     )
-    if (options.useBias) {
+    if (useBias) {
       ???
+      // XXX TODO
 //      bias = addWeight(tf,
 //        name = "bias",
 //        shape = (filters,),
@@ -178,9 +189,9 @@ class Conv(rank: Int, filters: Int, kernelSize: Seq[Long], options: Conv.Options
       ConvUtils.convOutputLength(
         length,
         kernelSize(i),
-        padding   = options.padding,
-        stride    = options.strides(i),
-        dilation  = options.dilationRate(i)
+        padding   = padding,
+        stride    = strides(i),
+        dilation  = dilationRate(i)
       )
     }
     Shape.of(arr: _*)
@@ -190,7 +201,7 @@ class Conv(rank: Int, filters: Int, kernelSize: Seq[Long], options: Conv.Options
 //    val inputShape = tf.TensorShape(inputShape).as_list()
     val batchRank = inputShape.numDimensions() - rank - 1
     try
-      if (options.dataFormat == DataFormat.ChannelsLast)
+      if (dataFormat == DataFormat.ChannelsLast)
         // Shape.of(
           inputShape.take(batchRank) append
           spatialOutputShape(inputShape.subShape(batchRank, inputShape.numDimensions() - 1)) append
@@ -216,17 +227,17 @@ class Conv(rank: Int, filters: Int, kernelSize: Seq[Long], options: Conv.Options
 
   def convolutionOp(tf: Ops, inputs: Operand[T], kernel: Operand[T]): Operand[T] = {
     val tfPadding =
-      if (options.padding == Padding.Causal)
+      if (padding == Padding.Causal)
         Padding.Valid.tfName   // Causal padding handled in `call`.
-      else options.padding.tfName
+      else padding.tfName
 
     tf.nn.conv2d /*convolution*/(
       inputs,
       kernel,
-      options.strides.map(_.asInstanceOf[java.lang.Long]).asJava,
+      strides.map(_.asInstanceOf[java.lang.Long]).asJava,
       tfPadding,
       op.nn.Conv2d
-        .dilations(options.dilationRate.map(_.asInstanceOf[java.lang.Long]).asJava)
+        .dilations(dilationRate.map(_.asInstanceOf[java.lang.Long]).asJava)
         .dataFormat(tfDataFormat)
     )
   }
@@ -236,7 +247,7 @@ class Conv(rank: Int, filters: Int, kernelSize: Seq[Long], options: Conv.Options
 
   // Calculates padding for 'causal' option for 1-d conv layers.
   private def computeCausalPadding(inputs: Operand[T]) = {
-    val leftPad   = options.dilationRate.head * (kernelSize.head - 1)
+    val leftPad   = dilationRate.head * (kernelSize.head - 1)
     val batchRank = if (inputs.shape.numDimensions() == 0 /*None*/)
       1
     else
@@ -259,7 +270,7 @@ class Conv(rank: Int, filters: Int, kernelSize: Seq[Long], options: Conv.Options
 
     var outputs: Operand[T] = convolutionOp(tf, inputs, kernel)
 
-    if (options.useBias) {
+    if (useBias) {
       val outputRank = outputs.shape.numDimensions()
 
       if (rank == 1 && isChannelsFirst) {
@@ -287,59 +298,11 @@ class Conv(rank: Int, filters: Int, kernelSize: Seq[Long], options: Conv.Options
       ??? // outputs.set_shape(outShape)
     }
 
-// XXX TODO: activation
-//    if (options.activation != None)
-//      this.activation(outputs)
-//    else
+    if (activation.isDefined) {
+      val a = Activations.select[T](activation.get)
+      a.apply(tf, outputs)
+    } else {
       outputs
+    }
   }
 }
-
-object Conv2D {
-  val   Padding     = Conv.Padding
-  type  Padding     = Conv.Padding // Padding.Value
-
-  val   DataFormat  = Conv.DataFormat
-  type  DataFormat  = Conv.DataFormat
-
-//  def setStrides(strideHeight: Long, strideWidth: Long): Options.Builder = {
-
-  case class Options(
-                      strides             : Seq[Long]           = Seq(1, 1),
-                      padding             : Padding             = Padding.Valid,
-                      dataFormat          : DataFormat          = DataFormat.ChannelsLast,
-                      dilationRate        : Seq[Long]           = Seq[Long](1, 1),
-                      groups              : Int                 = 1,
-                      activation          : Option[Activations] = None, // Activations.select(Activations.linear),
-                      useBias             : Boolean             = true,
-                      kernelInitializer   : Initializer         = Initializers.select(Initializers.glorotUniform),
-                      biasInitializer     : Initializer         = Initializers.select(Initializers.zeros),
-//                      kernelRegularizer   : Regularizer         = ...,
-//                      biasRegularizer     : Regularizer         = ...,
-//                      activityRegularizer : Regularizer         = ...,
-//                      kernelConstraint    : Constraint          = ...,
-//                      biasConstraint      : Constraint          = ...,
-                    ) extends Conv.Options
-}
-
-/** 2D convolution layer (e.g. spatial convolution over images).
-  * This layer creates a convolution kernel that is convolved
-  * with the layer input to produce a tensor of
-  * outputs. If `use_bias` is True,
-  * a bias vector is created and added to the outputs. Finally, if
-  * `activation` is not `None`, it is applied to the outputs as well.
-  * When using this layer as the first layer in a model,
-  * provide the keyword argument `input_shape`
-  * (tuple of integers or `None`, does not include the sample axis),
-  * e.g. `input_shape=(128, 128, 3)` for 128x128 RGB pictures
-  * in `data_format="channels_last"`. You can use `None` when
-  * a dimension has variable size.
-  *
-  * @param filters    the dimensionality of the output space (i.e. the number of
-  *                   output filters in the convolution)
-  * @param kernelSize two integers, specifying the height
-  *                   and width of the 2D convolution window. Can be a single integer to specify
-  *                   the same value for all spatial dimensions.
-  */
-class Conv2D(filters: Int, kernelSize: Seq[Long], options: Conv2D.Options)
-  extends Conv(rank = 1, filters = filters, kernelSize = kernelSize, options = options)
