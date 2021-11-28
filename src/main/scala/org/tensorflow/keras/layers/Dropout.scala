@@ -78,9 +78,9 @@ class Dropout[T <: TNumber](rate: Float, noiseShape: Shape = Shape.unknown(), se
   }
 
   override protected def call(tf: Ops, inputs: Operand[T]*): Operand[T] =
-    call(tf, inputs(0))
+    callOne(tf, inputs(0))
 
-  private def call(tf: Ops, inputs: Operand[T]): Operand[T] = {
+  private def callOne(tf: Ops, inputs: Operand[T]): Operand[T] = {
     val training = false // XXX TODO
     if (!training)
       ??? // training = Backend.learningPhase()

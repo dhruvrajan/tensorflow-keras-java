@@ -12,35 +12,31 @@ import org.tensorflow.ndarray.Shape
 import org.tensorflow.types.family.TNumber
 
 object Layers {
-  // Builders for Input Layer
   def input[T <: TNumber](firstDim: Long, units: Long*) =
     new Input[T](Keras.concatenate(firstDim, units: _*): _*)
 
-  // Builders for Dense Layer
-  def dense[T <: TNumber](units: Int) = new Dense[T](units, Dense.Options.defaults[T])
-
-  def dense[T <: TNumber](units: Int, options: Dense.Options[T]) = new Dense[T](units, options)
-
-  def dense[T <: TNumber](units: Int, activation: Activation[T]) =
-    new Dense[T](units, Dense.Options.builder[T].setActivation(activation).build)
-
-  def dense[T <: TNumber](units: Int, activation: Activations) =
-    new Dense[T](units, Dense.Options.builder[T].setActivation(activation).build)
-
-  def dense[T <: TNumber](units: Int, activation: Activations, kernelInitializer: Initializers,
-                          biasInitializer: Initializers) =
-    new Dense[T](units, Dense.Options.builder[T]
-      .setActivation(activation)
-      .setKernelInitializer(kernelInitializer)
-      .setBiasInitializer(biasInitializer).build
-    )
-
-  def dense[T <: TNumber](units: Int, activation: Activation[T], kernelInitializer: Initializer,
-                          biasInitializer: Initializer) =
-    new Dense[T](units, Dense.Options.builder[T]
-      .setActivation(activation)
-      .setKernelInitializer(kernelInitializer)
-      .setBiasInitializer(biasInitializer).build
+  def dense[T <: TNumber](units: Int,
+                          activation          : Option[Activations] = None,
+                          useBias             : Boolean = true,
+                          kernelInitializer   : Initializers = Initializers.glorotUniform,
+                          biasInitializer     : Initializers = Initializers.zeros,
+                          kernelRegularizer   : Option[Nothing] = None,
+                          biasRegularizer     : Option[Nothing] = None,
+                          activityRegularizer : Option[Nothing] = None,
+                          kernelConstraint    : Option[Nothing] = None,
+                          biasConstraint      : Option[Nothing] = None,
+                         ): Dense[T] =
+    new Dense[T](
+      units             = units,
+      activation        = activation.map(Activations.select[T]),
+      useBias           = useBias,
+      kernelInitializer = Initializers.select(kernelInitializer),
+      biasInitializer   = Initializers.select(biasInitializer),
+      kernelRegularizer = kernelRegularizer,
+      biasRegularizer   = biasRegularizer,
+      activityRegularizer = activityRegularizer,
+      kernelConstraint = kernelConstraint,
+      biasConstraint = biasConstraint
     )
 
   // Builders for Flatten Layer

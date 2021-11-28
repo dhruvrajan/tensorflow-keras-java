@@ -26,7 +26,7 @@ object Conv {
   sealed trait Padding { def tfName: String }
 
   object DataFormat {
-    case object ChannelsLast  extends DataFormat {
+    case object ChannelsLast extends DataFormat {
       override def tfName(ndim: Int): String = ndim match {
         case 3 => "NWC"
         case 4 => "NHWC"
@@ -243,7 +243,7 @@ class Conv(
   }
 
   @SafeVarargs override final protected def call(tf: Ops, inputs: Operand[T]*): Operand[T] =
-    call(tf, inputs(0))
+    callOne(tf, inputs(0))
 
   // Calculates padding for 'causal' option for 1-d conv layers.
   private def computeCausalPadding(inputs: Operand[T]) = {
@@ -261,7 +261,7 @@ class Conv(
 //     causal_padding
   }
 
-  private def call(tf: Ops, inputs0: Operand[T]): Operand[T] = {
+  private def callOne(tf: Ops, inputs0: Operand[T]): Operand[T] = {
     var inputs      = inputs0
     val input_shape = inputs.shape
 

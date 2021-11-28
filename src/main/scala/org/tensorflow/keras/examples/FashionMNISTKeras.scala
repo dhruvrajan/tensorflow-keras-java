@@ -46,13 +46,18 @@ object FashionMNISTKeras {
   Sequential.of(classOf[TFloat32],
     Layers.input(28, 28),
     Layers.flatten(),
-    Layers.dense(256, Activations.relu, Initializers.randomNormal, Initializers.zeros), // Using Layer Options Builder
-    new Dense[TFloat32](128, Dense.Options.builder[TFloat32]
-      .setActivation(Activations.relu)
-      .setKernelInitializer(Initializers.randomNormal)
-      .setBiasInitializer(Initializers.zeros).build
+    Layers.dense(256, Some(Activations.relu),
+      kernelInitializer = Initializers.randomNormal,
+      biasInitializer   = Initializers.zeros
+    ),
+    Layers.dense[TFloat32](128, Some(Activations.relu),
+      kernelInitializer = Initializers.randomNormal,
+      biasInitializer   = Initializers.zeros
     ), // Using static helper Layers.dense(...)
-    Layers.dense(10, Activations.softmax, Initializers.randomNormal, Initializers.zeros)
+    Layers.dense(10, Some(Activations.softmax),
+      kernelInitializer = Initializers.randomNormal,
+      biasInitializer   = Initializers.zeros
+    )
   )
 
   // Model Compile Configuration
