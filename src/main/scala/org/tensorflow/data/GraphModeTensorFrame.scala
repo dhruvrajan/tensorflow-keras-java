@@ -19,10 +19,10 @@ object GraphModeTensorFrame {
   }
 }
 
-class GraphModeTensorFrame[T <: TType](val dtype: Class[T], val firstTensor: Tensor, val tensors: Tensor*) //    @SafeVarargs
+class GraphModeTensorFrame[T <: TType](dtype: Class[T], firstTensor: Tensor, tensors: Tensor*) //    @SafeVarargs
   extends TensorFrame[T] with GraphLoader[T] with AutoCloseable { // Check first dimension matches
 
-  val matchDim: Long = firstTensor.shape.size(0)
+  private val matchDim: Long = firstTensor.shape.size(0)
   for (t <- tensors) {
     if (t.shape.size(0) != matchDim) throw new IllegalArgumentException("All dataTensors in a tensor frame must have equal first dimension.")
   }
@@ -31,7 +31,7 @@ class GraphModeTensorFrame[T <: TType](val dtype: Class[T], val firstTensor: Ten
   final private val dataTensors = {
     val res = new Array[Tensor](tensors.length + 1)
     res(0) = firstTensor
-    System.arraycopy(tensors, 0, res, 1, tensors.length)
+    System.arraycopy(tensors.toArray, 0, res, 1, tensors.length)
     res
   }
 

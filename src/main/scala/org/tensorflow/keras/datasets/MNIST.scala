@@ -5,7 +5,6 @@ import org.tensorflow.data.GraphModeTensorFrame
 import org.tensorflow.keras.utils.DataUtils
 import org.tensorflow.keras.utils.Keras
 import org.tensorflow.types.TFloat32
-import org.tensorflow.utils.Pair
 import org.tensorflow.utils.Tensors
 import java.io.DataInputStream
 import java.io.FileInputStream
@@ -43,7 +42,7 @@ object MNIST {
   }
 
   @throws[IOException]
-  def graphLoaders: Pair[GraphLoader[TFloat32], GraphLoader[TFloat32]] = { // Download MNIST files if they don't exist.
+  def graphLoaders: (GraphLoader[TFloat32], GraphLoader[TFloat32]) = { // Download MNIST files if they don't exist.
     MNIST.download()
     // Read data files into arrays
     val trainImages = readImages(Keras.kerasPath(LOCAL_PREFIX, TRAIN_IMAGES).toString)
@@ -51,20 +50,20 @@ object MNIST {
     val testImages  = readImages(Keras.kerasPath(LOCAL_PREFIX, TEST_IMAGES).toString)
     val testLabels  = readLabelsOneHot(Keras.kerasPath(LOCAL_PREFIX + TEST_LABELS).toString)
     // Return a pair of graph loaders; train and test sets
-    new Pair(
+    (
       new GraphModeTensorFrame(classOf[TFloat32], Tensors.create(trainImages) , Tensors.create(trainLabels)),
       new GraphModeTensorFrame(classOf[TFloat32], Tensors.create(testImages)  , Tensors.create(testLabels))
     )
   }
 
   @throws[IOException]
-  def graphLoaders2D: Pair[GraphLoader[TFloat32], GraphLoader[TFloat32]] = {
+  def graphLoaders2D: (GraphLoader[TFloat32], GraphLoader[TFloat32]) = {
     MNIST.download()
     val trainImages = readImages2D(Keras.kerasPath(LOCAL_PREFIX, TRAIN_IMAGES).toString)
     val trainLabels = readLabelsOneHot(Keras.kerasPath(LOCAL_PREFIX, TRAIN_LABELS).toString)
     val testImages  = readImages2D(Keras.kerasPath(LOCAL_PREFIX, TEST_IMAGES).toString)
     val testLabels  = readLabelsOneHot(Keras.kerasPath(LOCAL_PREFIX + TEST_LABELS).toString)
-    new Pair(
+    (
       new GraphModeTensorFrame(classOf[TFloat32], Tensors.create(trainImages) , Tensors.create(trainLabels)),
       new GraphModeTensorFrame(classOf[TFloat32], Tensors.create(testImages)  , Tensors.create(testLabels))
     )

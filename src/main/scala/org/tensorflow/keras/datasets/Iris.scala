@@ -3,7 +3,7 @@ package org.tensorflow.keras.datasets
 import org.tensorflow.data.{GraphLoader, GraphModeTensorFrame}
 import org.tensorflow.keras.utils.{DataUtils, Keras}
 import org.tensorflow.types.TFloat32
-import org.tensorflow.utils.{Pair, Tensors}
+import org.tensorflow.utils.Tensors
 
 import java.io.{BufferedReader, FileReader, IOException}
 import java.util
@@ -42,7 +42,7 @@ object Iris {
     DataUtils.getFile(LOCAL_PREFIX + LOCAL_FILE, IRIS_ORIGIN)
 
   @throws[IOException]
-  def loadData(val_split: Double): Pair[GraphLoader[TFloat32], GraphLoader[TFloat32]] = {
+  def loadData(val_split: Double): (GraphLoader[TFloat32], GraphLoader[TFloat32]) = {
     Iris.download()
     val fr = new FileReader(Keras.kerasPath(LOCAL_PREFIX + LOCAL_FILE).toFile)
     try {
@@ -89,7 +89,7 @@ object Iris {
           count += 1
         }
 
-        new Pair(
+        (
           new GraphModeTensorFrame(classOf[TFloat32], Tensors.create(XTrain), Tensors.create(yTrain)),
           new GraphModeTensorFrame(classOf[TFloat32], Tensors.create(XVal)  , Tensors.create(yVal))
         )
