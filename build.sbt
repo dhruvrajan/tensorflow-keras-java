@@ -5,11 +5,11 @@ lazy val projectVersion = "0.1.0-SNAPSHOT"
 
 lazy val deps = new {
   val main = new {
-    val tensorflow      = "0.3.3"
+    val tensorflow      = "0.4.0"
   }
   val test = new {
     val junitInterface  = "0.13.2"
-    val junitJupiter    = "5.8.1"
+    val junitJupiter    = "5.8.2"
   }
 }
 
@@ -29,8 +29,8 @@ lazy val root = project.in(file("."))
   .settings(
     name             := baseName,
     licenses         := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt")),
-    scalaVersion     := "2.13.6",
-    crossScalaVersions := Seq("3.0.2", "2.13.6", "2.12.15"),
+    scalaVersion     := "2.13.7",
+    crossScalaVersions := Seq("3.1.0", "2.13.7", "2.12.15"),
     scalacOptions   ++= Seq("-deprecation"),
     javacOptions                 := basicJavaOpts ++ Seq("-Xlint:unchecked", "-target", "1.8"),
     Compile / doc / javacOptions := basicJavaOpts,

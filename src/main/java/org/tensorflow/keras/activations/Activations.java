@@ -73,7 +73,7 @@ public enum Activations {
     /**
      * Rectified linear unit.
      */
-    public static <T extends TType> Relu<T> relu(Ops tf, Operand<T> x) {
+    public static <T extends TNumber> Relu<T> relu(Ops tf, Operand<T> x) {
         return tf.nn.relu(x);
     }
 
