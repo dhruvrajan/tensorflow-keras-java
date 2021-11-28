@@ -1,10 +1,8 @@
 package org.tensorflow.keras.layers
 
 import org.tensorflow.Tensor
-import org.tensorflow.keras.activations.Activation
 import org.tensorflow.keras.activations.Activations
-import org.tensorflow.keras.initializers.Initializer
-import org.tensorflow.keras.initializers.Initializers
+import org.tensorflow.keras.initializers.{Initializer, Initializers}
 import org.tensorflow.keras.layers.BatchNormalization.RenormClipping
 import org.tensorflow.keras.layers.Conv.{DataFormat, Padding}
 import org.tensorflow.keras.utils.Keras
@@ -13,13 +11,13 @@ import org.tensorflow.types.family.TNumber
 
 object Layers {
   def input[T <: TNumber](firstDim: Long, units: Long*) =
-    new Input[T](Keras.concatenate(firstDim, units: _*): _*)
+    new Input[T](Keras.concatenate(firstDim, units: _*))
 
   def dense[T <: TNumber](units: Int,
                           activation          : Option[Activations] = None,
                           useBias             : Boolean = true,
-                          kernelInitializer   : Initializers = Initializers.glorotUniform,
-                          biasInitializer     : Initializers = Initializers.zeros,
+                          kernelInitializer   : Initializers.Value = Initializers.glorotUniform,
+                          biasInitializer     : Initializers.Value = Initializers.zeros,
                           kernelRegularizer   : Option[Nothing] = None,
                           biasRegularizer     : Option[Nothing] = None,
                           activityRegularizer : Option[Nothing] = None,

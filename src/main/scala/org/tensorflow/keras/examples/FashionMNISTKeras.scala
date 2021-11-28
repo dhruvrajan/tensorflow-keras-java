@@ -43,7 +43,7 @@ object FashionMNISTKeras {
   //       methods defined in `Layers` which wrap the explicit builders
   //       to decrease verbosity.
   private val model =
-  Sequential.of(classOf[TFloat32],
+  Sequential(classOf[TFloat32],
     Layers.input(28, 28),
     Layers.flatten(),
     Layers.dense(256, Some(Activations.relu),
