@@ -1,19 +1,35 @@
 package org.tensorflow.keras.initializers
 
+import org.tensorflow.Operand
+import org.tensorflow.framework.initializers.VarianceScaling.Distribution
+import org.tensorflow.framework.initializers.{Glorot, Initializer, Ones, RandomNormal, Zeros}
+import org.tensorflow.keras.utils.Keras
+import org.tensorflow.op.{Ops => TF}
+import org.tensorflow.op.core.Assign
+import org.tensorflow.types.family.{TFloating, TNumber, TType}
+
 object Initializers extends Enumeration {
   type Initializers = Value
 
   val zeros, ones, randomNormal, glorotUniform = Value
 
-  def select(initializer: Initializers): Initializer = initializer match {
+  implicit class Ops[T <: TType](private val i: Initializer[T]) extends AnyVal {
+    def apply(tf: TF, in: Operand[T], dtype: Class[T]): Assign[T] =
+      tf.assign(in, i.call(tf, Keras.shapeOperandL(tf, in.asOutput.shape), dtype))
+  }
+
+  def select[T <: TNumber](initializer: Initializers): Initializer[T] = initializer match {
     case `zeros` =>
-      new Zeros
+      new Zeros[T]
     case `ones` =>
-      new Ones
+      new Ones[T]
     case `randomNormal` =>
-      new RandomNormal(0.0f, 0.1f, -0.2f, 0.2f)
+      val seed = scala.util.Random.nextLong()
+      val res = new RandomNormal[TFloating](0.0f, 0.1f, seed) // XXX TODO: -0.2f, 0.2f)
+      res.asInstanceOf[Initializer[T]]
     case `glorotUniform` =>
-      throw new UnsupportedOperationException("Glorot Uniform does not yet exist")
+      val res = new Glorot[TFloating](Distribution.UNIFORM, ???)
+      res.asInstanceOf[Initializer[T]]
     case _ =>
       throw new IllegalArgumentException("invalid initializer type")
   }

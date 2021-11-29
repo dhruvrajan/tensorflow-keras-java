@@ -4,6 +4,7 @@ import org.tensorflow.Operand;
 import org.tensorflow.ndarray.Shape;
 import org.tensorflow.op.Ops;
 import org.tensorflow.types.TInt32;
+import org.tensorflow.types.TInt64;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -49,6 +50,15 @@ public class Keras {
     int[] shapeArray = new int[shape.numDimensions()];
     for (int i = 0; i < shapeArray.length; i++) {
       shapeArray[i] = (int) shape.size(i);
+    }
+
+    return tf.constant(shapeArray);
+  }
+
+  public static Operand<TInt64> shapeOperandL(Ops tf, Shape shape) {
+    long[] shapeArray = new long[shape.numDimensions()];
+    for (int i = 0; i < shapeArray.length; i++) {
+      shapeArray[i] = shape.size(i);
     }
 
     return tf.constant(shapeArray);

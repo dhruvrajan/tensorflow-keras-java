@@ -1,14 +1,16 @@
 package org.tensorflow.keras.layers
 
 import org.tensorflow.Operand
-import org.tensorflow.keras.initializers.Initializer
+import org.tensorflow.framework.initializers.Initializer
 import org.tensorflow.keras.initializers.Initializers
+import org.tensorflow.keras.initializers.Initializers.Ops
 import org.tensorflow.keras.mixin.LayerFunction
 import org.tensorflow.ndarray.Shape
-import org.tensorflow.op.Ops
+import org.tensorflow.op.{Ops => TF}
 import org.tensorflow.op.core.Assign
 import org.tensorflow.op.core.Variable
 import org.tensorflow.types.family.TNumber
+
 import java.{util => ju}
 
 /**
@@ -37,9 +39,9 @@ abstract class Layer[T <: TNumber](val INPUTS_LENGTH: Int) extends LayerFunction
     * @param inputShape Shape of the layer's input tensor
     *
     */
-  protected def build(tf: Ops, inputShape: Shape): Unit
+  protected def build(tf: TF, inputShape: Shape): Unit
 
-  final def build(tf: Ops, inputShape: Shape, dtype: Class[T]): Unit = {
+  final def build(tf: TF, inputShape: Shape, dtype: Class[T]): Unit = {
     this.dtype = dtype
     build(tf, inputShape)
     this.built = true
@@ -60,12 +62,12 @@ abstract class Layer[T <: TNumber](val INPUTS_LENGTH: Int) extends LayerFunction
     * @param inputs A sequence of TF Operands
     * @return The transformed input tensors, according to the layer's logic.
     */
-  @SuppressWarnings(Array("unchecked")) protected def call(tf: Ops, inputs: Operand[T]*): Operand[T]
+  @SuppressWarnings(Array("unchecked")) protected def call(tf: TF, inputs: Operand[T]*): Operand[T]
 
   /**
     * Internal wrapper for Layer.call
     */
-  override final def apply(tf: Ops, inputs: Operand[T]*): Operand[T] = {
+  override final def apply(tf: TF, inputs: Operand[T]*): Operand[T] = {
     if (!this.built) throw new IllegalStateException("Layer.call() cannot be called before the layer is built (Layer.build())")
     if (inputs.length != INPUTS_LENGTH) throw new IllegalArgumentException("Layer call() expected " + INPUTS_LENGTH + "inputs; received " + inputs.length + ".")
     this.call(tf, inputs: _*)
@@ -83,9 +85,9 @@ abstract class Layer[T <: TNumber](val INPUTS_LENGTH: Int) extends LayerFunction
     variable
   }
 
-  final protected def addWeight(tf: Ops, name: String, variable: Variable[T], initializerName: String, initializer: Nothing): Variable[T] = addWeight(tf, name, variable, initializerName, Initializers.select(initializer))
+//  final protected def addWeight(tf: Ops, name: String, variable: Variable[T], initializerName: String, initializer: Nothing): Variable[T] = addWeight(tf, name, variable, initializerName, Initializers.select(initializer))
 
-  final protected def addWeight(tf: Ops, name: String, variable: Variable[T], initializerName: String, initializer: Initializer): Variable[T] = {
+  final protected def addWeight(tf: TF, name: String, variable: Variable[T], initializerName: String, initializer: Initializer[T]): Variable[T] = {
     this.weights.put(name, variable)
     initializerOpMap.put(initializerName, initializer.apply(tf, variable, dtype))
     variable

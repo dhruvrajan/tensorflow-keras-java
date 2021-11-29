@@ -4,9 +4,9 @@
 package org.tensorflow.keras.layers
 
 import org.tensorflow.Operand
+import org.tensorflow.framework.initializers.Initializer
 import org.tensorflow.keras.activations.Activation
 import org.tensorflow.keras.activations.Activations
-import org.tensorflow.keras.initializers.Initializer
 import org.tensorflow.keras.initializers.Initializers
 import org.tensorflow.keras.utils.TensorShape
 import org.tensorflow.ndarray.Shape
@@ -26,8 +26,8 @@ class Dense[T <: TNumber](
                            units              : Int,
                            activation         : Option[Activation[T]] = None,
                            useBias            : Boolean = true,
-                           kernelInitializer  : Initializer = Initializers.select(Initializers.glorotUniform),
-                           biasInitializer    : Initializer = Initializers.select(Initializers.zeros),
+                           kernelInitializer  : Initializer[T] = Initializers.select(Initializers.glorotUniform),
+                           biasInitializer    : Initializer[T] = Initializers.select(Initializers.zeros),
                            kernelRegularizer  : Option[Nothing] = None,
                            biasRegularizer    : Option[Nothing] = None,
                            activityRegularizer: Option[Nothing] = None,

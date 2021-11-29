@@ -1,12 +1,14 @@
 package org.tensorflow.keras.layers
 
 import org.tensorflow.Tensor
+import org.tensorflow.framework.initializers.Initializer
 import org.tensorflow.keras.activations.Activations
-import org.tensorflow.keras.initializers.{Initializer, Initializers}
+import org.tensorflow.keras.initializers.Initializers
 import org.tensorflow.keras.layers.BatchNormalization.RenormClipping
 import org.tensorflow.keras.layers.Conv.{DataFormat, Padding}
 import org.tensorflow.keras.utils.Keras
 import org.tensorflow.ndarray.Shape
+import org.tensorflow.types.TFloat32
 import org.tensorflow.types.family.TNumber
 
 object Layers {
@@ -28,8 +30,8 @@ object Layers {
       units             = units,
       activation        = activation.map(Activations.select[T]),
       useBias           = useBias,
-      kernelInitializer = Initializers.select(kernelInitializer),
-      biasInitializer   = Initializers.select(biasInitializer),
+      kernelInitializer = Initializers.select[T](kernelInitializer),
+      biasInitializer   = Initializers.select[T](biasInitializer),
       kernelRegularizer = kernelRegularizer,
       biasRegularizer   = biasRegularizer,
       activityRegularizer = activityRegularizer,
@@ -51,8 +53,8 @@ object Layers {
               groups              : Int                 = 1,
               activation          : Option[Activations] = None, // Activations.select(Activations.linear),
               useBias             : Boolean             = true,
-              kernelInitializer   : Initializer         = Initializers.select(Initializers.glorotUniform),
-              biasInitializer     : Initializer         = Initializers.select(Initializers.zeros),
+              kernelInitializer   : Initializer[TFloat32] = Initializers.select[TFloat32](Initializers.glorotUniform),
+              biasInitializer     : Initializer[TFloat32] = Initializers.select[TFloat32](Initializers.zeros),
               kernelRegularizer   : Option[Nothing]     = None,
               biasRegularizer     : Option[Nothing]     = None,
               activityRegularizer : Option[Nothing]     = None,
@@ -92,10 +94,10 @@ object Layers {
                           epsilon         : Float           = 1e-3f,
                           center          : Boolean         = true,
                           scale           : Boolean         = true,
-                          betaInitializer : Initializer     = Initializers.select(Initializers.zeros),
-                          gammaInitializer: Initializer     = Initializers.select(Initializers.ones ),
-                          movingMeanInitializer: Initializer = Initializers.select(Initializers.zeros),
-                          movingVarianceInitializer: Initializer = Initializers.select(Initializers.ones ),
+                          betaInitializer : Initializer[T] = Initializers.select[T](Initializers.zeros),
+                          gammaInitializer: Initializer[T] = Initializers.select[T](Initializers.ones ),
+                          movingMeanInitializer: Initializer[T] = Initializers.select[T](Initializers.zeros),
+                          movingVarianceInitializer: Initializer[T] = Initializers.select[T](Initializers.ones ),
                           betaRegularizer : Option[Nothing] = None,
                           gammaRegularizer: Option[Nothing] = None,
                           betaConstraint  : Option[Nothing] = None,

@@ -1,6 +1,6 @@
 package org.tensorflow.keras.layers
 
-import org.tensorflow.keras.initializers.Initializer
+import org.tensorflow.framework.initializers.Initializer
 import org.tensorflow.ndarray.Shape
 import org.tensorflow.op.core.Variable
 import org.tensorflow.proto.framework.{VariableAggregation, VariableSynchronization}
@@ -41,7 +41,7 @@ trait ScalaLayer[T <: TNumber] {
                                     name            : String, //                 = None,
                                     shape           : Shape                   = Shape.scalar() /*unknown()*/,
                                     dtype           : Class[_ <: TNumber]     = self.dtype,
-                                    initializer     : Option[Initializer]     = None,
+                                    initializer     : Option[Initializer[T]]  = None,
                                     regularizer     : Option[Nothing]         = None,
                                     trainable       : Option[Boolean]         = None,
                                     constraint      : Option[Nothing]         = None,

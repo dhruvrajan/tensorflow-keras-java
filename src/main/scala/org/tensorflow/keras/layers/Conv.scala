@@ -3,8 +3,8 @@
 
 package org.tensorflow.keras.layers
 
+import org.tensorflow.framework.initializers.Initializer
 import org.tensorflow.keras.activations.Activations
-import org.tensorflow.keras.initializers.Initializer
 import org.tensorflow.keras.layers.Conv.{DataFormat, Padding}
 import org.tensorflow.keras.utils.ConvUtils
 import org.tensorflow.ndarray.Shape
@@ -73,8 +73,8 @@ class Conv(
             groups              : Int,
             activation          : Option[Activations],
             useBias             : Boolean,
-            kernelInitializer   : Initializer,
-            biasInitializer     : Initializer,
+            kernelInitializer   : Initializer[TFloat32],
+            biasInitializer     : Initializer[TFloat32],
             kernelRegularizer   : Option[Nothing],
             biasRegularizer     : Option[Nothing],
             activityRegularizer : Option[Nothing],

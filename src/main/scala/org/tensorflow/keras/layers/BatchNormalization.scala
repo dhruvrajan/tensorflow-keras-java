@@ -1,6 +1,7 @@
 package org.tensorflow.keras.layers
 
-import org.tensorflow.keras.initializers.{Initializer, Initializers}
+import org.tensorflow.framework.initializers.Initializer
+import org.tensorflow.keras.initializers.Initializers
 import org.tensorflow.keras.layers.BatchNormalization.RenormClipping
 import org.tensorflow.ndarray.Shape
 import org.tensorflow.op.Ops
@@ -56,10 +57,10 @@ class BatchNormalization[T <: TNumber](
                                         epsilon         : Float           = 1e-3f,
                                         center          : Boolean         = true,
                                         scale           : Boolean         = true,
-                                        betaInitializer : Initializer     = Initializers.select(Initializers.zeros),
-                                        gammaInitializer: Initializer     = Initializers.select(Initializers.ones ),
-                                        movingMeanInitializer: Initializer = Initializers.select(Initializers.zeros),
-                                        movingVarianceInitializer: Initializer = Initializers.select(Initializers.ones ),
+                                        betaInitializer : Initializer[T]          = Initializers.select(Initializers.zeros),
+                                        gammaInitializer: Initializer[T]          = Initializers.select(Initializers.ones ),
+                                        movingMeanInitializer: Initializer[T]     = Initializers.select(Initializers.zeros),
+                                        movingVarianceInitializer: Initializer[T] = Initializers.select(Initializers.ones ),
                                         betaRegularizer : Option[Nothing] = None,
                                         gammaRegularizer: Option[Nothing] = None,
                                         betaConstraint  : Option[Nothing] = None,

@@ -1,8 +1,10 @@
 package org.tensorflow.keras.layers
 
+import org.tensorflow.framework.initializers.Initializer
 import org.tensorflow.keras.activations.Activations
-import org.tensorflow.keras.initializers.{Initializer, Initializers}
+import org.tensorflow.keras.initializers.Initializers
 import org.tensorflow.keras.layers.Conv.{DataFormat, Padding}
+import org.tensorflow.types.TFloat32
 
 object Conv2D {
   val   Padding   : Conv.Padding.type     = Conv.Padding
@@ -41,8 +43,8 @@ class Conv2D(
               groups              : Int                 = 1,
               activation          : Option[Activations] = None, // Activations.select(Activations.linear),
               useBias             : Boolean             = true,
-              kernelInitializer   : Initializer         = Initializers.select(Initializers.glorotUniform),
-              biasInitializer     : Initializer         = Initializers.select(Initializers.zeros),
+              kernelInitializer   : Initializer[TFloat32] = Initializers.select(Initializers.glorotUniform),
+              biasInitializer     : Initializer[TFloat32] = Initializers.select(Initializers.zeros),
               kernelRegularizer   : Option[Nothing]     = None,
               biasRegularizer     : Option[Nothing]     = None,
               activityRegularizer : Option[Nothing]     = None,
