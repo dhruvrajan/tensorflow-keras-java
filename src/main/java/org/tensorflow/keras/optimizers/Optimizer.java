@@ -4,10 +4,11 @@ import org.tensorflow.Operand;
 import org.tensorflow.op.Ops;
 import org.tensorflow.op.core.Gradients;
 import org.tensorflow.op.core.Variable;
+import org.tensorflow.types.family.TNumber;
 
 import java.util.List;
 
-public abstract class Optimizer<T extends Number> {
+public abstract class Optimizer<T extends TNumber> {
     private Class<T> dtype;
     private boolean built;
 

@@ -1,7 +1,8 @@
 package org.tensorflow.keras.utils;
 
+import org.tensorflow.ndarray.Shape;
+
 import java.lang.Math;
-import org.tensorflow.Shape;
 
 import static org.tensorflow.keras.utils.Keras.*;
 
@@ -64,6 +65,6 @@ public class TensorShape {
   }
 
   public Shape toShape() {
-    return Shape.make(head(dims), tail(dims));
+    return Shape.of(dims); // Shape.make(head(dims), tail(dims));
   }
 }

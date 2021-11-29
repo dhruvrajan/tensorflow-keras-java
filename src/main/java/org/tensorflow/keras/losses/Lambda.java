@@ -3,6 +3,7 @@ package org.tensorflow.keras.losses;
 import org.tensorflow.Operand;
 import org.tensorflow.keras.mixin.LossOrMetric;
 import org.tensorflow.op.Ops;
+import org.tensorflow.types.family.TNumber;
 
 public class Lambda extends Loss {
     private LossOrMetric metricFunction;
@@ -12,7 +13,7 @@ public class Lambda extends Loss {
     }
 
     @Override
-    public <T extends Number> Operand<T> apply(Ops tf, Class<T> dtype, Operand<T> yTrue, Operand<T> yPred) {
+    public <T extends TNumber> Operand<T> apply(Ops tf, Class<T> dtype, Operand<T> yTrue, Operand<T> yPred) {
         return this.metricFunction.apply(tf, dtype, yTrue, yPred);
     }
 }

@@ -4,6 +4,7 @@ import org.tensorflow.Operand;
 import org.tensorflow.keras.mixin.LossOrMetric;
 import org.tensorflow.keras.utils.Keras;
 import org.tensorflow.op.Ops;
+import org.tensorflow.types.family.TNumber;
 
 public enum Losses {
     sparseCategoricalCrossentropy;
@@ -21,7 +22,7 @@ public enum Losses {
         }
     }
 
-    public static <T extends Number> Operand<T> sparseCategoricalCrossentropyLoss(Ops tf, Class<T> dtype, Operand<T> actual, Operand<T> labels) {
-        return tf.mean(tf.neg(tf.reduceSum(tf.mul(actual, tf.log(labels)), Keras.constArray(tf, 1))), Keras.constArray(tf, 0));
+    public static <T extends TNumber> Operand<T> sparseCategoricalCrossentropyLoss(Ops tf, Class<T> dtype, Operand<T> actual, Operand<T> labels) {
+        return tf.math.mean(tf.math.neg(tf.reduceSum(tf.math.mul(actual, tf.math.log(labels)), Keras.constArray(tf, 1))), Keras.constArray(tf, 0));
     }
 }

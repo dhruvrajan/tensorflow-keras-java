@@ -1,17 +1,16 @@
 package org.tensorflow.utils;
 
 import org.junit.jupiter.api.Test;
-import org.tensorflow.*;
+import org.tensorflow.Graph;
+import org.tensorflow.Operand;
+import org.tensorflow.Session;
+import org.tensorflow.Tensor;
 import org.tensorflow.keras.utils.Keras;
+import org.tensorflow.ndarray.Shape;
 import org.tensorflow.op.Ops;
-import org.tensorflow.op.core.Batch;
-import org.tensorflow.op.core.ConcatenateDataset;
 import org.tensorflow.op.core.Placeholder;
-import org.tensorflow.op.core.Slice;
+import org.tensorflow.types.TInt32;
 
-import java.nio.IntBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,33 +20,26 @@ class TensorShapeTest {
     @Test
     void testBatch() {
 
-
         try (Graph graph = new Graph()) {
             Ops tf = Ops.create(graph);
 
             // env is an ExecutionEnvironment, such as a Graph instance.
             try (Session session = new Session(graph);
-                 Tensor<Integer> t1 = Tensors.create(new int[][] {{2, 4}, {6, 8}})) {
-                Placeholder<Integer> p1 = tf.placeholder(Integer.class, Placeholder.shape(Keras.shapeFromDims(t1.shape())));
-                Operand<Integer> op = tf.reshape(p1, tf.constant(new int[] {-1}));
-                List<Tensor<?>> tensors =
+                 Tensor t1 = Tensors.create(new int[][] {{2, 4}, {6, 8}})) {
+                Placeholder<TInt32> p1 = tf.placeholder(TInt32.class, Placeholder.shape(t1.shape()));
+                Operand<TInt32> op = tf.reshape(p1, tf.constant(new int[] {-1}));
+                List<Tensor> tensors =
                         session.runner().feed(p1.asOutput(), t1).fetch(op).run();
 
-                Shape shape = Keras.shapeFromDims(tensors.get(0).shape());
+                Shape shape = Keras.shapeFromDims(tensors.get(0).shape().asArray());
                 System.out.println("done");
             }
         }
-
     }
 
     private static Shape getShape(long... dims) {
         assert dims.length > 0;
-
-        long head = dims[0];
-        long[] tail = new long[dims.length - 1];
-        System.arraycopy(dims, 1, tail, 0, dims.length - 1);
-
-        return Shape.make(head, tail);
+        return Shape.of(dims);
     }
 
     @Test
@@ -79,7 +71,7 @@ class TensorShapeTest {
         assertThrows(IllegalStateException.class, () -> first.assertKnown(3));
 
         // Test fromShape
-        Shape shape = Shape.make(5, 6, 7, 8);
+        Shape shape = Shape.of(5, 6, 7, 8);
         TensorShape second = new TensorShape(shape);
         assertEquals(shape, second.toShape());
 

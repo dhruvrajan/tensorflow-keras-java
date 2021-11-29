@@ -1,7 +1,7 @@
 package org.tensorflow.utils;
 
-import org.tensorflow.DataType;
-import org.tensorflow.Shape;
+import org.tensorflow.ndarray.Shape;
+import org.tensorflow.proto.framework.DataType;
 
 /**
  * Describes a tf.Tensor
@@ -11,9 +11,9 @@ import org.tensorflow.Shape;
  */
 public class TensorSpec {
 
-  private Shape shape;
-  private DataType dtype;
-  private String name;
+  private final Shape shape;
+  private final DataType dtype;
+  private final String name;
 
   /**
    * Creates a `TensorSpec`.
@@ -24,6 +24,7 @@ public class TensorSpec {
   private TensorSpec(Shape shape, DataType dtype) {
     this.shape = shape;
     this.dtype = dtype;
+    this.name  = null;
   }
 
   /**

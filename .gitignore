@@ -1,39 +1,12 @@
-*.class
-*.log
-.DS_Store
-*~
-
-# sbt specific
-.cache
-.history
-.lib/
-dist/*
 target/
 lib_managed/
 src_managed/
 project/boot/
-project/plugins/project/
-
-# vscode/metals
-**/.bloop
+.idea/
+.idea_modules/
+.history
+.bsp/
+.bloop/
 .metals/
-.vscode/
-
-# IntelliJ IDEA
-.idea
-*.iml
-
-# Scala-IDE specific
-.scala_dependencies
-.worksheet
-
-# ENSIME specific
-.ensime_cache/
-.ensime
-venv
-<<<<<<< HEAD
-.classpath
-.project
-=======
-bin/
->>>>>>> dev
+project/metals.sbt
+project/project/
