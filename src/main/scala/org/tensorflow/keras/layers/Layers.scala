@@ -133,4 +133,7 @@ object Layers {
       virtualBatchSize  = virtualBatchSize,
       adjustment        = adjustment      ,
     )
+
+  // Builders for Reshape Layer
+  def reshape[T <: TNumber](alpha: Float = 0.3f) = new LeakyReLU[T](alpha = alpha)
 }

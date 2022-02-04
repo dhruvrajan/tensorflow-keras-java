@@ -8,7 +8,6 @@ import org.tensorflow.op.core.Constant
 import org.tensorflow.types.TInt32
 import org.tensorflow.types.family.TNumber
 
-
 object Flatten {
   private val FLATTEN_INPUT_LENGTH = 1
 }

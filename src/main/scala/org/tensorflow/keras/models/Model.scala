@@ -87,9 +87,8 @@ object Model {
     private var _epochs    = 0
     private var _batchSize = 0
 
-    def epochs: Int = _epochs
-
-    def batchSize: Int = _batchSize
+    def epochs    : Int = _epochs
+    def batchSize : Int = _batchSize
   }
 }
 
@@ -101,13 +100,11 @@ abstract class Model[T <: TNumber](dtype0: Class[T]) extends Layer[T](1) { // TO
   def compile(tf: Ops, optimizer: Optimizer[T], loss: Loss, metric: ju.List[Metric]): Unit
 
   @throws[Exception]
-  def compile(tf: Ops, compilerBuilder: Model.CompileOptions[T]): Unit = {
+  def compile(tf: Ops, compilerBuilder: Model.CompileOptions[T]): Unit =
     compile(tf, compilerBuilder.optimizer, compilerBuilder.loss, compilerBuilder.metrics)
-  }
 
   def fit(tf: Ops, train: GraphLoader[T], test: GraphLoader[T], epochs: Int, batchSize: Int): Unit
 
-  def fit(tf: Ops, train: GraphLoader[T], test: GraphLoader[T], fitOptions: Model.FitOptions): Unit = {
+  def fit(tf: Ops, train: GraphLoader[T], test: GraphLoader[T], fitOptions: Model.FitOptions): Unit =
     fit(tf, train, test, fitOptions.epochs, fitOptions.batchSize)
-  }
 }

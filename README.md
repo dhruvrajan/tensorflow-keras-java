@@ -4,7 +4,8 @@
 
 ## statement
 
-This is a project for testing a Scala-based Keras API for the [Java bindings](https://github.com/tensorflow/java) to 
+This is a project for testing a Scala-based [Keras](https://github.com/keras-team/keras) API for the
+[Java bindings](https://github.com/tensorflow/java) to 
 TensorFlow. It is a fork from a [Java-based project](https://github.com/dhruvrajan/tensorflow-keras-java). The original
 author of the Java project was Dhruv Rajan, the original project was released under MIT license.
 
@@ -155,40 +156,33 @@ import org.tensorflow.keras.models.Sequential
 import org.tensorflow.keras.optimizers.Optimizers.sgd
 import org.tensorflow.keras.scala.{Layers, Model}
 import org.tensorflow.op.Ops
-import org.tensorflow.utils.Pair
+import org.tensorflow.types.TFloat32
 
 import scala.util.Using
 
 object FashionMNISTKeras {
-  val model: Model[java.lang.Float] = Sequential.of(
+  val model: Model[TFloat32] = Sequential(
     Layers.input(28, 28),
     Layers.flatten(28 * 28),
     Layers.dense(128, activation = relu),
     Layers.dense(10, activation = softmax)
   )
 
-  def train(model: Model[java.lang.Float]): Model[java.lang.Float] = {
-    Using.resource(new Graph()) { graph => {
+  def train(model: Model[TFloat32]): Unit =
+    Using.resource(new Graph()) { graph =>
       val tf: Ops = Ops.create(graph)
       // Compile Model
       model.compile(tf, optimizer = sgd, loss = sparseCategoricalCrossentropy, metrics = List(accuracy))
-
-      val data: Pair[GraphLoader[java.lang.Float], GraphLoader[java.lang.Float]] = FashionMNIST.graphLoaders2D()
+      val (train, test) = FashionMNIST.graphLoaders2D
       // GraphLoader objects contain AutoCloseable `Tensors`.
-      Using.resources(data.first(), data.second()) { (train, test) => {
+      Using.resources(train, test) { (_, _) =>
         // Fit Model
         model.fit(tf, train, test, epochs = 10, batchSize = 100)
       }
-      }
     }
-    }
-    // Output Model
-    model
-  }
 
-  def main(args: Array[String]): Unit = {
+  def main(args: Array[String]): Unit =
     train(model)
-  }
 }
 ```
 
