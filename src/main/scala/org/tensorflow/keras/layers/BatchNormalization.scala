@@ -116,7 +116,7 @@ class BatchNormalization[T <: TNumber](
 
   override protected def build(tf: Ops, inputShape: Shape): Unit = {
     // val inputShape = tf.TensorShape(inputShape)
-    if (!inputShape.isUnknown)
+    if (inputShape.isUnknown)
       throw new IllegalArgumentException(
         s"Input has undefined rank. Received =  input_shape=$inputShape.")
 

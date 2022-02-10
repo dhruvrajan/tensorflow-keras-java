@@ -10,6 +10,7 @@ import org.tensorflow.keras.metrics.Metrics
 import org.tensorflow.keras.models.{Model, Sequential}
 import org.tensorflow.keras.models.Model.CompileOptions
 import org.tensorflow.keras.optimizers.Optimizers
+import org.tensorflow.ndarray.Shape
 import org.tensorflow.op.Ops
 import org.tensorflow.types.TFloat32
 
@@ -44,7 +45,7 @@ object FashionMNISTKeras {
   //       to decrease verbosity.
   private val model =
     Sequential(classOf[TFloat32],
-      Layers.input(28, 28),
+      Layers.input(Shape.of(28, 28)),
       Layers.flatten(),
       Layers.dense(256, Some(Activations.relu),
         kernelInitializer = Initializers.randomNormal,

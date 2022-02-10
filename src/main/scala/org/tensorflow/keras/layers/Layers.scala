@@ -12,8 +12,8 @@ import org.tensorflow.types.TFloat32
 import org.tensorflow.types.family.TNumber
 
 object Layers {
-  def input[T <: TNumber](firstDim: Long, units: Long*) =
-    new Input[T](Keras.concatenate(firstDim, units: _*))
+  def input[T <: TNumber](units: Shape, batchSize: Long = Shape.UNKNOWN_SIZE) =
+    new Input[T](units /*Keras.concatenate(firstDim, units: _*)*/, batchSize = batchSize)
 
   def dense[T <: TNumber](units: Int,
                           activation          : Option[Activations] = None,
