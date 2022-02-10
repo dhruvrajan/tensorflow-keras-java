@@ -36,9 +36,9 @@ object MNIST {
   @throws[IOException]
   def download(): Unit = {
     DataUtils.getFile(LOCAL_PREFIX + TRAIN_IMAGES , ORIGIN_BASE + TRAIN_IMAGES, "440fcabf73cc546fa21475e81ea370265605f56be210a4024d2ca8f203523609", DataUtils.Checksum.sha256)
-    DataUtils.getFile(LOCAL_PREFIX + TRAIN_LABELS , ORIGIN_BASE + TRAIN_LABELS, "fcdfeedb53b53c99384b2cd314206a08fdf6aa97070e19921427a179ea123d19", DataUtils.Checksum.sha256)
-    DataUtils.getFile(LOCAL_PREFIX + TEST_IMAGES  , ORIGIN_BASE + TEST_IMAGES , "beb4b4806386107117295b2e3e08b4c16a6dfb4f001bfeb97bf25425ba1e08e4", DataUtils.Checksum.sha256)
-    DataUtils.getFile(LOCAL_PREFIX + TEST_LABELS  , ORIGIN_BASE + TEST_LABELS , "986c5b8cbc6074861436f5581f7798be35c7c0025262d33b4df4c9ef668ec773", DataUtils.Checksum.sha256)
+    DataUtils.getFile(LOCAL_PREFIX + TRAIN_LABELS , ORIGIN_BASE + TRAIN_LABELS, "3552534a0a558bbed6aed32b30c495cca23d567ec52cac8be1a0730e8010255c", DataUtils.Checksum.sha256)
+    DataUtils.getFile(LOCAL_PREFIX + TEST_IMAGES  , ORIGIN_BASE + TEST_IMAGES , "8d422c7b0a1c1c79245a5bcf07fe86e33eeafee792b84584aec276f5a2dbc4e6", DataUtils.Checksum.sha256)
+    DataUtils.getFile(LOCAL_PREFIX + TEST_LABELS  , ORIGIN_BASE + TEST_LABELS , "f7ae60f92e00ec6debd23a6088c31dbd2371eca3ffa0defaefb259924204aec6", DataUtils.Checksum.sha256)
   }
 
   @throws[IOException]

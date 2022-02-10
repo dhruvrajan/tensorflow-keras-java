@@ -21,6 +21,50 @@ object ConvUtils {
     (outputLength + stride - 1) / stride
   }
 
+  /** Determines output length of a transposed convolution given input length.
+    *
+    * @param padding        one of `"same"`, `"valid"`, `"full"`.
+    * @param outputPadding  amount of padding along the output dimension. Can
+    *   be set to `None` in which case the output length is inferred.
+    * @return The output length
+    */
+  def deconvOutputLength(inputLength: Long, filterSize: Long,
+                           padding: Conv.Padding,
+                           outputPadding: Option[Long] = None,
+                           stride: Long = 0,
+                           dilation: Long = 1): Long = {
+    // Get the dilated kernel size
+    val convSize = filterSize + (filterSize - 1) * (dilation - 1)
+
+    // Infer length if output padding is None, else compute the exact length
+    outputPadding match {
+      case None =>
+        padding match {
+          case Padding.Valid =>
+            inputLength * stride + math.max(convSize - stride, 0)
+          case Padding.Full =>
+            inputLength * stride - (stride + convSize - 2)
+          case Padding.Same =>
+            inputLength * stride
+          case _ =>
+            throw new IllegalArgumentException(padding.toString)
+        }
+
+      case Some(outPad) =>
+        val pad = padding match {
+          case Padding.Same =>
+            filterSize / 2
+          case Padding.Valid =>
+            0L
+          case Padding.Full =>
+            filterSize - 1
+          case _ =>
+            throw new IllegalArgumentException(padding.toString)
+        }
+        (inputLength - 1) * stride + filterSize - 2 * pad + outPad
+    }
+  }
+
   /** Returns `unsqueeze_batch(op(squeeze_batch(inp)))`.
     * Where `squeeze_batch` reshapes `inp` to shape
     * `[prod(inp.shape[:-inner_rank])] + inp.shape[-inner_rank:]`

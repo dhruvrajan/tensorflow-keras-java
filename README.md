@@ -17,6 +17,11 @@ comes with absolutely no warranties. To contact the author, send an e-mail to `c
 
 The project builds with [sbt](https://www.scala-sbt.org/). You may need to edit `build.sbt` to adjust `tfClassifer`.
 
+## clean-up
+
+_Note:_ datasets are currently cached in `~/.keras`. This should use system default cache directories in the future,
+instead.
+
 -------
 
 Below are the original README notes.

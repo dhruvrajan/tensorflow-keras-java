@@ -261,7 +261,7 @@ class Conv(
 //     causal_padding
   }
 
-  private def callOne(tf: Ops, inputs0: Operand[T]): Operand[T] = {
+  protected def callOne(tf: Ops, inputs0: Operand[T]): Operand[T] = {
     var inputs      = inputs0
     val input_shape = inputs.shape
 
