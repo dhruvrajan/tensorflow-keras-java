@@ -17,14 +17,15 @@ class Flatten[T <: TNumber]() extends Layer[T](Flatten.FLATTEN_INPUT_LENGTH) {
 
   override def build(tf: Ops, inputShape: Shape): Unit = {
     val tensorShape = new TensorShape(inputShape)
-    this.units = tf.constant(Array[Int](-1, (tensorShape.numElements / Math.abs(tensorShape.size(0))).toInt))
+    units = tf.constant(Array[Int](-1, (tensorShape.numElements / Math.abs(tensorShape.size(0))).toInt))
   }
 
   override def computeOutputShape(inputShape: Shape): Shape = { // leaves unknown dimensions unknown
     Shape.of(new TensorShape(inputShape).numElements)
   }
 
-  @SafeVarargs final def call(tf: Ops, inputs: Operand[T]*): Operand[T] = this.callOne(tf, inputs(0))
+  override final def call(tf: Ops, inputs: Seq[Operand[T]], training: Option[Boolean]): Operand[T] =
+    callOne(tf, inputs.head)
 
-  private def callOne(tf: Ops, input: Operand[T]) = tf.reshape(input, this.units)
+  private def callOne(tf: Ops, input: Operand[T]) = tf.reshape(input, units)
 }

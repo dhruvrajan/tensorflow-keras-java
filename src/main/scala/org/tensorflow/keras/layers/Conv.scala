@@ -83,7 +83,7 @@ class Conv(
             trainable           : Boolean = true,
 //            convOp              : Option[Nothing],
           )
-  extends Layer[TFloat32](1) with ScalaLayer[TFloat32] {
+  extends Layer[TFloat32](1) /*with ScalaLayer[TFloat32]*/ {
 
   type T = TFloat32
 
@@ -91,8 +91,8 @@ class Conv(
   private val tfDataFormat    = /*options.*/dataFormat.tfName(rank + 2)
   private val isChannelsFirst = /*options.*/dataFormat == DataFormat.ChannelsFirst
 
-  private var kernel: Variable[T] = _
-  private var bias  : Variable[T] = _
+  protected var kernel: Variable[T] = _
+  protected var bias  : Variable[T] = _
 
   validateInit()
 
@@ -119,7 +119,7 @@ class Conv(
       )
   }
 
-  private def getChannelAxis: Int =
+  protected final def getChannelAxis: Int =
     if (dataFormat == DataFormat.ChannelsFirst) -1 - rank else -1
 
   private def getInputChannel(inputShape: Shape): Int = {
@@ -150,10 +150,11 @@ class Conv(
     // and make sure the output shape has all positive dimensions.
     computeOutputShape(inputShape)
 
-    kernel = addWeightExt(
+    kernel = addWeight(tf,
       name        = "kernel",
       shape       = Shape.of(kernelShape: _*),
-      initializer = Some(kernelInitializer),
+      initializerName = "kernelInit",
+      initializer = /*Some(*/kernelInitializer/*)*/,
       regularizer = kernelRegularizer,
       constraint  = kernelConstraint,
       trainable   = Some(true),
@@ -242,8 +243,8 @@ class Conv(
     )
   }
 
-  @SafeVarargs override final protected def call(tf: Ops, inputs: Operand[T]*): Operand[T] =
-    callOne(tf, inputs(0))
+  override final protected def call(tf: Ops, inputs: Seq[Operand[T]], training: Option[Boolean]): Operand[T] =
+    callOne(tf, inputs.head)
 
   // Calculates padding for 'causal' option for 1-d conv layers.
   private def computeCausalPadding(inputs: Operand[T]) = {

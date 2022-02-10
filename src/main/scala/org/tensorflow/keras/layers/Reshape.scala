@@ -70,8 +70,8 @@ class Reshape[T <: TNumber](targetShape: Shape) extends Layer[T](1) {
     }
   }
 
-  override protected def call(tf: Ops, inputs: Operand[T]*): Operand[T] =
-    callOne(tf, inputs(0))
+  override protected def call(tf: Ops, inputs: Seq[Operand[T]], training: Option[Boolean]): Operand[T] =
+    callOne(tf, inputs.head)
 
   private def callOne(tf: Ops, inputs: Operand[T]): Operand[T] = {
     // XXX TODO why is the default TInt32, and should we use that?

@@ -37,8 +37,8 @@ class Sequential[T <: TNumber](dtype: Class[T], val firstLayer: Input[T], layers
   override def computeOutputShape(inputShape: Shape): Shape =
     throw new UnsupportedOperationException("Can't call computeOutputShape on Model")
 
-  final override def call(tf: Ops, inputs: Operand[T]*): Operand[T] =
-    callOne(tf, inputs(0))
+  final override def call(tf: Ops, inputs: Seq[Operand[T]], training: Option[Boolean]): Operand[T] =
+    callOne(tf, inputs.head)
 
   def callOne(tf: Ops, in: Operand[T]): Operand[T] = {
     var out: Operand[T] = in

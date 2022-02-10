@@ -58,7 +58,8 @@ class Dense[T <: TNumber](
   override def computeOutputShape(inputShape: Shape): Shape = // leaves unknown dimensions unknown
     new TensorShape(inputShape).replaceLast(this.units).toShape
 
-  override final def call(tf: Ops, inputs: Operand[T]*): Operand[T] = this.callOne(tf, inputs(0))
+  override final def call(tf: Ops, inputs: Seq[Operand[T]], training: Option[Boolean]): Operand[T] =
+    this.callOne(tf, inputs.head)
 
   private def callOne(tf: Ops, input: Operand[T]): Operand[T] = {
     val signal = tf.math.add(tf.linalg.matMul(input, this.kernel), this.bias)

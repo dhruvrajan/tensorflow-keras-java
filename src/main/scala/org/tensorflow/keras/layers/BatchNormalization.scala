@@ -3,14 +3,16 @@ package org.tensorflow.keras.layers
 import org.tensorflow.framework.initializers.Initializer
 import org.tensorflow.keras.initializers.Initializers
 import org.tensorflow.keras.layers.BatchNormalization.RenormClipping
+import org.tensorflow.keras.utils.Backend
 import org.tensorflow.ndarray.Shape
-import org.tensorflow.op.Ops
+import org.tensorflow.op.{Ops, core}
 import org.tensorflow.op.core.Variable
 import org.tensorflow.proto.framework.{VariableAggregation, VariableSynchronization}
 import org.tensorflow.types.family.TNumber
-import org.tensorflow.types.{TBfloat16, TFloat16, TFloat32}
+import org.tensorflow.types.{TBfloat16, TFloat16, TFloat32, TInt32}
 import org.tensorflow.{Operand, Tensor}
 
+import scala.collection.JavaConverters.asJavaIterableConverter
 import scala.util.Try
 
 object BatchNormalization {
@@ -73,7 +75,7 @@ class BatchNormalization[T <: TNumber](
                                         virtualBatchSize: Option[Int]     = None,
                                         adjustment      : Option[Nothing] = None,
                                         //  name=None,
-                                      ) extends Layer[T](1) with ScalaLayer[T] {
+                                      ) extends Layer[T](1) /*with ScalaLayer[T]*/ {
 
   private var moving_mean     = Option.empty[Variable[T]]
   private var moving_variance = Option.empty[Variable[T]]
@@ -240,11 +242,12 @@ class BatchNormalization[T <: TNumber](
       }
     }
     if (scale) {
-      /*this.gamma =*/ addWeightExt(
+      /*this.gamma =*/ addWeight(tf,
         name        = "gamma",
         shape       = Shape.of(paramShape: _*),
         dtype       = paramDType,
-        initializer = Some(gammaInitializer),
+        initializerName = "gammeInit",
+        initializer = gammaInitializer,
         regularizer = gammaRegularizer,
         constraint  = gammaConstraint,
         trainable   = Some(true),
@@ -263,11 +266,12 @@ class BatchNormalization[T <: TNumber](
     }
 
     if (this.center) {
-      /*this.beta =*/ addWeightExt(
+      /*this.beta =*/ addWeight(tf,
         name        = "beta",
         shape       = Shape.of(paramShape: _*),
         dtype       = paramDType,
-        initializer = Some(betaInitializer),
+        initializerName = "betaInit",
+        initializer = betaInitializer,
         regularizer = betaRegularizer,
         constraint  = betaConstraint,
         trainable   = Some(true),
@@ -296,22 +300,24 @@ class BatchNormalization[T <: TNumber](
       // } else {
       //   partitioner = None
       // }
-      this.moving_mean = Some(addWeightExt(
+      this.moving_mean = Some(addWeight(tf,
         name            = "moving_mean",
         shape           = Shape.of(paramShape: _*),
         dtype           = paramDType,
-        initializer     = Some(movingMeanInitializer),
+        initializerName = "moving_meanInit",
+        initializer     = movingMeanInitializer,
         synchronization = VariableSynchronization.VARIABLE_SYNCHRONIZATION_ON_READ,
         trainable       = Some(false),
         aggregation     = VariableAggregation.VARIABLE_AGGREGATION_MEAN,
 //        experimental_autocast = false
       ))
 
-      this.moving_variance = Some(addWeightExt(
+      this.moving_variance = Some(addWeight(tf,
         name            = "moving_variance",
         shape           = Shape.of(paramShape: _*),
         dtype           = paramDType,
-        initializer     = Some(movingVarianceInitializer),
+        initializerName = "moving_varianceInit",
+        initializer     = movingVarianceInitializer,
         synchronization = VariableSynchronization.VARIABLE_SYNCHRONIZATION_ON_READ,
         trainable       = Some(false),
         aggregation     = VariableAggregation.VARIABLE_AGGREGATION_MEAN,
@@ -372,13 +378,64 @@ class BatchNormalization[T <: TNumber](
       }
     } finally {
       // XXX TODO
-      // if (partitioner.isDefined)
-      //   this._scope.set_partitioner(partitioner)
+       if (partitioner.isDefined) {
+         ???
+         //   this._scope.set_partitioner(partitioner)
+       }
     }
     built = true
   }
 
   override def computeOutputShape(inputShape: Shape): Shape = inputShape
 
-  override protected def call(tf: Ops, inputs: Operand[T]*): Operand[T] = ???
+  override protected def call(tf: Ops, inputs: Seq[Operand[T]], training: Option[Boolean]): Operand[T] =
+    callOne(tf, inputs.head, training = training)
+
+  private def getTrainingValue(training: Option[Boolean] = None): Boolean = {
+    val _training = training.getOrElse(Backend.learningPhase)
+    if (true /*_USE_V2_BEHAVIOR*/) {
+      if (!trainable)
+        // When the layer is not trainable, it overrides the value passed from
+        // model.
+        return false
+    }
+    _training
+  }
+
+  private def callOne(tf: Ops, inputs0: Operand[T], training: Option[Boolean]): Operand[T] = {
+    var inputs    = inputs0 // tf.dtypes.cast(inputs0, computeDtype)
+    val _training = getTrainingValue(training)
+
+    if (virtualBatchSize.isDefined) {
+      // Virtual batches (aka ghost batches) can be simulated by reshaping the
+      // Tensor and reusing the existing batch norm implementation
+      val originalShape0: core.Shape[TInt32] = tf.shape(inputs)
+      val originalShapeR  = tf.shape.tail(originalShape0)
+      val originalShape   = tf.concat(
+        Iterable(tf.constant(Array(-1)), originalShapeR).asJava, /*axis =*/ tf.constant(0)
+      )
+      val expandedShape = tf.concat(
+        Iterable(tf.constant(Array(virtualBatchSize.get, -1)), originalShapeR).asJava, /*axis =*/ tf.constant(0)
+      )
+
+      // Will cause errors if virtual_batch_size does not divide the batch size
+      inputs = tf.reshape(inputs, expandedShape)
+
+      def undoVirtualBatching(outputs: Nothing) =
+        tf.reshape(outputs, originalShape)
+    }
+
+    if (fused.contains(true)) {
+      var outputs = ??? // this._fused_batch_norm(inputs, training = training)
+      if (virtualBatchSize.isDefined) {
+        // Currently never reaches here since fused_batch_norm does not support
+        // virtual batching
+        ??? // outputs = undoVirtualBatching(outputs)
+      }
+      return outputs
+    }
+
+    // XXX TODO: continue here
+    ???
+  }
 }

@@ -18,7 +18,8 @@ abstract class Activation[T <: TNumber]() extends Layer[T](1) {
     inputShape
   }
 
-  @SafeVarargs final def call(tf: Ops, inputs: Operand[T]*): Operand[T] = callOne(tf, inputs(0))
+  override final def call(tf: Ops, inputs: Seq[Operand[T]], training: Option[Boolean]): Operand[T] =
+    callOne(tf, inputs.head)
 
   /**
     * Calls the activation function. Override this when defining an activation function.

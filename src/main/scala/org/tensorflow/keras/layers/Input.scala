@@ -28,5 +28,5 @@ class Input[T <: TNumber](units: Shape, batchSize: Long = Shape.UNKNOWN_SIZE)
     this.built = true
   }
 
-  @SafeVarargs final def call(tf: Ops, inputs: Operand[T]*): Operand[T] = input
+  override final def call(tf: Ops, inputs: Seq[Operand[T]], training: Option[Boolean]): Operand[T] = input
 }

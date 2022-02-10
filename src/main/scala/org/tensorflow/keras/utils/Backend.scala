@@ -6,6 +6,8 @@ import org.tensorflow.op.nn.LeakyRelu
 import org.tensorflow.types.family.TNumber
 
 object Backend {
+  def learningPhase: Boolean = false  // XXX TODO
+
   /** Rectified linear unit.
     * With default values, it returns element-wise `max(x, 0)`.
     * Otherwise, it follows:

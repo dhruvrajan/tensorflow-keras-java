@@ -40,8 +40,8 @@ class LeakyReLU[T <: TNumber](alpha: Float = 0.3f) extends Layer[T](1) {
     * @param inputs A sequence of TF Operands
     * @return The transformed input tensors, according to the layer's logic.
     */
-  override protected def call(tf: Ops, inputs: Operand[T]*): Operand[T] =
-    callOne(tf, inputs(0))
+  override protected def call(tf: Ops, inputs: Seq[Operand[T]], training: Option[Boolean]): Operand[T] =
+    callOne(tf, inputs.head)
 
   private def callOne(tf: Ops, inputs: Operand[T]): Operand[T] =
     Backend.relu(tf, inputs, alpha = alpha)

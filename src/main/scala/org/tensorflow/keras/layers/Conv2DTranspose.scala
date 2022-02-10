@@ -158,52 +158,48 @@ class Conv2DTranspose(
     case _ =>
   }
 
-  override protected def build(tf: Ops, inputShape: Shape): Unit = ???
+  override protected def build(tf: Ops, inputShape: Shape): Unit = {
+    // input_shape = tf.TensorShape (input_shape)
+    if (inputShape.numDimensions() != 4)
+      throw new IllegalArgumentException(s"Inputs should have rank 4. Received input_shape = $inputShape")
+      
+    val channelAxis = getChannelAxis
+    if (inputShape.size(channelAxis) == Shape.UNKNOWN_SIZE)
+      throw new IllegalArgumentException(
+        "The channel dimension of the inputs to `Conv2DTranspose` should be defined. " ++
+        s"The input_shape received is $inputShape where axis $channelAxis (0 - based) is the channel dimension, which found to be `None`.")
 
-  //  def build (self, input_shape):
-  //  input_shape = tf.TensorShape (input_shape)
-  //  if len (input_shape) != 4:
-  //  raise ValueError ('Inputs should have rank 4.'
-  //  f 'Received input_shape = {
-  //  input_shape
-  //  }.')
-  //  channel_axis = self._get_channel_axis ()
-  //  if input_shape.dims[channel_axis].value is None:
-  //  raise ValueError ('The channel dimension of the inputs'
-  //  'to `Conv2DTranspose` should be defined.'
-  //  f 'The input_shape received is {
-  //  input_shape
-  //  }, '
-  //  f 'where axis {
-  //  channel_axis
-  //  } (0 - based) '
-  //  'is the channel dimension, which found to be `None`.')
-  //  input_dim = int (input_shape[channel_axis] )
-  //  self.input_spec = InputSpec (ndim = 4, axes = {
-  //  channel_axis: input_dim
-  //  })
-  //  kernel_shape = self.kernel_size + (self.filters, input_dim)
-  //
-  //  self.kernel = self.add_weight (
-  //  name = 'kernel',
-  //  shape = kernel_shape,
-  //  initializer = self.kernel_initializer,
-  //  regularizer = self.kernel_regularizer,
-  //  constraint = self.kernel_constraint,
-  //  trainable = True,
-  //  dtype = self.dtype)
-  //  if self.use_bias:
-  //  self.bias = self.add_weight (
-  //  name = 'bias',
-  //  shape = (self.filters, ),
-  //  initializer = self.bias_initializer,
-  //  regularizer = self.bias_regularizer,
-  //  constraint = self.bias_constraint,
-  //  trainable = True,
-  //  dtype = self.dtype)
-  //  else:
-  //  self.bias = None
-  //  self.built = True
+    val inputDim = inputShape.size(channelAxis) // .toInt
+    // XXX TODO:
+//    this.input_spec = InputSpec (ndim = 4, axes = { channelAxis: inputDim })
+    val kernelShape = (kernelSize._1 + filters, kernelSize._2 + inputDim)
+
+    this.kernel = addWeight(tf,
+      name        = "kernel",
+      shape       = Shape.of(kernelShape._1, kernelShape._2),
+      initializerName = "kernelInit",
+      initializer = kernelInitializer,
+      regularizer = kernelRegularizer,
+      constraint  = kernelConstraint,
+      trainable   = Some(true),
+      dtype       = dtype
+    )
+    if (useBias) {
+      this.bias = addWeight(tf,
+        name        = "bias",
+        shape       = Shape.of(filters), // (filters, ),
+        initializerName = "biasInit",
+        initializer = biasInitializer,
+        regularizer = biasRegularizer,
+        constraint  = biasConstraint,
+        trainable   = Some(true),
+        dtype       = dtype
+      )
+    } else {
+      this.bias = null // None
+    }
+    built = true
+  }
 
   override protected def callOne(tf: Ops, inputs0: Operand[T]): Operand[T] = ???
 

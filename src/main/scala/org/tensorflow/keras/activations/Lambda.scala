@@ -8,15 +8,10 @@ import org.tensorflow.types.family.TNumber
 /**
   * Creates an `Activation` from an unnamed function.
   *
+  * @param unnamedActivation An activation function.
   * @param < T>
   */
-class Lambda[T <: TNumber](val activation: ActivationFunction[T])
-
-/**
-  * Creates an Activation function.
-  *
-  * @param unnamedActivation An activation function.
-  */ extends Activation[T] {
+class Lambda[T <: TNumber](val activation: ActivationFunction[T]) extends Activation[T] {
   /**
     * Applies the given activation.
     */
