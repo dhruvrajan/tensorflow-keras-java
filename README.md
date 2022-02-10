@@ -9,7 +9,7 @@ This is a project for testing a Scala-based [Keras](https://github.com/keras-tea
 TensorFlow. It is a fork from a [Java-based project](https://github.com/dhruvrajan/tensorflow-keras-java). The original
 author of the Java project was Dhruv Rajan, the original project was released under MIT license.
 
-This project is (C)opyright 2021 by Hanns Holger Rutz. All rights reserved. The project is released under
+This project is (C)opyright 2021–2022 by Hanns Holger Rutz. All rights reserved. The project is released under
 the [GNU Lesser General Public License](https://raw.github.com/Sciss/tensorflow-keras-scala/main/LICENSE) v2.1+ and
 comes with absolutely no warranties. To contact the author, send an e-mail to `contact at sciss.de`.
 

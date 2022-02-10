@@ -135,5 +135,5 @@ object Layers {
     )
 
   // Builders for Reshape Layer
-  def reshape[T <: TNumber](alpha: Float = 0.3f) = new LeakyReLU[T](alpha = alpha)
+  def reshape[T <: TNumber](targetShape: Shape) = new Reshape[T](targetShape)
 }

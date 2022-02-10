@@ -28,7 +28,7 @@ object Initializers extends Enumeration {
       val res = new RandomNormal[TFloating](0.0f, 0.1f, seed) // XXX TODO: -0.2f, 0.2f)
       res.asInstanceOf[Initializer[T]]
     case `glorotUniform` =>
-      val res = new Glorot[TFloating](Distribution.UNIFORM, ???)
+      val res = new Glorot[TFloating](Distribution.UNIFORM, util.Random.nextLong()) // XXX TODO ok seed?
       res.asInstanceOf[Initializer[T]]
     case _ =>
       throw new IllegalArgumentException("invalid initializer type")
