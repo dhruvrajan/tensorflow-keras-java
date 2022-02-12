@@ -424,19 +424,22 @@ class BatchNormalization[T <: TNumber](
   private def calculateMeanAndVar(tf: Ops, inputs: Operand[T], reductionAxes: Seq[Long],
                                   keepDims: Boolean): (Operand[T], Operand[T]) = {
     // XXX TODO where is this in tf-java?
-    ??? // tf.nn.moments(inputs, reduction_axes, keepdims = keepDims)
+    // tf.nn.moments(inputs, reduction_axes, keepdims = keepDims)
     val ops = tf.withName("moments")
     // cf. https://github.com/tensorflow/tensorflow/blob/v2.8.0/tensorflow/python/ops/nn_impl.py#L1318
     val x     = inputs
     val axes  = reductionAxes
-    val y     = if (x.`type`() == classOf[TFloat16]) ops.dtypes.cast(x, classOf[TFloat32]) else x
-    var mean      = ??? : Operand[T] // ops.math.reduce_mean(y, axes, keepdims = true, name = "mean")
-    var variance  = ??? : Operand[T] //ops.math.reduce_mean(
-//      ops.math.squaredDifference(y, ops.stopGradient(mean)),
-//      axes,
-//      keepdims = true,
-//      name = "variance"
-//    )
+    val y: Operand[T] = if (x.`type`() == classOf[TFloat16]) ops.dtypes.cast(x, classOf[TFloat32]).asInstanceOf[Operand[T]] else x
+
+    import org.tensorflow.utils.MissingBits._
+    val axesJ     = Some(ops.constant(axes.toArray))
+    var mean    : Operand[T] = ops.math.reduceMean(y, axesJ, keepDims = true, name = Some("mean"))
+    var variance: Operand[T] = ops.math.reduceMean(
+      ops.math.squaredDifference(y, ops.stopGradient(mean)),
+      axesJ,
+      keepDims = true,
+      name = Some("variance")
+    )
     val axisJ = Squeeze.axis(axes.map(_.asInstanceOf[java.lang.Long]): _*)  // WTF why not `long`?
     if (!keepDims) {
       mean = ops.squeeze(mean, axisJ)
