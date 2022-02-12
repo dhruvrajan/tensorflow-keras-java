@@ -3,10 +3,10 @@ package org.tensorflow.keras.layers
 import org.tensorflow.framework.initializers.Initializer
 import org.tensorflow.keras.initializers.Initializers
 import org.tensorflow.keras.layers.BatchNormalization.RenormClipping
-import org.tensorflow.keras.utils.{Backend, ControlFlowUtil}
+import org.tensorflow.keras.utils.Backend
 import org.tensorflow.ndarray.Shape
+import org.tensorflow.op.core.{Squeeze, Variable}
 import org.tensorflow.op.{Ops, core}
-import org.tensorflow.op.core.Variable
 import org.tensorflow.proto.framework.{VariableAggregation, VariableSynchronization}
 import org.tensorflow.types.family.TNumber
 import org.tensorflow.types.{TBfloat16, TFloat16, TFloat32, TInt32}
@@ -421,13 +421,38 @@ class BatchNormalization[T <: TNumber](
     _training
   }
 
-  private def calculateMeanAndVar(tf: Ops, inputs: Operand[T], reductionAxes: Seq[Int],
+  private def calculateMeanAndVar(tf: Ops, inputs: Operand[T], reductionAxes: Seq[Long],
                                   keepDims: Boolean): (Operand[T], Operand[T]) = {
     // XXX TODO where is this in tf-java?
     ??? // tf.nn.moments(inputs, reduction_axes, keepdims = keepDims)
+    val ops = tf.withName("moments")
+    // cf. https://github.com/tensorflow/tensorflow/blob/v2.8.0/tensorflow/python/ops/nn_impl.py#L1318
+    val x     = inputs
+    val axes  = reductionAxes
+    val y     = if (x.`type`() == classOf[TFloat16]) ops.dtypes.cast(x, classOf[TFloat32]) else x
+    var mean      = ??? : Operand[T] // ops.math.reduce_mean(y, axes, keepdims = true, name = "mean")
+    var variance  = ??? : Operand[T] //ops.math.reduce_mean(
+//      ops.math.squaredDifference(y, ops.stopGradient(mean)),
+//      axes,
+//      keepdims = true,
+//      name = "variance"
+//    )
+    val axisJ = Squeeze.axis(axes.map(_.asInstanceOf[java.lang.Long]): _*)  // WTF why not `long`?
+    if (!keepDims) {
+      mean = ops.squeeze(mean, axisJ)
+    }
+    variance = ops.squeeze(variance, axisJ)
+    if (x.`type`() == classOf[TFloat16]) {
+      (
+        ops.dtypes.cast(mean    , classOf[TFloat16]) .asInstanceOf[Operand[T]],
+        ops.dtypes.cast(variance, classOf[TFloat16]) .asInstanceOf[Operand[T]]
+      )
+    } else {
+      (mean, variance)
+    }
   }
 
-  private def moments(tf: Ops, inputs: Operand[T], reductionAxes: Seq[Int], keepDims: Boolean) = {
+  private def moments(tf: Ops, inputs: Operand[T], reductionAxes: Seq[Long], keepDims: Boolean) = {
     var (mean, variance) = calculateMeanAndVar(tf, inputs, reductionAxes, keepDims)
     // TODO(b/129279393): Support zero batch input in non DistributionStrategy
     // code as well.
@@ -485,7 +510,7 @@ class BatchNormalization[T <: TNumber](
     // Compute the axes along which to reduce the mean / variance
     val inputShape    = inputs.shape
     val ndims         = inputShape.numDimensions() //  len(input_shape)
-    var reductionAxes = (0 until ndims).filterNot(axis.contains)
+    var reductionAxes = (0L until ndims.toLong).filterNot(axis.contains)
     if (this.virtualBatchSize.isDefined)
       reductionAxes = reductionAxes.patch(1, Nil, 1)  // Do not reduce along virtual batch dim
 
