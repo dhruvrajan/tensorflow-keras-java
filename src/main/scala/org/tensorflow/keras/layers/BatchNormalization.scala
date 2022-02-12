@@ -93,6 +93,9 @@ class BatchNormalization[T <: TNumber](
 
   private var axis: Seq[Int] = axis0
 
+  private var gamma = Option.empty[Variable[T]]
+  private var beta  = Option.empty[Variable[T]]
+
   // XXX TODO
   // this.supports_masking = True
 
@@ -242,7 +245,7 @@ class BatchNormalization[T <: TNumber](
       }
     }
     if (scale) {
-      /*this.gamma =*/ addWeight(tf,
+      this.gamma = Some(addWeight(tf,
         name        = "gamma",
         shape       = Shape.of(paramShape: _*),
         dtype       = paramDType,
@@ -252,9 +255,10 @@ class BatchNormalization[T <: TNumber](
         constraint  = gammaConstraint,
         trainable   = Some(true),
 //        experimental_autocast = False
-      )
+      ))
+
     } else {
-      // this.gamma = None
+      this.gamma = None
       if (fused.contains(true)) {
         // /*this._gamma_const =*/ Backend.constant(
         //   1.0, dtype = paramDType, shape = param_shape)
@@ -266,7 +270,7 @@ class BatchNormalization[T <: TNumber](
     }
 
     if (this.center) {
-      /*this.beta =*/ addWeight(tf,
+      this.beta = Some(addWeight(tf,
         name        = "beta",
         shape       = Shape.of(paramShape: _*),
         dtype       = paramDType,
@@ -276,9 +280,9 @@ class BatchNormalization[T <: TNumber](
         constraint  = betaConstraint,
         trainable   = Some(true),
 //        experimental_autocast = false
-      )
+      ))
     } else {
-      // this.beta = None
+      this.beta = None
       if (fused.contains(true)) {
         // /*this._beta_const =*/ Backend.constant(
         //   0.0, dtype = paramDType, shape = paramShape)
@@ -435,7 +439,74 @@ class BatchNormalization[T <: TNumber](
       return outputs
     }
 
-    // XXX TODO: continue here
-    ???
+
+    val inputs_dtype = inputs.`type`() // .dtype.base_dtype
+    if (inputs_dtype == classOf[TFloat16] /*in (tf.float16, tf.bfloat16)*/) {
+      // Do all math in float32 if given 16-bit inputs for numeric stability.
+      // In particular, it's very easy for variance to overflow in float16 and
+      // for safety we also choose to cast bfloat16 to float32.
+      inputs = tf.dtypes.cast[TFloat32](inputs, classOf[TFloat32]).asInstanceOf[Operand[T]] // XXX TODO
+    }
+
+    // Compute the axes along which to reduce the mean / variance
+    val input_shape = inputs.shape
+    val ndims = input_shape.numDimensions() //  len(input_shape)
+    var reduction_axes = (0 until ndims).filterNot(axis.contains)
+    if (this.virtualBatchSize.isDefined)
+      reduction_axes = reduction_axes.patch(1, Nil, 1)  // Do not reduce along virtual batch dim
+
+    // Broadcasting only necessary for single-axis batch norm where the axis is
+    // not the last dimension
+    val broadcast_shape = Array.fill(ndims)(1L)
+    broadcast_shape(axis.head) = input_shape.size(axis.head)
+
+    def _broadcast(vOpt: Option[Operand[T]]): Option[Operand[T]] = vOpt match {
+      case Some(v) if v.shape().numDimensions() != ndims && reduction_axes != (0 until (ndims - 1)) =>
+        val res = tf.reshape(v, tf.constant(broadcast_shape))
+        Some(res)
+      case _ => vOpt
+    }
+
+    var (scale, offset) = (_broadcast(gamma), _broadcast(beta))
+
+    // Determine a boolean value for `training`: could be True, False, or None.
+    // val training_value = control_flow_util.constant_value(training)
+    val (mean0, variance0) = if (training.contains(false) /*training_value == false*/) {
+      (moving_mean, moving_variance)
+    } else {
+      // XXX TODO continue here
+      ???
+    }
+
+    val mean      = mean0     .map { _mean      => tf.dtypes.cast(_mean    , inputs.`type`) }
+    val variance  = variance0 .map { _variance  => tf.dtypes.cast(_variance, inputs.`type`) }
+    offset = offset.map { _offset =>
+      tf.dtypes.cast(_offset, inputs.`type`).asInstanceOf[Operand[T]]
+    }
+    scale = scale.map { _scale =>
+      tf.dtypes.cast(_scale, inputs.`type`)
+    }
+    var outputs: Operand[T] = tf.nn.batchNormWithGlobalNormalization( // XXX TODO
+      inputs,                       // t - tensor
+      _broadcast(mean     ).orNull, // m - mean
+      _broadcast(variance ).orNull, // v - variance
+      offset.orNull,                // beta
+      scale.orNull,                 // gamma
+      epsilon,                      // varianceEpsilon
+      false     // XXX TODO ??? scaleAfterNormalization
+    )
+
+    if (inputs_dtype == classOf[TFloat16] /*in (tf.float16, tf.bfloat16)*/) {
+      outputs = tf.dtypes.cast(outputs, inputs_dtype)
+    }
+
+    // If some components of the shape got lost due to adjustments, fix that.
+    // outputs.set_shape(input_shape) // XXX TODO
+
+    if (virtualBatchSize.isDefined) {
+      ???
+//      outputs = undo_virtual_batching(outputs)
+    }
+    outputs
   }
 }

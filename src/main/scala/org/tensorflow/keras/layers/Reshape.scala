@@ -1,11 +1,11 @@
 package org.tensorflow.keras.layers
 
 import org.tensorflow.Operand
+import org.tensorflow.keras.utils.TensorShape
 import org.tensorflow.ndarray.Shape
 import org.tensorflow.op.Ops
 import org.tensorflow.types.TInt64
 import org.tensorflow.types.family.TNumber
-import org.tensorflow.utils.TensorShape
 
 // based on https://github.com/keras-team/keras/blob/master/keras/layers/reshaping/reshape.py
 

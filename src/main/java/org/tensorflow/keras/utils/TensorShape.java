@@ -59,6 +59,18 @@ public class TensorShape {
     return this;
   }
 
+  public TensorShape concatenate(long... dims) {
+    this.dims = concatenate(this.dims, dims);
+    return this;
+  }
+
+  private static long[] concatenate(long[] first, long... last) {
+    long[] dims = new long[first.length + last.length];
+    System.arraycopy(first, 0, dims, 0, first.length);
+    System.arraycopy(last, 0, dims, first.length, last.length);
+    return dims;
+  }
+
   public TensorShape addToFront(long dim) {
     this.dims = Keras.concatenate(dim, dims);
     return this;
