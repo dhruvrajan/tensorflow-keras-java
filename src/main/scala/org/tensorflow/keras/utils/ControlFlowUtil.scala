@@ -19,10 +19,11 @@ object ControlFlowUtil {
     * @throws IllegalArgumentException If `true_fn` or `false_fn` is not callable.
     */
   def smartCond[T <: TType](tf: Ops, pred: Variable[T], true_fn: Any = None, false_fn: Any = None /*, name=None*/) = { // pylint: disable=invalid-name
+    // XXX TODO where is in tf-java?
+//     tf.cond(
+//      pred, true_fn=true_fn, false_fn=false_fn, name=name)
+//     return tf.__internal__.smart_cond.smart_cond(
+//       pred, true_fn=true_fn, false_fn=false_fn, name=name)
     ???
-    // tf.cond(
-    //  pred, true_fn=true_fn, false_fn=false_fn, name=name)
-    // return tf.__internal__.smart_cond.smart_cond(
-    //   pred, true_fn=true_fn, false_fn=false_fn, name=name)
   }
 }

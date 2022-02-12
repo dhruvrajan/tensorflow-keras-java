@@ -3,7 +3,7 @@ package org.tensorflow.keras.layers
 import org.tensorflow.framework.initializers.Initializer
 import org.tensorflow.keras.initializers.Initializers
 import org.tensorflow.keras.layers.BatchNormalization.RenormClipping
-import org.tensorflow.keras.utils.Backend
+import org.tensorflow.keras.utils.{Backend, ControlFlowUtil}
 import org.tensorflow.ndarray.Shape
 import org.tensorflow.op.{Ops, core}
 import org.tensorflow.op.core.Variable
@@ -117,6 +117,21 @@ class BatchNormalization[T <: TNumber](
       classOf[TFloat32]
     else
       if (dtype != null) dtype else classOf[TFloat32]
+  }
+
+  private def supportZeroSizeInput(tf: Ops): Boolean = {
+    false
+//    if (!tf.distribute.has_strategy()) return false
+//
+//    val strategy = tf.distribute.get_strategy()
+//    // TODO(b / 195085185): remove experimental_enable_get_next_as_optional after
+//    // migrating all users.
+//    getattr(
+//      strategy.extended, "enable_partial_batch_handling",
+//      getattr(strategy.extended, "experimental_enable_get_next_as_optional",
+//        false
+//    ))
+//    false
   }
 
   override protected def build(tf: Ops, inputShape: Shape): Unit = {
@@ -406,6 +421,25 @@ class BatchNormalization[T <: TNumber](
     _training
   }
 
+  private def calculateMeanAndVar(tf: Ops, inputs: Operand[T], reductionAxes: Seq[Int],
+                                  keepDims: Boolean): (Operand[T], Operand[T]) = {
+    // XXX TODO where is this in tf-java?
+    ??? // tf.nn.moments(inputs, reduction_axes, keepdims = keepDims)
+  }
+
+  private def moments(tf: Ops, inputs: Operand[T], reductionAxes: Seq[Int], keepDims: Boolean) = {
+    var (mean, variance) = calculateMeanAndVar(tf, inputs, reductionAxes, keepDims)
+    // TODO(b/129279393): Support zero batch input in non DistributionStrategy
+    // code as well.
+    if (supportZeroSizeInput(tf)) {
+      ???
+//      val input_batch_size = tf.shape(inputs)[0]
+//      mean      = tf.where(input_batch_size > 0, mean     , backend.zeros_like(mean))
+//      variance  = tf.where(input_batch_size > 0, variance , backend.zeros_like(variance))
+    }
+    (mean, variance)
+  }
+
   private def callOne(tf: Ops, inputs0: Operand[T], training: Option[Boolean]): Operand[T] = {
     var inputs    = inputs0 // tf.dtypes.cast(inputs0, computeDtype)
     val _training = getTrainingValue(training)
@@ -449,19 +483,19 @@ class BatchNormalization[T <: TNumber](
     }
 
     // Compute the axes along which to reduce the mean / variance
-    val input_shape = inputs.shape
-    val ndims = input_shape.numDimensions() //  len(input_shape)
-    var reduction_axes = (0 until ndims).filterNot(axis.contains)
+    val inputShape    = inputs.shape
+    val ndims         = inputShape.numDimensions() //  len(input_shape)
+    var reductionAxes = (0 until ndims).filterNot(axis.contains)
     if (this.virtualBatchSize.isDefined)
-      reduction_axes = reduction_axes.patch(1, Nil, 1)  // Do not reduce along virtual batch dim
+      reductionAxes = reductionAxes.patch(1, Nil, 1)  // Do not reduce along virtual batch dim
 
     // Broadcasting only necessary for single-axis batch norm where the axis is
     // not the last dimension
     val broadcast_shape = Array.fill(ndims)(1L)
-    broadcast_shape(axis.head) = input_shape.size(axis.head)
+    broadcast_shape(axis.head) = inputShape.size(axis.head)
 
     def _broadcast(vOpt: Option[Operand[T]]): Option[Operand[T]] = vOpt match {
-      case Some(v) if v.shape().numDimensions() != ndims && reduction_axes != (0 until (ndims - 1)) =>
+      case Some(v) if v.shape().numDimensions() != ndims && reductionAxes != (0 until (ndims - 1)) =>
         val res = tf.reshape(v, tf.constant(broadcast_shape))
         Some(res)
       case _ => vOpt
@@ -474,8 +508,42 @@ class BatchNormalization[T <: TNumber](
     val (mean0, variance0) = if (training.contains(false) /*training_value == false*/) {
       (moving_mean, moving_variance)
     } else {
+      if (adjustment.contains(true)) {
+        ???
+//        val (adj_scale, adj_bias) = self.adjustment(tf.shape(inputs))
+//        // Adjust only during training.
+//        adj_scale = control_flow_util.smart_cond(
+//          training, lambda: adj_scale, lambda: tf.ones_like(adj_scale)
+//        )
+//        adj_bias = control_flow_util.smart_cond(
+//          training, lambda: adj_bias, lambda: tf.zeros_like(adj_bias)
+//        )
+//        val (scale, offset) = _compose_transforms(adj_scale, adj_bias, scale, offset)
+      }
+
+      // Some of the computations here are not necessary when training==False
+      // but not a constant. However, this makes the code simpler.
+      val keepDims = virtualBatchSize.isDefined || axis.size > 1
+      var (mean, variance) = this.moments(tf,
+        tf.dtypes.cast(inputs, paramDType).asInstanceOf[Operand[T]],  // XXX TODO
+        reductionAxes,
+        keepDims = keepDims
+      )
+
+      val moving_mean     = this.moving_mean
+      val moving_variance = this.moving_variance
+
+      ???
+//      mean = ControlFlowUtil.smartCond(
+//        training, /*lambda:*/ mean,
+//        /*lambda:*/ tf.convert_to_tensor(moving_mean))
+//      variance = ControlFlowUtil.smartCond(
+//        training, /*lambda:*/ variance,
+//        /*lambda:*/ tf.convert_to_tensor(moving_variance))
+
       // XXX TODO continue here
       ???
+      (Some(mean), Some(variance))
     }
 
     val mean      = mean0     .map { _mean      => tf.dtypes.cast(_mean    , inputs.`type`) }
